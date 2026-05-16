@@ -2,9 +2,10 @@ import { Bell, Search, Menu } from 'lucide-react'
 import { useNotificationsStore } from '../store/notifications'
 import { useAuthStore } from '../store/auth'
 import { useSidebarStore } from '../store/sidebar'
+import { useSearchStore } from '../store/search'
 import { UserAvatar } from './UserAvatar'
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import clsx from 'clsx'
 
 interface HeaderProps {
@@ -17,8 +18,11 @@ export function Header({ title, actions }: HeaderProps) {
   const unreadCount     = useNotificationsStore(s => s.unreadCount)
   const openNotifications = useNotificationsStore(s => s.openPanel)
   const { collapsed, openMobile } = useSidebarStore()
+  const { query, setQuery } = useSearchStore()
   const navigate = useNavigate()
-  const [search, setSearch] = useState('')
+  const location = useLocation()
+
+  useEffect(() => { setQuery('') }, [location.pathname, setQuery])
 
   return (
     <header className={clsx(
@@ -46,8 +50,8 @@ export function Header({ title, actions }: HeaderProps) {
         <input
           className="input pl-9 h-8 text-sm"
           placeholder="Buscar..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
+          value={query}
+          onChange={e => setQuery(e.target.value)}
         />
       </div>
 

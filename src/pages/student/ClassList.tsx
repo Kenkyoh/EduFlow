@@ -1,16 +1,29 @@
 import { useNavigate } from 'react-router-dom'
 import { Header } from '../../components/Header'
 import { mockSubjects, mockReportCardData } from '../../data/mock'
+import { useSearchStore } from '../../store/search'
 import clsx from 'clsx'
 
 export function StudentClassList() {
   const navigate = useNavigate()
+  const query = useSearchStore(s => s.query)
+
+  const displayed = mockSubjects.slice(0, 5).filter(s =>
+    !query ||
+    s.name.toLowerCase().includes(query.toLowerCase()) ||
+    s.teacher.toLowerCase().includes(query.toLowerCase())
+  )
 
   return (
     <>
       <Header title="Minhas Turmas" />
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {mockSubjects.slice(0, 5).map(s => {
+        {displayed.length === 0 ? (
+          <p className="col-span-full text-center py-12 text-[#94A3B8] text-sm">
+            Nenhuma turma encontrada para "{query}"
+          </p>
+        ) : null}
+        {displayed.map(s => {
           const reportData = mockReportCardData.find(r => r.subjectId === s.id)
           return (
             <button

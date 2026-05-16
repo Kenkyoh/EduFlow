@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Building2, Plus, Search, ChevronRight, X, Check } from 'lucide-react'
+import { Building2, Plus, ChevronRight, X, Check } from 'lucide-react'
 import { mockSchools } from '../../data/mock'
 import type { School } from '../../types'
 import clsx from 'clsx'
 import { STATUS_CONFIG, PLAN_CONFIG } from './adminConfig'
+import { useSearchStore } from '../../store/search'
 
 const BR_STATES = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO']
 
@@ -24,7 +25,7 @@ const EMPTY_FORM: AddSchoolForm = {
 export function AdminSchools() {
   const navigate = useNavigate()
   const [schools, setSchools] = useState<School[]>(mockSchools)
-  const [search, setSearch] = useState('')
+  const query = useSearchStore(s => s.query)
   const [filterStatus, setFilterStatus] = useState<string>('all')
   const [filterPlan, setFilterPlan] = useState<string>('all')
   const [showModal, setShowModal] = useState(false)
@@ -36,8 +37,8 @@ export function AdminSchools() {
   useEffect(() => () => { if (closeTimerRef.current) clearTimeout(closeTimerRef.current) }, [])
 
   const filtered = schools.filter(s => {
-    const q = search.toLowerCase()
-    const matchSearch = s.name.toLowerCase().includes(q) || s.city.toLowerCase().includes(q) || s.state.toLowerCase().includes(q)
+    const q = query.toLowerCase()
+    const matchSearch = !q || s.name.toLowerCase().includes(q) || s.city.toLowerCase().includes(q) || s.state.toLowerCase().includes(q)
     const matchStatus = filterStatus === 'all' || s.status === filterStatus
     const matchPlan   = filterPlan === 'all'   || s.plan === filterPlan
     return matchSearch && matchStatus && matchPlan
@@ -102,15 +103,6 @@ export function AdminSchools() {
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]" />
-          <input
-            className="input pl-9 h-9 text-sm"
-            placeholder="Buscar escola, cidade..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-          />
-        </div>
         <select
           className="input h-9 text-sm w-auto pr-8"
           value={filterStatus}

@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom'
 import { Clock, Upload, Filter, CheckCircle, AlertTriangle } from 'lucide-react'
 import { Header } from '../../components/Header'
 import { mockActivities, getActivityTypeLabel, getDaysUntil, mockSubjects } from '../../data/mock'
+import { useSearchStore } from '../../store/search'
 import clsx from 'clsx'
 
 export function StudentActivities() {
   const navigate = useNavigate()
+  const query = useSearchStore(s => s.query)
   const [filter, setFilter] = useState<'all' | 'pending' | 'late' | 'submitted'>('all')
   const [subjectFilter, setSubjectFilter] = useState<string>('all')
 
@@ -16,6 +18,11 @@ export function StudentActivities() {
     if (filter === 'submitted') return a.status === 'submitted' || a.status === 'graded'
     return true
   }).filter(a => subjectFilter === 'all' || a.subjectId === subjectFilter)
+    .filter(a =>
+      !query ||
+      a.title.toLowerCase().includes(query.toLowerCase()) ||
+      a.subjectName.toLowerCase().includes(query.toLowerCase())
+    )
 
   const sorted = [...filtered].sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
 
