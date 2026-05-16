@@ -47,6 +47,8 @@ export function ToastContainer() {
           {icons[t.type]}
           <span className="flex-1">{t.message}</span>
           <button
+            type="button"
+            aria-label="Fechar notificação"
             onClick={() => remove(t.id)}
             className="text-white/60 hover:text-white transition-colors"
           >

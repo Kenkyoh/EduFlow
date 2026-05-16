@@ -37,6 +37,7 @@ export function TeacherDashboard() {
         title="Dashboard do Professor"
         actions={
           <button
+            type="button"
             onClick={() => setDrawerOpen(true)}
             className="btn-primary text-sm"
           >
@@ -114,6 +115,7 @@ export function TeacherDashboard() {
                 {corrections.map(sub => (
                   <button
                     key={sub.id}
+                    type="button"
                     onClick={() => navigate(`/teacher/correct/${sub.id}`)}
                     className="card w-full text-left p-4 hover:shadow-md transition-shadow"
                   >
@@ -146,6 +148,7 @@ export function TeacherDashboard() {
             <div className="flex items-center justify-between mt-4">
               <h3 className="font-display font-semibold text-[#0F172A]">Turmas Ativas</h3>
               <button
+                type="button"
                 onClick={() => navigate('/teacher/classes')}
                 className="text-sm text-[#1E3A8A] hover:underline flex items-center gap-1"
               >
@@ -157,6 +160,7 @@ export function TeacherDashboard() {
               {activeClasses.map(cls => (
                 <button
                   key={cls.id}
+                  type="button"
                   onClick={() => navigate(`/teacher/class/${cls.id}`)}
                   className="card w-full text-left p-4 hover:shadow-md transition-shadow"
                 >
@@ -211,6 +215,7 @@ export function TeacherDashboard() {
                 {messages.map(msg => (
                   <button
                     key={msg.id}
+                    type="button"
                     onClick={() => navigate('/messages')}
                     className="w-full flex items-start gap-2.5 p-2 rounded-lg hover:bg-slate-50 transition-colors text-left"
                   >
@@ -231,6 +236,7 @@ export function TeacherDashboard() {
                 ))}
               </div>
               <button
+                type="button"
                 onClick={() => navigate('/messages')}
                 className="mt-2 w-full btn-ghost text-xs"
               >
@@ -261,6 +267,7 @@ export function TeacherDashboard() {
                 ))}
               </div>
               <button
+                type="button"
                 onClick={() => setDrawerOpen(true)}
                 className="mt-2 w-full btn-secondary text-xs"
               >

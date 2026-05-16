@@ -51,6 +51,7 @@ export function StudentClassView() {
         <div className="flex border-b border-[#E2E8F0]">
           {tabs.map(t => (
             <button
+              type="button"
               key={t.id}
               onClick={() => setTab(t.id)}
               className={clsx(
@@ -82,6 +83,7 @@ export function StudentClassView() {
                   <div className="mt-3 space-y-2">
                     {ann.pollOptions.map(opt => (
                       <button
+                        type="button"
                         key={opt.text}
                         onClick={() => toast(`Voto registrado: "${opt.text}"`, 'success')}
                         className="w-full flex items-center justify-between p-2 rounded-lg border border-[#E2E8F0] hover:border-[#1E3A8A] hover:bg-blue-50 transition-all text-sm text-left"
@@ -125,6 +127,7 @@ export function StudentClassView() {
                       </span>
                       {act.status === 'pending' || act.status === 'upcoming' ? (
                         <button
+                          type="button"
                           onClick={() => navigate(`/student/submit/${act.id}`)}
                           className="btn-primary text-xs h-7 px-3"
                         >
@@ -134,6 +137,7 @@ export function StudentClassView() {
                         <span className="badge-success text-xs">Entregue</span>
                       ) : act.status === 'late' ? (
                         <button
+                          type="button"
                           onClick={() => navigate(`/student/submit/${act.id}`)}
                           className="btn-danger text-xs h-7 px-3"
                         >
@@ -202,7 +206,7 @@ export function StudentClassView() {
                   <p className="text-sm font-medium text-[#0F172A]">{mat.title}</p>
                   <p className="text-xs text-[#94A3B8]">{mat.type} · {mat.size} · {mat.date}</p>
                 </div>
-                <button className="btn-ghost text-xs" onClick={() => toast('Download iniciado', 'info')}>Download</button>
+                <button type="button" className="btn-ghost text-xs" onClick={() => toast('Download iniciado', 'info')}>Download</button>
               </div>
             ))}
           </div>

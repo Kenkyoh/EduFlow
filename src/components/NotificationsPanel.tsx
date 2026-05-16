@@ -66,12 +66,15 @@ export function NotificationsPanel() {
           </div>
           <div className="flex items-center gap-2">
             <button
+              type="button"
               onClick={markAllAsRead}
               className="text-xs text-[#1E3A8A] hover:underline flex items-center gap-1"
             >
               <Check size={12} /> Marcar todas
             </button>
             <button
+              type="button"
+              aria-label="Fechar notificações"
               onClick={closePanel}
               className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-slate-100 text-[#64748B]"
             >
@@ -84,6 +87,7 @@ export function NotificationsPanel() {
         <div className="flex gap-1 p-2 border-b border-[#E2E8F0] overflow-x-auto scrollbar-hide">
           {filters.map(f => (
             <button
+              type="button"
               key={f}
               onClick={() => setFilter(f)}
               className={clsx(
@@ -109,6 +113,7 @@ export function NotificationsPanel() {
             <div className="divide-y divide-[#F1F5F9]">
               {filtered.map(n => (
                 <button
+                  type="button"
                   key={n.id}
                   onClick={() => handleClick(n)}
                   className={clsx(

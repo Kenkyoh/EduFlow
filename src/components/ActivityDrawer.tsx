@@ -106,6 +106,8 @@ export function ActivityDrawer({ isOpen, onClose, initialDate, onPublish }: Acti
             <p className="text-xs text-[#64748B] mt-0.5">Preencha os campos abaixo</p>
           </div>
           <button
+            type="button"
+            aria-label="Fechar"
             onClick={onClose}
             className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-[#64748B]"
           >
@@ -125,6 +127,7 @@ export function ActivityDrawer({ isOpen, onClose, initialDate, onPublish }: Acti
                 <div className="flex gap-2 mt-2">
                   {['+1 dia', '+3 dias', '+1 sem'].map(d => (
                     <button
+                      type="button"
                       key={d}
                       className="px-2 py-1 rounded bg-amber-100 text-amber-800 text-xs font-medium hover:bg-amber-200 transition-colors"
                     >
@@ -208,6 +211,7 @@ export function ActivityDrawer({ isOpen, onClose, initialDate, onPublish }: Acti
             <div className="flex flex-wrap gap-1.5">
               {ACTIVITY_TYPES.map(t => (
                 <button
+                  type="button"
                   key={t.value}
                   onClick={() => setForm(f => ({ ...f, type: t.value }))}
                   className={clsx(
@@ -325,6 +329,7 @@ export function ActivityDrawer({ isOpen, onClose, initialDate, onPublish }: Acti
                 <p className="text-xs text-[#94A3B8]">Alunos podem enviar novamente</p>
               </div>
               <button
+                type="button"
                 onClick={() => setForm(f => ({ ...f, allowResubmit: !f.allowResubmit }))}
                 className={clsx(
                   'relative w-10 h-5.5 rounded-full transition-colors',
@@ -345,6 +350,7 @@ export function ActivityDrawer({ isOpen, onClose, initialDate, onPublish }: Acti
                 <p className="text-xs text-[#94A3B8]">Enviar alerta ao publicar</p>
               </div>
               <button
+                type="button"
                 onClick={() => setForm(f => ({ ...f, notifyStudents: !f.notifyStudents }))}
                 className={clsx(
                   'relative w-10 rounded-full transition-colors',
@@ -363,10 +369,11 @@ export function ActivityDrawer({ isOpen, onClose, initialDate, onPublish }: Acti
 
         {/* Footer */}
         <div className="flex items-center gap-3 px-5 py-4 border-t border-[#E2E8F0] flex-shrink-0">
-          <button onClick={onClose} className="btn-secondary flex-1">
+          <button type="button" onClick={onClose} className="btn-secondary flex-1">
             Cancelar
           </button>
           <button
+            type="button"
             onClick={handlePublish}
             disabled={publishing}
             className="btn-primary flex-1"

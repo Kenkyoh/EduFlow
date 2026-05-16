@@ -287,10 +287,11 @@ function ObjectiveHeader({
               onBlur={commit}
               onKeyDown={e => { if (e.key === 'Enter') commit(); if (e.key === 'Escape') { setTitle(objective.title); setEditing(false) } }}
             />
-            <button onClick={commit} className="text-emerald-600"><Check size={11} /></button>
+            <button type="button" aria-label="Confirmar edição" onClick={commit} className="text-emerald-600"><Check size={11} /></button>
           </div>
         ) : (
           <button
+            type="button"
             className="flex items-center gap-1 hover:text-[#1E3A8A] group"
             onClick={() => setEditing(true)}
             title={objective.description}
@@ -480,7 +481,7 @@ export function GradeTable() {
               </select>
               <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#94A3B8] pointer-events-none" />
             </div>
-            <button className="btn-secondary text-sm h-9">
+            <button type="button" className="btn-secondary text-sm h-9">
               <Download size={14} /> Exportar
             </button>
           </div>

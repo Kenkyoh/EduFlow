@@ -59,11 +59,11 @@ export function SubmitActivity() {
           </div>
 
           <div className="flex gap-3">
-            <button onClick={() => navigate(-1)} className="btn-secondary flex-1">
+            <button type="button" onClick={() => navigate(-1)} className="btn-secondary flex-1">
               Voltar ao dashboard
             </button>
             {activity.allowResubmit && (
-              <button onClick={() => setSubmitted(false)} className="btn-ghost flex-1">
+              <button type="button" onClick={() => setSubmitted(false)} className="btn-ghost flex-1">
                 Reenviar
               </button>
             )}
@@ -80,6 +80,7 @@ export function SubmitActivity() {
       <div className="max-w-2xl mx-auto space-y-5">
         {/* Back */}
         <button
+          type="button"
           onClick={() => navigate(-1)}
           className="flex items-center gap-1.5 text-sm text-[#64748B] hover:text-[#0F172A] transition-colors"
         >
@@ -135,6 +136,7 @@ export function SubmitActivity() {
         {/* Submission mode toggle */}
         <div className="flex rounded-lg border border-[#E2E8F0] overflow-hidden">
           <button
+            type="button"
             onClick={() => setMode('upload')}
             className={clsx(
               'flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors',
@@ -144,6 +146,7 @@ export function SubmitActivity() {
             <Upload size={16} /> Upload de arquivo
           </button>
           <button
+            type="button"
             onClick={() => setMode('editor')}
             className={clsx(
               'flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors',
@@ -189,6 +192,8 @@ export function SubmitActivity() {
                       <p className="text-xs text-[#64748B]">{(f.size / 1024 / 1024).toFixed(1)} MB</p>
                     </div>
                     <button
+                      type="button"
+                      aria-label="Remover arquivo"
                       onClick={() => setFiles(prev => prev.filter((_, j) => j !== i))}
                       className="text-[#94A3B8] hover:text-red-500 transition-colors text-lg"
                     >
@@ -207,6 +212,7 @@ export function SubmitActivity() {
             <div className="flex items-center gap-2 p-2 border-b border-[#E2E8F0] bg-[#F8FAFC] rounded-t-lg">
               {['B', 'I', 'U', 'H1', 'H2', '• Lista', '1. Lista', '"Citação'].map(fmt => (
                 <button
+                  type="button"
                   key={fmt}
                   className="px-2 py-1 text-xs font-medium text-[#64748B] hover:bg-white rounded hover:shadow-sm transition-all border border-transparent hover:border-[#E2E8F0]"
                 >
@@ -235,10 +241,11 @@ export function SubmitActivity() {
 
         {/* Submit */}
         <div className="flex gap-3">
-          <button onClick={() => navigate(-1)} className="btn-secondary flex-1">
+          <button type="button" onClick={() => navigate(-1)} className="btn-secondary flex-1">
             Cancelar
           </button>
           <button
+            type="button"
             onClick={handleSubmit}
             disabled={submitting}
             className="btn-primary flex-1"

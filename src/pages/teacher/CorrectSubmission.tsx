@@ -62,6 +62,7 @@ export function CorrectSubmission() {
         {/* Navigation */}
         <div className="flex items-center justify-between">
           <button
+            type="button"
             onClick={() => navigate(-1)}
             className="flex items-center gap-1.5 text-sm text-[#64748B] hover:text-[#0F172A]"
           >
@@ -72,6 +73,8 @@ export function CorrectSubmission() {
               {currentIdx + 1} de {uncorrected.length} entregas
             </span>
             <button
+              type="button"
+              aria-label="Entrega anterior"
               disabled={currentIdx === 0}
               onClick={() => navigate(`/teacher/correct/${uncorrected[currentIdx - 1].id}`)}
               className="w-8 h-8 rounded-lg border border-[#E2E8F0] flex items-center justify-center disabled:opacity-40 hover:bg-slate-50"
@@ -79,6 +82,8 @@ export function CorrectSubmission() {
               <ChevronLeft size={16} />
             </button>
             <button
+              type="button"
+              aria-label="Próxima entrega"
               disabled={currentIdx >= uncorrected.length - 1}
               onClick={() => navigate(`/teacher/correct/${uncorrected[currentIdx + 1].id}`)}
               className="w-8 h-8 rounded-lg border border-[#E2E8F0] flex items-center justify-center disabled:opacity-40 hover:bg-slate-50"
@@ -152,7 +157,7 @@ export function CorrectSubmission() {
                     <FileText size={48} className="text-[#94A3B8] mx-auto mb-3" strokeWidth={1} />
                     <p className="text-sm text-[#64748B]">Visualizador de PDF</p>
                     <p className="text-xs text-[#94A3B8] mt-1">{submission.files[0].name}</p>
-                    <button className="mt-3 btn-secondary text-xs">
+                    <button type="button" className="mt-3 btn-secondary text-xs">
                       Abrir em nova aba
                     </button>
                   </div>
@@ -200,6 +205,7 @@ export function CorrectSubmission() {
                   {[10, 9.5, 9, 8.5, 8, 7.5, 7, 6.5, 6, 5.5, 5, 4].map(n => (
                     <button
                       key={n}
+                      type="button"
                       onClick={() => setGrade(n.toFixed(1))}
                       className={clsx(
                         'px-2 py-0.5 rounded text-xs font-medium border transition-all',
@@ -242,6 +248,7 @@ export function CorrectSubmission() {
                         {Array.from({ length: r.max }, (_, i) => i + 1).map(v => (
                           <button
                             key={v}
+                            type="button"
                             className="w-6 h-6 rounded border border-[#E2E8F0] hover:border-[#1E3A8A] hover:bg-blue-50 transition-all text-[11px] text-[#64748B]"
                           >
                             {v}
@@ -269,10 +276,11 @@ export function CorrectSubmission() {
                 </div>
               ) : (
                 <div className="flex gap-3">
-                  <button onClick={() => navigate(-1)} className="btn-ghost flex-1">
+                  <button type="button" onClick={() => navigate(-1)} className="btn-ghost flex-1">
                     Cancelar
                   </button>
                   <button
+                    type="button"
                     onClick={handleConfirm}
                     disabled={saving}
                     className="btn-primary flex-1"

@@ -71,6 +71,7 @@ export function StudentDashboard() {
             <div className="flex items-center justify-between">
               <h3 className="font-display font-semibold text-[#0F172A]">Próximas Atividades</h3>
               <button
+                type="button"
                 onClick={() => navigate('/student/activities')}
                 className="text-sm text-[#1E3A8A] hover:underline flex items-center gap-1"
               >
@@ -90,6 +91,7 @@ export function StudentDashboard() {
                   const days = getDaysUntil(act.dueDate)
                   return (
                     <button
+                      type="button"
                       key={act.id}
                       onClick={() => navigate(`/student/submit/${act.id}`)}
                       className="activity-card w-full text-left"
@@ -217,6 +219,7 @@ export function StudentDashboard() {
                 ))}
               </div>
               <button
+                type="button"
                 onClick={() => navigate('/student/report-card')}
                 className="mt-3 w-full btn-ghost text-xs"
               >
@@ -265,6 +268,7 @@ export function StudentDashboard() {
                   { label: 'Turmas', icon: '📚', path: '/student/classes' },
                 ].map(item => (
                   <button
+                    type="button"
                     key={item.path}
                     onClick={() => navigate(item.path)}
                     className="flex flex-col items-center gap-1 p-3 rounded-lg bg-[#F8FAFC] hover:bg-blue-50 border border-[#E2E8F0] hover:border-[#1E3A8A]/20 transition-all text-xs font-medium text-[#64748B] hover:text-[#1E3A8A]"

@@ -192,7 +192,7 @@ export function CoordinatorDashboard() {
                     </td>
                     <td className="px-5 py-3 text-sm text-[#64748B]">há {student.lastAccess}</td>
                     <td className="px-5 py-3">
-                      <button className="text-xs text-[#1E3A8A] hover:underline">
+                      <button type="button" className="text-xs text-[#1E3A8A] hover:underline">
                         Contatar
                       </button>
                     </td>

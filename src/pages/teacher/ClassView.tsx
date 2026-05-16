@@ -31,7 +31,7 @@ export function TeacherClassView() {
       <Header
         title={`${cls.name} — ${cls.subjectName}`}
         actions={
-          <button onClick={() => setDrawerOpen(true)} className="btn-primary text-sm">
+          <button type="button" onClick={() => setDrawerOpen(true)} className="btn-primary text-sm">
             <Plus size={16} /> Nova atividade
           </button>
         }
@@ -73,6 +73,7 @@ export function TeacherClassView() {
           {tabs.map(t => (
             <button
               key={t.id}
+              type="button"
               onClick={() => setTab(t.id)}
               className={clsx(
                 'flex items-center gap-1.5 px-4 py-3 text-sm font-medium border-b-2 transition-all',
@@ -94,6 +95,7 @@ export function TeacherClassView() {
               {['Aviso', 'Material', 'Enquete', 'Urgente'].map(type => (
                 <button
                   key={type}
+                  type="button"
                   onClick={() => toast(`Criando ${type.toLowerCase()}...`, 'info')}
                   className={clsx(
                     'px-3 py-1.5 rounded-lg text-xs font-medium border transition-all',
@@ -171,7 +173,7 @@ export function TeacherClassView() {
               <div className="card p-10 flex flex-col items-center gap-3 text-[#94A3B8]">
                 <ClipboardList size={36} strokeWidth={1.5} />
                 <p className="font-medium">Nenhuma atividade publicada</p>
-                <button onClick={() => setDrawerOpen(true)} className="btn-primary text-sm">
+                <button type="button" onClick={() => setDrawerOpen(true)} className="btn-primary text-sm">
                   Criar primeira atividade
                 </button>
               </div>
@@ -267,6 +269,7 @@ export function TeacherClassView() {
             <p className="font-semibold text-[#0F172A]">Grade de Notas</p>
             <p className="text-sm text-[#64748B] mt-1">Acesse a grade completa de notas para edição inline</p>
             <button
+              type="button"
               onClick={() => navigate('/teacher/grades')}
               className="btn-primary mt-4 text-sm"
             >
@@ -291,10 +294,11 @@ export function TeacherClassView() {
                   <p className="text-sm font-medium text-[#0F172A]">{mat.title}</p>
                   <p className="text-xs text-[#94A3B8]">{mat.type} · {mat.size} · {mat.date}</p>
                 </div>
-                <button className="btn-ghost text-xs">Download</button>
+                <button type="button" className="btn-ghost text-xs">Download</button>
               </div>
             ))}
             <button
+              type="button"
               onClick={() => toast('Upload de material...', 'info')}
               className="btn-secondary w-full text-sm"
             >

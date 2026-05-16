@@ -101,7 +101,7 @@ export function Settings() {
                       CE
                     </div>
                     <div>
-                      <button className="btn-secondary text-sm">
+                      <button type="button" className="btn-secondary text-sm">
                         <Upload size={14} /> Upload do logo
                       </button>
                       <p className="text-xs text-[#94A3B8] mt-1">PNG ou SVG, mín. 120×120px, máx. 2MB</p>
@@ -148,6 +148,8 @@ export function Settings() {
                       {['#1E3A8A', '#7C3AED', '#059669', '#DC2626', '#D97706', '#0891B2'].map(c => (
                         <button
                           key={c}
+                          type="button"
+                          title={c}
                           onClick={() => setPrimaryColor(c)}
                           className={clsx(
                             'w-7 h-7 rounded-full border-2 transition-all',
@@ -229,6 +231,7 @@ export function Settings() {
                     return (
                       <button
                         key={scale}
+                        type="button"
                         onClick={() => { setGradeScale(scale); toast(`Escala alterada para ${info.short} — todo o sistema foi atualizado.`, 'success') }}
                         className={clsx(
                           'p-4 rounded-xl border-2 text-left transition-all',
@@ -440,6 +443,7 @@ export function Settings() {
                       <span className="badge-success text-xs">Conectado</span>
                     )}
                     <button
+                      type="button"
                       onClick={() => toast(integration.connected ? `${integration.name} desconectado` : `Conectando ${integration.name}...`, 'info')}
                       className={integration.connected ? 'btn-ghost text-xs' : 'btn-secondary text-xs'}
                     >
@@ -455,7 +459,7 @@ export function Settings() {
             <div className="card p-5">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-display font-semibold text-[#0F172A]">Usuários da Instituição</h3>
-                <button className="btn-primary text-sm" onClick={() => toast('Convidando usuário...', 'info')}>
+                <button type="button" className="btn-primary text-sm" onClick={() => toast('Convidando usuário...', 'info')}>
                   <Users size={14} /> Convidar usuário
                 </button>
               </div>
@@ -495,6 +499,7 @@ export function Settings() {
           {/* Save button */}
           <div className="flex justify-end">
             <button
+              type="button"
               onClick={handleSave}
               disabled={saving}
               className="btn-primary"

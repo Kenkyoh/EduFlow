@@ -41,6 +41,7 @@ export function StudentActivities() {
               { id: 'submitted', label: 'Entregues' },
             ].map(f => (
               <button
+                type="button"
                 key={f.id}
                 onClick={() => setFilter(f.id as any)}
                 className={clsx(
@@ -128,6 +129,7 @@ export function StudentActivities() {
                         <span className="badge-success">Entregue</span>
                       ) : (
                         <button
+                          type="button"
                           onClick={() => navigate(`/student/submit/${act.id}`)}
                           className={clsx(
                             'text-xs h-7 px-3 inline-flex items-center gap-1 rounded-lg font-medium transition-colors',

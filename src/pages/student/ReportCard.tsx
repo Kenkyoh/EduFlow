@@ -281,7 +281,7 @@ export function StudentReportCard() {
                 <option key={p} value={p}>{p}º Bimestre</option>
               ))}
             </select>
-            <button onClick={handleExport} className="btn-primary text-sm h-9">
+            <button type="button" onClick={handleExport} className="btn-primary text-sm h-9">
               <Download size={14} /> Exportar PDF
             </button>
           </div>
