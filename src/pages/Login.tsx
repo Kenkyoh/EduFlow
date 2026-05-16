@@ -6,22 +6,50 @@ import type { UserRole } from '../types'
 import clsx from 'clsx'
 
 const DEMO_PROFILES: { role: UserRole; label: string; email: string; color: string; emoji: string }[] = [
-  { role: 'student',     label: 'Aluno',        email: 'lucas@escola.eduflow.app',         color: 'bg-blue-50 border-blue-200 text-blue-700',     emoji: '🎓' },
-  { role: 'teacher',     label: 'Professor',    email: 'ana.lima@escola.eduflow.app',      color: 'bg-purple-50 border-purple-200 text-purple-700', emoji: '👩‍🏫' },
-  { role: 'coordinator', label: 'Coordenador',  email: 'carlos@escola.eduflow.app',        color: 'bg-emerald-50 border-emerald-200 text-emerald-700', emoji: '📊' },
-  { role: 'guardian',    label: 'Responsável',  email: 'fernanda.mendes@gmail.com',        color: 'bg-rose-50 border-rose-200 text-rose-700',     emoji: '👪' },
+  { role: 'student',     label: 'Aluno',        email: 'lucas@escola.eduflow.app',    color: 'bg-blue-50 border-blue-200 text-blue-700',        emoji: '🎓' },
+  { role: 'teacher',     label: 'Professor',    email: 'ana.lima@escola.eduflow.app', color: 'bg-purple-50 border-purple-200 text-purple-700',  emoji: '👩‍🏫' },
+  { role: 'coordinator', label: 'Coordenador',  email: 'carlos@escola.eduflow.app',   color: 'bg-emerald-50 border-emerald-200 text-emerald-700', emoji: '📊' },
+  { role: 'guardian',    label: 'Responsável',  email: 'fernanda.mendes@gmail.com',   color: 'bg-rose-50 border-rose-200 text-rose-700',        emoji: '👪' },
 ]
+
+const EMAIL_ROLE: Record<string, UserRole> = {
+  'lucas@escola.eduflow.app':    'student',
+  'ana.lima@escola.eduflow.app': 'teacher',
+  'carlos@escola.eduflow.app':   'coordinator',
+  'fernanda.mendes@gmail.com':   'guardian',
+}
+
+const ADMIN_EMAIL    = 'admin@eduflow.app'
+const ADMIN_PASSWORD = 'EduFlow@2025#Admin'
 
 export function Login() {
   const navigate = useNavigate()
   const login = useAuthStore(s => s.login)
   const [email, setEmail] = useState('lucas@escola.eduflow.app')
-  const [password, setPassword] = useState('••••••••')
+  const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
   const [selectedRole, setSelectedRole] = useState<UserRole>('student')
 
-  const handleLogin = async (role: UserRole = selectedRole, loginEmail = email) => {
+  const handleLogin = async (overrideRole?: UserRole, quickEmail?: string) => {
+    setError('')
+    const loginEmail = (quickEmail ?? email).trim().toLowerCase()
+
+    if (loginEmail === ADMIN_EMAIL) {
+      if (password !== ADMIN_PASSWORD) {
+        setError('E-mail ou senha incorretos.')
+        return
+      }
+      setLoading(true)
+      await new Promise(r => setTimeout(r, 800))
+      login(loginEmail, 'admin')
+      setLoading(false)
+      navigate('/admin')
+      return
+    }
+
+    const role = overrideRole ?? EMAIL_ROLE[loginEmail] ?? selectedRole
     setLoading(true)
     await new Promise(r => setTimeout(r, 800))
     login(loginEmail, role)
@@ -29,7 +57,6 @@ export function Login() {
 
     if (role === 'student')       navigate('/student')
     else if (role === 'teacher')  navigate('/teacher')
-    else if (role === 'admin')    navigate('/admin')
     else if (role === 'guardian') navigate('/guardian')
     else navigate('/coordinator')
   }
@@ -69,6 +96,7 @@ export function Login() {
                     setSelectedRole(p.role)
                     setEmail(p.email)
                     handleLogin(p.role, p.email)
+                    setError('')
                   }}
                   className={clsx(
                     'flex items-center gap-2 py-2 px-3 rounded-lg border text-xs font-medium transition-all hover:scale-[1.02]',
@@ -81,25 +109,6 @@ export function Login() {
               ))}
             </div>
 
-            {/* Admin access */}
-            <div className="mt-3 pt-3 border-t border-[#E2E8F0]">
-              <p className="text-xs font-medium text-[#94A3B8] mb-2">Acesso administrativo</p>
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedRole('admin')
-                  setEmail('admin@eduflow.app')
-                  handleLogin('admin', 'admin@eduflow.app')
-                }}
-                className="w-full flex items-center gap-3 py-2.5 px-3 rounded-lg border bg-amber-50 border-amber-200 text-amber-800 text-xs font-medium transition-all hover:scale-[1.02] hover:bg-amber-100"
-              >
-                <span className="text-lg">🏫</span>
-                <div className="text-left">
-                  <p className="font-semibold">Coordenador do Site</p>
-                  <p className="text-amber-600 text-[10px]">Gerenciar todas as escolas</p>
-                </div>
-              </button>
-            </div>
           </div>
 
           <div className="flex items-center gap-3 mb-5">
@@ -149,9 +158,13 @@ export function Login() {
               <button type="button" className="text-xs text-[#1E3A8A] hover:underline">Esqueci a senha</button>
             </div>
 
+            {error && (
+              <p className="text-xs text-red-500 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</p>
+            )}
+
             <button
               type="button"
-              onClick={() => handleLogin(selectedRole, email)}
+              onClick={() => handleLogin()}
               disabled={loading}
               className="btn-primary w-full"
             >
