@@ -43,13 +43,34 @@ export function Settings() {
     <>
       <Header title={isAdmin ? 'Configurações da Plataforma' : 'Configurações da Instituição'} />
 
+      {/* Tab strip — horizontal on mobile, vertical sidebar on desktop */}
+      <div className="flex gap-1 border-b border-[#E2E8F0] mb-5 overflow-x-auto scrollbar-hide md:hidden">
+        {tabs.map(t => (
+          <button
+            key={t.id}
+            type="button"
+            onClick={() => setTab(t.id)}
+            className={clsx(
+              'flex items-center gap-1.5 px-3 py-2.5 text-sm font-medium border-b-2 -mb-px whitespace-nowrap transition-colors flex-shrink-0',
+              tab === t.id
+                ? 'border-[#1E3A8A] text-[#1E3A8A]'
+                : 'border-transparent text-[#64748B] hover:text-[#0F172A]'
+            )}
+          >
+            <t.icon size={14} />
+            {t.label}
+          </button>
+        ))}
+      </div>
+
       <div className="flex gap-6">
-        {/* Sidebar nav */}
-        <div className="w-48 flex-shrink-0">
+        {/* Sidebar nav — desktop only */}
+        <div className="hidden md:block w-48 flex-shrink-0">
           <nav className="space-y-0.5">
             {tabs.map(t => (
               <button
                 key={t.id}
+                type="button"
                 onClick={() => setTab(t.id)}
                 className={clsx(
                   'w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-all',

@@ -29,9 +29,28 @@ export function AdminSettings() {
     <>
       <Header title="Configurações" />
 
-      <div className="flex gap-6">
-        {/* Sidebar nav */}
-        <div className="w-48 flex-shrink-0">
+      {/* Mobile tab strip */}
+      <div className="flex gap-1 border-b border-[#E2E8F0] mb-5 overflow-x-auto scrollbar-hide md:hidden">
+        {tabs.map(t => (
+          <button
+            key={t.id}
+            type="button"
+            onClick={() => setTab(t.id)}
+            className={clsx(
+              'flex items-center gap-1.5 px-3 py-2.5 text-sm font-medium border-b-2 -mb-px whitespace-nowrap transition-all flex-shrink-0',
+              tab === t.id
+                ? 'border-[#1E3A8A] text-[#1E3A8A]'
+                : 'border-transparent text-[#64748B] hover:text-[#0F172A]'
+            )}
+          >
+            <t.icon size={14} /> {t.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="md:flex md:gap-6">
+        {/* Sidebar nav — desktop only */}
+        <div className="hidden md:block w-48 flex-shrink-0">
           <nav className="space-y-0.5">
             {tabs.map(t => (
               <button
@@ -68,11 +87,11 @@ export function AdminSettings() {
                   </div>
                   <div>
                     <p className="text-sm font-medium text-[#0F172A]">{user?.name}</p>
-                    <p className="text-xs text-[#94A3B8]">Coordenador do Site · EduFlow</p>
+                    <p className="text-xs text-[#94A3B8]">Administrador · EduFlow</p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-medium text-[#64748B] mb-1.5">Nome</label>
                     <input className="input" defaultValue={user?.name ?? ''} />

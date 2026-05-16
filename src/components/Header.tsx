@@ -1,9 +1,11 @@
-import { Bell, Search } from 'lucide-react'
+import { Bell, Search, Menu } from 'lucide-react'
 import { useNotificationsStore } from '../store/notifications'
 import { useAuthStore } from '../store/auth'
+import { useSidebarStore } from '../store/sidebar'
 import { UserAvatar } from './UserAvatar'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import clsx from 'clsx'
 
 interface HeaderProps {
   title: string
@@ -11,20 +13,35 @@ interface HeaderProps {
 }
 
 export function Header({ title, actions }: HeaderProps) {
-  const user = useAuthStore(s => s.user)
-  const unreadCount = useNotificationsStore(s => s.unreadCount)
+  const user            = useAuthStore(s => s.user)
+  const unreadCount     = useNotificationsStore(s => s.unreadCount)
   const openNotifications = useNotificationsStore(s => s.openPanel)
+  const { collapsed, openMobile } = useSidebarStore()
   const navigate = useNavigate()
   const [search, setSearch] = useState('')
 
   return (
-    <header className="fixed top-0 right-0 left-60 h-[60px] bg-white border-b border-[#E2E8F0] flex items-center px-6 gap-4 z-20">
-      <h1 className="font-display font-semibold text-[#0F172A] text-lg flex-shrink-0">
+    <header className={clsx(
+      'fixed top-0 right-0 h-[60px] bg-white border-b border-[#E2E8F0] flex items-center px-3 md:px-6 gap-3 z-20 transition-all duration-300',
+      'left-0',
+      collapsed ? 'md:left-16' : 'md:left-60'
+    )}>
+      {/* Hamburger — mobile only */}
+      <button
+        type="button"
+        onClick={openMobile}
+        className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-lg text-[#64748B] hover:bg-slate-100 hover:text-[#0F172A] transition-all md:hidden"
+        aria-label="Abrir menu"
+      >
+        <Menu size={20} />
+      </button>
+
+      <h1 className="font-display font-semibold text-[#0F172A] text-base md:text-lg flex-shrink-0">
         {title}
       </h1>
 
-      {/* Search */}
-      <div className="relative flex-1 max-w-xs ml-4">
+      {/* Search — hidden on very small screens */}
+      <div className="relative flex-1 max-w-xs ml-2 hidden sm:block">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8]" />
         <input
           className="input pl-9 h-8 text-sm"
@@ -34,7 +51,7 @@ export function Header({ title, actions }: HeaderProps) {
         />
       </div>
 
-      <div className="flex items-center gap-2 ml-auto">
+      <div className="flex items-center gap-1 md:gap-2 ml-auto">
         {actions}
 
         {/* Notification Bell */}
@@ -52,7 +69,7 @@ export function Header({ title, actions }: HeaderProps) {
           )}
         </button>
 
-        {/* Avatar — click goes to profile (non-admin) */}
+        {/* Avatar */}
         <button
           type="button"
           onClick={() => user?.role !== 'admin' && navigate('/profile')}
