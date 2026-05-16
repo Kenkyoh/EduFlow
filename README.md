@@ -8,15 +8,23 @@ Plataforma educacional unificada construída com React + TypeScript. Reúne alun
 
 ## Demonstração rápida
 
-Acesse qualquer perfil com um clique na tela de login:
+Acesse os perfis de demonstração com um clique na tela de login (sem senha):
 
 | Perfil | E-mail | Acesso a |
 |---|---|---|
 | Aluno | `lucas@escola.eduflow.app` | Turmas, atividades, boletim, calendário |
 | Professor | `ana.lima@escola.eduflow.app` | Turmas, lançamento de notas, correção |
-| Coordenador | `carlos.santos@escola.eduflow.app` | Analytics, visão geral das turmas |
+| Coordenador | `carlos@escola.eduflow.app` | Analytics, visão geral das turmas |
 | Responsável | `fernanda.mendes@gmail.com` | Desempenho, frequência e atividades dos filhos |
-| Admin | `admin@eduflow.app` | Gerenciar todas as escolas da plataforma |
+
+### Acesso Administrativo
+
+O administrador **não aparece no acesso rápido** e requer credenciais específicas no formulário de login:
+
+| Campo | Valor |
+|---|---|
+| E-mail | `admin@eduflow.app` |
+| Senha | `EduFlow@2025#Admin` |
 
 ---
 
