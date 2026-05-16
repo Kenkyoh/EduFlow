@@ -6,6 +6,7 @@ import type { School } from '../../types'
 import clsx from 'clsx'
 import { STATUS_CONFIG, PLAN_CONFIG } from './adminConfig'
 import { useSearchStore } from '../../store/search'
+import { useTranslation } from '../../i18n'
 
 const BR_STATES = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO']
 
@@ -24,6 +25,7 @@ const EMPTY_FORM: AddSchoolForm = {
 
 export function AdminSchools() {
   const navigate = useNavigate()
+  const t = useTranslation()
   const [schools, setSchools] = useState<School[]>(mockSchools)
   const query = useSearchStore(s => s.query)
   const [filterStatus, setFilterStatus] = useState<string>('all')
@@ -46,9 +48,9 @@ export function AdminSchools() {
 
   const validate = (): boolean => {
     const e: Partial<AddSchoolForm> = {}
-    if (!form.name.trim())  e.name = 'Obrigatório'
-    if (!form.city.trim())  e.city = 'Obrigatório'
-    if (!form.state.trim()) e.state = 'Obrigatório'
+    if (!form.name.trim())  e.name = t('common.required')
+    if (!form.city.trim())  e.city = t('common.required')
+    if (!form.state.trim()) e.state = t('common.required')
     setErrors(e)
     return Object.keys(e).length === 0
   }
@@ -92,12 +94,12 @@ export function AdminSchools() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-display font-bold text-[#0F172A]">Escolas</h1>
-          <p className="text-sm text-[#64748B] mt-0.5">{schools.length} escolas cadastradas na plataforma</p>
+          <h1 className="text-2xl font-display font-bold text-[#0F172A]">{t('admin.schools.title')}</h1>
+          <p className="text-sm text-[#64748B] mt-0.5">{t('admin.schools.registered', { n: schools.length })}</p>
         </div>
         <button type="button" onClick={() => setShowModal(true)} className="btn-primary gap-2">
           <Plus size={16} />
-          Nova Escola
+          {t('admin.schools.newSchool')}
         </button>
       </div>
 
@@ -108,20 +110,20 @@ export function AdminSchools() {
           value={filterStatus}
           onChange={e => setFilterStatus(e.target.value)}
         >
-          <option value="all">Todos os status</option>
-          <option value="active">Ativo</option>
-          <option value="trial">Trial</option>
-          <option value="inactive">Inativo</option>
+          <option value="all">{t('admin.schools.allStatus')}</option>
+          <option value="active">{t('admin.schools.statusActive')}</option>
+          <option value="trial">{t('admin.schools.statusTrial')}</option>
+          <option value="inactive">{t('admin.schools.statusInactive')}</option>
         </select>
         <select
           className="input h-9 text-sm w-auto pr-8"
           value={filterPlan}
           onChange={e => setFilterPlan(e.target.value)}
         >
-          <option value="all">Todos os planos</option>
-          <option value="premium">Premium</option>
-          <option value="standard">Standard</option>
-          <option value="basic">Basic</option>
+          <option value="all">{t('admin.schools.allPlans')}</option>
+          <option value="premium">{t('admin.schools.planPremium')}</option>
+          <option value="standard">{t('admin.schools.planStandard')}</option>
+          <option value="basic">{t('admin.schools.planBasic')}</option>
         </select>
       </div>
 
@@ -130,14 +132,23 @@ export function AdminSchools() {
         {filtered.length === 0 ? (
           <div className="py-16 text-center">
             <Building2 size={32} className="mx-auto text-[#CBD5E1] mb-3" />
-            <p className="text-sm text-[#94A3B8]">Nenhuma escola encontrada</p>
+            <p className="text-sm text-[#94A3B8]">{t('admin.schools.noSchools')}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-[#F1F5F9]">
-                  {['Escola', 'Localização', 'Plano', 'Status', 'Alunos', 'Professores', 'Criada em', ''].map((h, i) => (
+                  {[
+                    t('admin.schools.cols.school'),
+                    t('admin.schools.cols.location'),
+                    t('admin.schools.cols.plan'),
+                    t('admin.schools.cols.status'),
+                    t('admin.schools.cols.students'),
+                    t('admin.schools.cols.teachers'),
+                    t('admin.schools.cols.createdAt'),
+                    '',
+                  ].map((h, i) => (
                     <th key={i} className="text-left text-xs font-semibold text-[#94A3B8] px-5 py-3 whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
@@ -199,8 +210,8 @@ export function AdminSchools() {
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-5 border-b border-[#F1F5F9]">
               <div>
-                <h2 className="font-display font-semibold text-[#0F172A]">Nova Escola</h2>
-                <p className="text-xs text-[#94A3B8] mt-0.5">Preencha os dados da nova escola</p>
+                <h2 className="font-display font-semibold text-[#0F172A]">{t('admin.schools.addModal.title')}</h2>
+                <p className="text-xs text-[#94A3B8] mt-0.5">{t('admin.schools.addModal.subtitle')}</p>
               </div>
               <button type="button" onClick={() => { setShowModal(false); setForm(EMPTY_FORM); setErrors({}) }} className="text-[#94A3B8] hover:text-[#64748B]">
                 <X size={20} />
@@ -212,34 +223,34 @@ export function AdminSchools() {
                 <div className="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
                   <Check size={28} className="text-emerald-600" />
                 </div>
-                <p className="font-semibold text-[#0F172A]">Escola cadastrada!</p>
-                <p className="text-xs text-[#94A3B8] mt-1">A escola foi adicionada à plataforma.</p>
+                <p className="font-semibold text-[#0F172A]">{t('admin.schools.addModal.successTitle')}</p>
+                <p className="text-xs text-[#94A3B8] mt-1">{t('admin.schools.addModal.successSub')}</p>
               </div>
             ) : (
               <div className="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto">
                 <div>
-                  <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider mb-3">Dados da escola</p>
+                  <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider mb-3">{t('admin.schools.addModal.schoolData')}</p>
                   <div className="space-y-3">
                     <div>
-                      <label className="block text-xs font-medium text-[#64748B] mb-1.5">Nome da escola *</label>
-                      <input className={clsx('input', errors.name && 'border-red-300 focus:border-red-400')} placeholder="Ex: Colégio Estadual..." {...field('name')} />
+                      <label className="block text-xs font-medium text-[#64748B] mb-1.5">{t('admin.schools.addModal.schoolName')}</label>
+                      <input className={clsx('input', errors.name && 'border-red-300 focus:border-red-400')} placeholder={t('admin.schools.addModal.namePlaceholder')} {...field('name')} />
                       {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-xs font-medium text-[#64748B] mb-1.5">Cidade *</label>
-                        <input className={clsx('input', errors.city && 'border-red-300')} placeholder="São Paulo" {...field('city')} />
+                        <label className="block text-xs font-medium text-[#64748B] mb-1.5">{t('admin.schools.addModal.cityLabel')}</label>
+                        <input className={clsx('input', errors.city && 'border-red-300')} placeholder={t('admin.schools.addModal.cityPlaceholder')} {...field('city')} />
                         {errors.city && <p className="text-xs text-red-500 mt-1">{errors.city}</p>}
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-[#64748B] mb-1.5">Estado *</label>
+                        <label className="block text-xs font-medium text-[#64748B] mb-1.5">{t('admin.schools.addModal.stateLabel')}</label>
                         <select className="input" {...field('state')}>
                           {BR_STATES.map(s => <option key={s} value={s}>{s}</option>)}
                         </select>
                       </div>
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-[#64748B] mb-1.5">Plano</label>
+                      <label className="block text-xs font-medium text-[#64748B] mb-1.5">{t('admin.schools.addModal.planLabel')}</label>
                       <div className="grid grid-cols-3 gap-2">
                         {(['basic', 'standard', 'premium'] as School['plan'][]).map(p => (
                           <button
@@ -264,15 +275,15 @@ export function AdminSchools() {
                 </div>
 
                 <div>
-                  <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider mb-3">Coordenador (opcional)</p>
+                  <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider mb-3">{t('admin.schools.addModal.coordinatorSection')}</p>
                   <div className="space-y-3">
                     <div>
-                      <label className="block text-xs font-medium text-[#64748B] mb-1.5">Nome do coordenador</label>
-                      <input className="input" placeholder="Dir. João Silva" {...field('coordinatorName')} />
+                      <label className="block text-xs font-medium text-[#64748B] mb-1.5">{t('admin.schools.addModal.coordinatorName')}</label>
+                      <input className="input" placeholder={t('admin.schools.addModal.coordinatorNamePH')} {...field('coordinatorName')} />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-[#64748B] mb-1.5">E-mail do coordenador</label>
-                      <input className="input" type="email" placeholder="joao@escola.eduflow.app" {...field('coordinatorEmail')} />
+                      <label className="block text-xs font-medium text-[#64748B] mb-1.5">{t('admin.schools.addModal.coordinatorEmail')}</label>
+                      <input className="input" type="email" placeholder={t('admin.schools.addModal.coordinatorEmailPH')} {...field('coordinatorEmail')} />
                     </div>
                   </div>
                 </div>
@@ -283,10 +294,10 @@ export function AdminSchools() {
                     onClick={() => { setShowModal(false); setForm(EMPTY_FORM); setErrors({}) }}
                     className="btn-secondary flex-1"
                   >
-                    Cancelar
+                    {t('admin.schools.addModal.cancel')}
                   </button>
                   <button type="button" onClick={handleAdd} className="btn-primary flex-1">
-                    Cadastrar Escola
+                    {t('admin.schools.addModal.register')}
                   </button>
                 </div>
               </div>

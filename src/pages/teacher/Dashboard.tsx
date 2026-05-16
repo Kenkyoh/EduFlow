@@ -5,14 +5,16 @@ import {
 } from 'lucide-react'
 import { Header } from '../../components/Header'
 import { ActivityDrawer } from '../../components/ActivityDrawer'
-import { mockActivities, mockClasses, mockSubmissions, getActivityTypeLabel } from '../../data/mock'
+import { mockActivities, mockClasses, mockSubmissions } from '../../data/mock'
 import { useState } from 'react'
 import { toast } from '../../components/Toast'
 import clsx from 'clsx'
+import { useTranslation } from '../../i18n'
 
 export function TeacherDashboard() {
   const navigate = useNavigate()
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const t = useTranslation()
 
   const corrections = mockSubmissions.filter(s => s.status === 'submitted')
   const activeClasses = mockClasses
@@ -34,7 +36,7 @@ export function TeacherDashboard() {
   return (
     <>
       <Header
-        title="Dashboard do Professor"
+        title={t('teacher.dashboard.title')}
         actions={
           <button
             type="button"
@@ -42,7 +44,7 @@ export function TeacherDashboard() {
             className="btn-primary text-sm"
           >
             <Plus size={16} />
-            Nova atividade
+            {t('teacher.dashboard.newActivity')}
           </button>
         }
       />
@@ -52,33 +54,33 @@ export function TeacherDashboard() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
             {
-              label: 'Correções pendentes',
+              label: t('teacher.dashboard.correctionsPending'),
               value: corrections.length,
-              sub: 'com prazo mais urgente: hoje',
+              sub: t('teacher.dashboard.urgentDeadline'),
               icon: CheckSquare,
               color: 'text-amber-500',
               bg: 'bg-amber-50',
             },
             {
-              label: 'Turmas ativas',
+              label: t('teacher.dashboard.activeClasses'),
               value: activeClasses.length,
-              sub: `${activeClasses.reduce((a, c) => a + c.studentsCount, 0)} alunos no total`,
+              sub: t('teacher.dashboard.studentsTotal', { n: activeClasses.reduce((a, c) => a + c.studentsCount, 0) }),
               icon: Users,
               color: 'text-[#1E3A8A]',
               bg: 'bg-blue-50',
             },
             {
-              label: 'Taxa de entrega',
+              label: t('teacher.dashboard.deliveryRate'),
               value: '78%',
-              sub: '-2% em relação ao bimestre anterior',
+              sub: t('teacher.dashboard.vsLastPeriod'),
               icon: TrendingUp,
               color: 'text-emerald-500',
               bg: 'bg-emerald-50',
             },
             {
-              label: 'Mensagens',
+              label: t('teacher.dashboard.messages'),
               value: messages.filter(m => m.unread).length,
-              sub: 'não respondidas',
+              sub: t('teacher.dashboard.unanswered'),
               icon: MessageSquare,
               color: 'text-purple-500',
               bg: 'bg-purple-50',
@@ -101,14 +103,14 @@ export function TeacherDashboard() {
           {/* Correction queue */}
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="font-display font-semibold text-[#0F172A]">Fila de Correções</h3>
-              <span className="badge-warning">{corrections.length} pendentes</span>
+              <h3 className="font-display font-semibold text-[#0F172A]">{t('teacher.dashboard.correctionQueue')}</h3>
+              <span className="badge-warning">{t('teacher.dashboard.pendingBadge', { n: corrections.length })}</span>
             </div>
 
             {corrections.length === 0 ? (
               <div className="card p-8 flex flex-col items-center gap-3 text-[#94A3B8]">
                 <CheckSquare size={36} strokeWidth={1.5} />
-                <p className="font-medium">Todas as entregas foram corrigidas</p>
+                <p className="font-medium">{t('teacher.dashboard.allCorrected')}</p>
               </div>
             ) : (
               <div className="space-y-2">
@@ -134,7 +136,7 @@ export function TeacherDashboard() {
                           <p className="text-[11px] text-[#94A3B8]">
                             {new Date(sub.submittedAt).toLocaleDateString('pt-BR')}
                           </p>
-                          <span className="badge-warning text-[10px]">Aguardando</span>
+                          <span className="badge-warning text-[10px]">{t('teacher.dashboard.waiting')}</span>
                         </div>
                         <ArrowRight size={16} className="text-[#94A3B8]" />
                       </div>
@@ -146,13 +148,13 @@ export function TeacherDashboard() {
 
             {/* Active classes with delivery rate */}
             <div className="flex items-center justify-between mt-4">
-              <h3 className="font-display font-semibold text-[#0F172A]">Turmas Ativas</h3>
+              <h3 className="font-display font-semibold text-[#0F172A]">{t('teacher.dashboard.activeClassesSection')}</h3>
               <button
                 type="button"
                 onClick={() => navigate('/teacher/classes')}
                 className="text-sm text-[#1E3A8A] hover:underline flex items-center gap-1"
               >
-                Gerenciar <ArrowRight size={14} />
+                {t('teacher.dashboard.manage')} <ArrowRight size={14} />
               </button>
             </div>
 
@@ -174,13 +176,13 @@ export function TeacherDashboard() {
                       </div>
                       <div>
                         <p className="text-sm font-medium text-[#0F172A]">{cls.name}</p>
-                        <p className="text-xs text-[#64748B]">{cls.subjectName} · {cls.studentsCount} alunos</p>
+                        <p className="text-xs text-[#64748B]">{cls.subjectName} · {t('teacher.dashboard.students', { n: cls.studentsCount })}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
                       <div className="text-right">
                         <p className="text-xs font-medium text-[#0F172A]">{cls.deliveryRate}%</p>
-                        <p className="text-[11px] text-[#94A3B8]">entrega</p>
+                        <p className="text-[11px] text-[#94A3B8]">{t('teacher.dashboard.delivery')}</p>
                       </div>
                       <div className="w-16">
                         <div className="h-1.5 bg-[#F1F5F9] rounded-full overflow-hidden">
@@ -207,9 +209,9 @@ export function TeacherDashboard() {
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <MessageSquare size={16} className="text-[#1E3A8A]" />
-                  <h3 className="font-display font-semibold text-[#0F172A] text-sm">Mensagens</h3>
+                  <h3 className="font-display font-semibold text-[#0F172A] text-sm">{t('teacher.dashboard.messages')}</h3>
                 </div>
-                <span className="badge-danger text-[10px]">{messages.filter(m => m.unread).length} novas</span>
+                <span className="badge-danger text-[10px]">{t('teacher.dashboard.newMessages', { n: messages.filter(m => m.unread).length })}</span>
               </div>
               <div className="space-y-2">
                 {messages.map(msg => (
@@ -240,7 +242,7 @@ export function TeacherDashboard() {
                 onClick={() => navigate('/messages')}
                 className="mt-2 w-full btn-ghost text-xs"
               >
-                Ver todas as mensagens
+                {t('teacher.dashboard.viewAllMessages')}
               </button>
             </div>
 
@@ -248,7 +250,7 @@ export function TeacherDashboard() {
             <div className="card p-4">
               <div className="flex items-center gap-2 mb-3">
                 <FileText size={16} className="text-[#7C3AED]" />
-                <h3 className="font-display font-semibold text-[#0F172A] text-sm">Próximas Publicações</h3>
+                <h3 className="font-display font-semibold text-[#0F172A] text-sm">{t('teacher.dashboard.upcomingPublications')}</h3>
               </div>
               <div className="space-y-2">
                 {mockActivities.slice(0, 3).map(act => (
@@ -271,7 +273,7 @@ export function TeacherDashboard() {
                 onClick={() => setDrawerOpen(true)}
                 className="mt-2 w-full btn-secondary text-xs"
               >
-                <Plus size={12} /> Nova atividade
+                <Plus size={12} /> {t('teacher.dashboard.newActivityBtn')}
               </button>
             </div>
           </div>

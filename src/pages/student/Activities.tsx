@@ -4,10 +4,12 @@ import { Clock, Upload, Filter, CheckCircle, AlertTriangle } from 'lucide-react'
 import { Header } from '../../components/Header'
 import { mockActivities, getActivityTypeLabel, getDaysUntil, mockSubjects } from '../../data/mock'
 import { useSearchStore } from '../../store/search'
+import { useTranslation } from '../../i18n'
 import clsx from 'clsx'
 
 export function StudentActivities() {
   const navigate = useNavigate()
+  const t = useTranslation()
   const query = useSearchStore(s => s.query)
   const [filter, setFilter] = useState<'all' | 'pending' | 'late' | 'submitted'>('all')
   const [subjectFilter, setSubjectFilter] = useState<string>('all')
@@ -28,17 +30,17 @@ export function StudentActivities() {
 
   return (
     <>
-      <Header title="Minhas Atividades" />
+      <Header title={t('student.activities.title')} />
 
       <div className="space-y-4">
         {/* Filters */}
         <div className="flex items-center gap-3 flex-wrap">
           <div className="flex rounded-lg border border-[#E2E8F0] overflow-hidden">
             {[
-              { id: 'all', label: 'Todas' },
-              { id: 'pending', label: 'Pendentes' },
-              { id: 'late', label: 'Atrasadas' },
-              { id: 'submitted', label: 'Entregues' },
+              { id: 'all', label: t('student.activities.all') },
+              { id: 'pending', label: t('student.activities.pending') },
+              { id: 'late', label: t('student.activities.late') },
+              { id: 'submitted', label: t('student.activities.submitted') },
             ].map(f => (
               <button
                 type="button"
@@ -59,7 +61,7 @@ export function StudentActivities() {
             value={subjectFilter}
             onChange={e => setSubjectFilter(e.target.value)}
           >
-            <option value="all">Todas as disciplinas</option>
+            <option value="all">{t('student.activities.allSubjects')}</option>
             {mockSubjects.map(s => (
               <option key={s.id} value={s.id}>{s.name}</option>
             ))}
@@ -69,9 +71,9 @@ export function StudentActivities() {
         {/* Stats */}
         <div className="grid grid-cols-3 gap-3">
           {[
-            { label: 'Pendentes', value: mockActivities.filter(a => a.status === 'pending' || a.status === 'upcoming').length, color: 'text-amber-600', bg: 'bg-amber-50' },
-            { label: 'Atrasadas', value: mockActivities.filter(a => a.status === 'late').length, color: 'text-red-600', bg: 'bg-red-50' },
-            { label: 'Entregues', value: mockActivities.filter(a => a.status === 'submitted' || a.status === 'graded').length, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+            { label: t('student.activities.stats.pending'), value: mockActivities.filter(a => a.status === 'pending' || a.status === 'upcoming').length, color: 'text-amber-600', bg: 'bg-amber-50' },
+            { label: t('student.activities.stats.late'), value: mockActivities.filter(a => a.status === 'late').length, color: 'text-red-600', bg: 'bg-red-50' },
+            { label: t('student.activities.stats.submitted'), value: mockActivities.filter(a => a.status === 'submitted' || a.status === 'graded').length, color: 'text-emerald-600', bg: 'bg-emerald-50' },
           ].map(stat => (
             <div key={stat.label} className={clsx('card p-4 flex items-center gap-3', stat.bg)}>
               <p className={clsx('text-2xl font-bold font-display', stat.color)}>{stat.value}</p>
@@ -84,7 +86,7 @@ export function StudentActivities() {
         {sorted.length === 0 ? (
           <div className="card p-12 flex flex-col items-center gap-3 text-[#94A3B8]">
             <CheckCircle size={40} strokeWidth={1.5} />
-            <p className="font-medium">Nenhuma atividade encontrada</p>
+            <p className="font-medium">{t('student.activities.noActivitiesFound')}</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -102,7 +104,7 @@ export function StudentActivities() {
                         >
                           {act.subjectName}
                         </span>
-                        <span className="text-xs text-[#94A3B8]">{getActivityTypeLabel(act.type)}</span>
+                        <span className="text-xs text-[#94A3B8]">{t('activityTypes.' + act.type)}</span>
                         <span className="text-xs text-[#94A3B8]">· {act.weight}%</span>
                       </div>
                       <h4 className="text-sm font-medium text-[#0F172A]">{act.title}</h4>
@@ -123,10 +125,16 @@ export function StudentActivities() {
                         isLate ? 'text-red-500' : days <= 1 ? 'text-amber-600' : 'text-[#64748B]'
                       )}>
                         {isLate ? <AlertTriangle size={12} /> : <Clock size={12} />}
-                        {isLate ? 'Atrasado' : days === 0 ? 'Hoje' : days === 1 ? 'Amanhã' : `${days} dias`}
+                        {isLate
+                          ? t('student.activities.late2')
+                          : days === 0
+                          ? t('student.activities.today')
+                          : days === 1
+                          ? t('student.activities.tomorrow')
+                          : t('student.activities.days', { n: days })}
                       </div>
                       {act.status === 'submitted' || act.status === 'graded' ? (
-                        <span className="badge-success">Entregue</span>
+                        <span className="badge-success">{t('student.activities.submitted')}</span>
                       ) : (
                         <button
                           type="button"
@@ -139,7 +147,7 @@ export function StudentActivities() {
                           )}
                         >
                           <Upload size={12} />
-                          {isLate ? 'Entregar (atrasado)' : 'Entregar'}
+                          {isLate ? t('student.activities.deliverLate') : t('student.activities.deliver')}
                         </button>
                       )}
                     </div>

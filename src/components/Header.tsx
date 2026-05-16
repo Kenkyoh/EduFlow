@@ -4,6 +4,7 @@ import { useAuthStore } from '../store/auth'
 import { useSidebarStore } from '../store/sidebar'
 import { useSearchStore } from '../store/search'
 import { UserAvatar } from './UserAvatar'
+import { useTranslation } from '../i18n'
 import { useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import clsx from 'clsx'
@@ -19,6 +20,7 @@ export function Header({ title, actions }: HeaderProps) {
   const openNotifications = useNotificationsStore(s => s.openPanel)
   const { collapsed, openMobile } = useSidebarStore()
   const { query, setQuery } = useSearchStore()
+  const t = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -35,7 +37,7 @@ export function Header({ title, actions }: HeaderProps) {
         type="button"
         onClick={openMobile}
         className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-lg text-[#64748B] hover:bg-slate-100 hover:text-[#0F172A] transition-all md:hidden"
-        aria-label="Abrir menu"
+        aria-label={t('nav.openMenu')}
       >
         <Menu size={20} />
       </button>
@@ -49,7 +51,7 @@ export function Header({ title, actions }: HeaderProps) {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8]" />
         <input
           className="input pl-9 h-8 text-sm"
-          placeholder="Buscar..."
+          placeholder={t('header.search')}
           value={query}
           onChange={e => setQuery(e.target.value)}
         />
@@ -63,7 +65,7 @@ export function Header({ title, actions }: HeaderProps) {
           type="button"
           onClick={openNotifications}
           className="relative w-9 h-9 flex items-center justify-center rounded-lg text-[#64748B] hover:bg-slate-100 hover:text-[#0F172A] transition-all"
-          aria-label="Notificações"
+          aria-label={t('nav.notifications')}
         >
           <Bell size={18} />
           {unreadCount > 0 && (
@@ -78,7 +80,7 @@ export function Header({ title, actions }: HeaderProps) {
           type="button"
           onClick={() => user?.role !== 'admin' && navigate('/profile')}
           className={user?.role !== 'admin' ? 'hover:opacity-80 transition-opacity' : 'cursor-default'}
-          title={user?.role !== 'admin' ? 'Meu perfil' : user?.name}
+          title={user?.role !== 'admin' ? t('header.myProfile') : user?.name}
         >
           <UserAvatar user={user} size={32} />
         </button>

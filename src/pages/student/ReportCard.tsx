@@ -6,14 +6,16 @@ import { mockReportCardData, MENCAO_COLORS, MENCAO_SCORES, MENCAO_ORDER } from '
 import { useSettingsStore } from '../../store/settings'
 import { formatGrade, gradeColorClass, scoreToMencao, scoreToConceptual, CONCEPTUAL_COLORS } from '../../utils/gradeFormat'
 import { toast } from '../../components/Toast'
+import { useTranslation } from '../../i18n'
 import type { ReportCardSubjectData } from '../../types'
 import clsx from 'clsx'
 
 function StatusBadge({ status }: { status: 'approved' | 'recovery' | 'failed' | 'pending' }) {
+  const t = useTranslation()
   switch (status) {
-    case 'approved':  return <span className="badge-success"><CheckCircle size={12} /> Aprovado</span>
-    case 'recovery':  return <span className="badge-warning"><AlertTriangle size={12} /> Recuperação</span>
-    case 'failed':    return <span className="badge-danger"><XCircle size={12} /> Reprovado</span>
+    case 'approved':  return <span className="badge-success"><CheckCircle size={12} /> {t('common.approved')}</span>
+    case 'recovery':  return <span className="badge-warning"><AlertTriangle size={12} /> {t('common.recovery')}</span>
+    case 'failed':    return <span className="badge-danger"><XCircle size={12} /> {t('common.failed')}</span>
     default:          return <span className="badge-neutral"><Clock size={12} /> Aguardando</span>
   }
 }
@@ -256,6 +258,7 @@ function SubjectCard({ subject }: { subject: ReportCardSubjectData }) {
 
 export function StudentReportCard() {
   const [period, setPeriod] = useState('2')
+  const t = useTranslation()
 
   const handleExport = () => {
     toast('Gerando PDF... Isso pode levar alguns segundos.', 'info')

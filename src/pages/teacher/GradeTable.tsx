@@ -10,6 +10,7 @@ import {
   formatGrade, gradeColorClass,
 } from '../../utils/gradeFormat'
 import { toast } from '../../components/Toast'
+import { useTranslation } from '../../i18n'
 import type { MencaoValue } from '../../types'
 import clsx from 'clsx'
 
@@ -25,10 +26,11 @@ function StatusIcon({ status }: { status: string }) {
 }
 
 function StatusBadge({ status }: { status: string }) {
+  const t = useTranslation()
   const map = {
-    approved: { label: 'Aprovado', cls: 'badge-success' },
-    recovery: { label: 'Recuperação', cls: 'badge-warning' },
-    failed: { label: 'Reprovado', cls: 'badge-danger' },
+    approved: { label: t('common.approved'), cls: 'badge-success' },
+    recovery: { label: t('common.recovery'), cls: 'badge-warning' },
+    failed: { label: t('common.failed'), cls: 'badge-danger' },
     pending: { label: 'Aguardando', cls: 'badge-neutral' },
   }
   const s = map[status as keyof typeof map] ?? map.pending
@@ -455,6 +457,7 @@ export function GradeTable() {
   const { grades, flashCells } = useGradesStore()
   const [selectedClass, setSelectedClass] = useState('turma-a')
   const { gradeScale, approvalGrade, recoveryMin } = useSettingsStore()
+  const t = useTranslation()
 
   const cls = mockClasses.find(c => c.id === selectedClass) ?? mockClasses[0]
   const isMencao = cls.gradingType === 'mencao' || gradeScale === 'mencao'

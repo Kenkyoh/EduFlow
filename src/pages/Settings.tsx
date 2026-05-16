@@ -4,6 +4,7 @@ import { Header } from '../components/Header'
 import { toast } from '../components/Toast'
 import { useSettingsStore } from '../store/settings'
 import { useAuthStore } from '../store/auth'
+import { useTranslation } from '../i18n'
 import type { GradeScale } from '../store/settings'
 import { SCALE_INFO, SCALE_PREVIEW, formatThreshold, scoreToConceptual, scoreToMencao, CONCEPTUAL_COLORS, CONCEPTUAL_VALUES } from '../utils/gradeFormat'
 import { MENCAO_COLORS, MENCAO_SCORES, MENCAO_ORDER } from '../data/mock'
@@ -14,6 +15,7 @@ type Tab = 'geral' | 'ano_letivo' | 'aprovacao' | 'usuarios' | 'integracoes'
 export function Settings() {
   const user = useAuthStore(s => s.user)
   const isAdmin = user?.role === 'admin'
+  const t = useTranslation()
   const [tab, setTab] = useState<Tab>('geral')
   const [primaryColor, setPrimaryColor] = useState('#1E3A8A')
   const [saving, setSaving] = useState(false)
@@ -27,21 +29,21 @@ export function Settings() {
     setSaving(true)
     await new Promise(r => setTimeout(r, 1000))
     setSaving(false)
-    toast('Configurações salvas com sucesso!')
+    toast(t('settings.saved'))
   }
 
   const allTabs: { id: Tab; label: string; icon: React.ElementType }[] = [
-    { id: 'geral', label: 'Geral', icon: SettingsIcon },
-    { id: 'ano_letivo', label: 'Ano Letivo', icon: Calendar },
-    { id: 'aprovacao', label: 'Aprovação', icon: Save },
-    { id: 'usuarios', label: 'Usuários', icon: Users },
-    { id: 'integracoes', label: 'Integrações', icon: Link },
+    { id: 'geral', label: t('settings.tabs.geral'), icon: SettingsIcon },
+    { id: 'ano_letivo', label: t('settings.tabs.anoLetivo'), icon: Calendar },
+    { id: 'aprovacao', label: t('settings.tabs.aprovacao'), icon: Save },
+    { id: 'usuarios', label: t('settings.tabs.usuarios'), icon: Users },
+    { id: 'integracoes', label: t('settings.tabs.integracoes'), icon: Link },
   ]
   const tabs = isAdmin ? allTabs.filter(t => t.id !== 'aprovacao') : allTabs
 
   return (
     <>
-      <Header title={isAdmin ? 'Configurações da Plataforma' : 'Configurações da Instituição'} />
+      <Header title={isAdmin ? t('settings.titlePlatform') : t('settings.titleInstitution')} />
 
       {/* Tab strip — horizontal on mobile, vertical sidebar on desktop */}
       <div className="flex gap-1 border-b border-[#E2E8F0] mb-5 overflow-x-auto scrollbar-hide md:hidden">
@@ -91,33 +93,33 @@ export function Settings() {
           {tab === 'geral' && (
             <div className="space-y-5">
               <div className="card p-5 space-y-4">
-                <h3 className="font-display font-semibold text-[#0F172A]">Identidade Visual</h3>
+                <h3 className="font-display font-semibold text-[#0F172A]">{t('settings.visualIdentity')}</h3>
 
                 {/* Logo */}
                 <div>
-                  <label className="block text-xs font-medium text-[#64748B] mb-2">Logo da instituição</label>
+                  <label className="block text-xs font-medium text-[#64748B] mb-2">{t('settings.institutionLogo')}</label>
                   <div className="flex items-center gap-4">
                     <div className="w-20 h-20 rounded-xl bg-[#1E3A8A] flex items-center justify-center text-white text-2xl font-bold border-2 border-[#E2E8F0]">
                       CE
                     </div>
                     <div>
                       <button type="button" className="btn-secondary text-sm">
-                        <Upload size={14} /> Upload do logo
+                        <Upload size={14} /> {t('settings.uploadLogo')}
                       </button>
-                      <p className="text-xs text-[#94A3B8] mt-1">PNG ou SVG, mín. 120×120px, máx. 2MB</p>
+                      <p className="text-xs text-[#94A3B8] mt-1">{t('settings.logoSpecs')}</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Institution name */}
                 <div>
-                  <label className="block text-xs font-medium text-[#64748B] mb-1.5">Nome da instituição</label>
+                  <label className="block text-xs font-medium text-[#64748B] mb-1.5">{t('settings.institutionName')}</label>
                   <input className="input max-w-sm" defaultValue="Colégio Estadual São Paulo" />
                 </div>
 
                 {/* Subdomain */}
                 <div>
-                  <label className="block text-xs font-medium text-[#64748B] mb-1.5">Subdomínio</label>
+                  <label className="block text-xs font-medium text-[#64748B] mb-1.5">{t('settings.subdomain')}</label>
                   <div className="flex items-center gap-0">
                     <input className="input rounded-r-none border-r-0 max-w-32 text-sm" defaultValue="escola" />
                     <span className="h-10 px-3 flex items-center bg-[#F8FAFC] border border-[#E2E8F0] rounded-r-lg text-sm text-[#64748B] whitespace-nowrap">
@@ -130,7 +132,7 @@ export function Settings() {
                 <div>
                   <label className="block text-xs font-medium text-[#64748B] mb-2">
                     <Palette size={12} className="inline mr-1" />
-                    Cor principal
+                    {t('settings.mainColor')}
                   </label>
                   <div className="flex items-center gap-3">
                     <input
@@ -165,8 +167,8 @@ export function Settings() {
                       A
                     </div>
                     <div>
-                      <p className="text-sm font-medium" style={{ color: primaryColor }}>Preview da cor principal</p>
-                      <p className="text-xs text-[#64748B]">Usado em botões, links e destaques</p>
+                      <p className="text-sm font-medium" style={{ color: primaryColor }}>{t('settings.colorPreview')}</p>
+                      <p className="text-xs text-[#64748B]">{t('settings.colorUsage')}</p>
                     </div>
                   </div>
                 </div>
@@ -176,28 +178,28 @@ export function Settings() {
 
           {tab === 'ano_letivo' && (
             <div className="card p-5 space-y-4">
-              <h3 className="font-display font-semibold text-[#0F172A]">Configurações do Ano Letivo</h3>
+              <h3 className="font-display font-semibold text-[#0F172A]">{t('settings.academicYearConfig')}</h3>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-[#64748B] mb-1.5">Ano letivo</label>
+                  <label className="block text-xs font-medium text-[#64748B] mb-1.5">{t('settings.academicYear')}</label>
                   <select className="input">
                     <option>2024</option>
                     <option>2025</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-[#64748B] mb-1.5">Organização</label>
+                  <label className="block text-xs font-medium text-[#64748B] mb-1.5">{t('settings.organization')}</label>
                   <select className="input">
-                    <option>Bimestral (4 períodos)</option>
-                    <option>Trimestral (3 períodos)</option>
-                    <option>Semestral (2 períodos)</option>
+                    <option>{t('settings.bimestral')}</option>
+                    <option>{t('settings.trimestral')}</option>
+                    <option>{t('settings.semestral')}</option>
                   </select>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-[#64748B] mb-2">Períodos</label>
+                <label className="block text-xs font-medium text-[#64748B] mb-2">{t('settings.periods')}</label>
                 <div className="space-y-2">
                   {[
                     { name: '1º Bimestre', start: '2024-02-05', end: '2024-04-19' },
@@ -221,8 +223,8 @@ export function Settings() {
             <div className="space-y-5">
               {/* Escala de notas */}
               <div className="card p-5 space-y-4">
-                <h3 className="font-display font-semibold text-[#0F172A]">Escala de Notas</h3>
-                <p className="text-xs text-[#64748B]">Define como as notas são inseridas e exibidas em todo o sistema.</p>
+                <h3 className="font-display font-semibold text-[#0F172A]">{t('settings.gradeScale')}</h3>
+                <p className="text-xs text-[#64748B]">{t('settings.gradeScaleDesc')}</p>
 
                 <div className="grid grid-cols-2 gap-3">
                   {(Object.keys(SCALE_INFO) as GradeScale[]).map(scale => {
@@ -261,7 +263,7 @@ export function Settings() {
                 {/* Live preview card */}
                 <div className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-4">
                   <p className="text-xs font-medium text-[#64748B] mb-3">
-                    Preview — como as notas aparecem agora com a escala <strong>{SCALE_INFO[gradeScale].short}</strong>
+                    {t('settings.preview')} <strong>{SCALE_INFO[gradeScale].short}</strong>
                   </p>
                   <div className="flex items-center gap-6 flex-wrap">
                     {([10, 8.5, 7.0, 5.5, 3.0] as const).map(score => {
@@ -297,12 +299,12 @@ export function Settings() {
 
               {/* Regras de aprovação */}
               <div className="card p-5 space-y-4">
-                <h3 className="font-display font-semibold text-[#0F172A]">Regras de Aprovação</h3>
+                <h3 className="font-display font-semibold text-[#0F172A]">{t('settings.approvalRules')}</h3>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-medium text-[#64748B] mb-1.5">
-                      Nota mínima para aprovação
+                      {t('settings.approvalGrade')}
                       <span className="ml-1 text-[#1E3A8A] font-bold">({formatThreshold(approvalGrade, gradeScale)})</span>
                     </label>
                     <div className="flex items-center gap-2">
@@ -315,7 +317,7 @@ export function Settings() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-[#64748B] mb-1.5">Frequência mínima</label>
+                    <label className="block text-xs font-medium text-[#64748B] mb-1.5">{t('settings.minAttendance')}</label>
                     <div className="flex items-center gap-2">
                       <input
                         type="number" className="input w-24"
@@ -327,7 +329,7 @@ export function Settings() {
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-[#64748B] mb-1.5">
-                      Faixa de recuperação
+                      {t('settings.recoveryRange')}
                       <span className="ml-1 text-amber-600 font-bold">
                         ({formatThreshold(recoveryMin, gradeScale)} – {formatThreshold(recoveryMax, gradeScale)})
                       </span>
@@ -341,11 +343,11 @@ export function Settings() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-[#64748B] mb-1.5">Arredondamento</label>
+                    <label className="block text-xs font-medium text-[#64748B] mb-1.5">{t('settings.rounding')}</label>
                     <select className="input">
-                      <option>1 decimal (7,4)</option>
-                      <option>2 decimais (7,45)</option>
-                      <option>Inteiro (7)</option>
+                      <option>{t('settings.decimal1')}</option>
+                      <option>{t('settings.decimal2')}</option>
+                      <option>{t('settings.integer')}</option>
                     </select>
                   </div>
                 </div>
@@ -353,9 +355,9 @@ export function Settings() {
                 {/* Status legend in current scale */}
                 <div className="flex gap-3 flex-wrap">
                   {[
-                    { label: 'Aprovado', min: approvalGrade, max: 10, bg: '#DCFCE7', color: '#166534' },
-                    { label: 'Recuperação', min: recoveryMin, max: approvalGrade - 0.1, bg: '#FEF9C3', color: '#854D0E' },
-                    { label: 'Reprovado', min: 0, max: recoveryMin - 0.1, bg: '#FEE2E2', color: '#991B1B' },
+                    { label: t('common.approved'), min: approvalGrade, max: 10, bg: '#DCFCE7', color: '#166534' },
+                    { label: t('common.recovery'), min: recoveryMin, max: approvalGrade - 0.1, bg: '#FEF9C3', color: '#854D0E' },
+                    { label: t('common.failed'), min: 0, max: recoveryMin - 0.1, bg: '#FEE2E2', color: '#991B1B' },
                   ].map(s => (
                     <div key={s.label} className="flex items-center gap-2 px-3 py-2 rounded-lg border" style={{ borderColor: s.bg }}>
                       <span className="w-2 h-2 rounded-full" style={{ backgroundColor: s.color }} />
@@ -374,8 +376,8 @@ export function Settings() {
                 gradeScale === 'mencao' ? 'ring-2 ring-[#1E3A8A]' : 'opacity-70'
               )}>
                 <div className="flex items-center gap-2">
-                  <h3 className="font-display font-semibold text-[#0F172A]">Escala de Menção (PA–N)</h3>
-                  {gradeScale === 'mencao' && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#1E3A8A] text-white">Ativa</span>}
+                  <h3 className="font-display font-semibold text-[#0F172A]">{t('settings.mencaoScale')}</h3>
+                  {gradeScale === 'mencao' && <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#1E3A8A] text-white">{t('settings.activeLabel')}</span>}
                 </div>
                 <div className="grid grid-cols-5 gap-2">
                   {MENCAO_ORDER.map(v => {
@@ -440,14 +442,14 @@ export function Settings() {
                   </div>
                   <div className="flex items-center gap-3">
                     {integration.connected && (
-                      <span className="badge-success text-xs">Conectado</span>
+                      <span className="badge-success text-xs">{t('settings.integrations.connected')}</span>
                     )}
                     <button
                       type="button"
                       onClick={() => toast(integration.connected ? `${integration.name} desconectado` : `Conectando ${integration.name}...`, 'info')}
                       className={integration.connected ? 'btn-ghost text-xs' : 'btn-secondary text-xs'}
                     >
-                      {integration.connected ? 'Desconectar' : 'Conectar'}
+                      {integration.connected ? t('settings.integrations.disconnect') : t('settings.integrations.connect')}
                     </button>
                   </div>
                 </div>
@@ -458,18 +460,18 @@ export function Settings() {
           {tab === 'usuarios' && (
             <div className="card p-5">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-display font-semibold text-[#0F172A]">Usuários da Instituição</h3>
+                <h3 className="font-display font-semibold text-[#0F172A]">{t('settings.users.title')}</h3>
                 <button type="button" className="btn-primary text-sm" onClick={() => toast('Convidando usuário...', 'info')}>
-                  <Users size={14} /> Convidar usuário
+                  <Users size={14} /> {t('settings.users.inviteUser')}
                 </button>
               </div>
               <table className="w-full text-sm">
                 <thead className="border-b border-[#E2E8F0]">
                   <tr>
-                    <th className="py-2 text-left text-xs font-medium text-[#64748B]">Nome</th>
-                    <th className="py-2 text-left text-xs font-medium text-[#64748B]">E-mail</th>
-                    <th className="py-2 text-left text-xs font-medium text-[#64748B]">Perfil</th>
-                    <th className="py-2 text-left text-xs font-medium text-[#64748B]">Status</th>
+                    <th className="py-2 text-left text-xs font-medium text-[#64748B]">{t('settings.users.name')}</th>
+                    <th className="py-2 text-left text-xs font-medium text-[#64748B]">{t('settings.users.email')}</th>
+                    <th className="py-2 text-left text-xs font-medium text-[#64748B]">{t('settings.users.profile')}</th>
+                    <th className="py-2 text-left text-xs font-medium text-[#64748B]">{t('settings.users.status')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#F1F5F9]">
@@ -485,8 +487,8 @@ export function Settings() {
                       <td className="py-2.5 text-[#64748B]">{u.role}</td>
                       <td className="py-2.5">
                         {u.active
-                          ? <span className="badge-success">Ativo</span>
-                          : <span className="badge-neutral">Inativo</span>
+                          ? <span className="badge-success">{t('common.active')}</span>
+                          : <span className="badge-neutral">{t('common.inactive')}</span>
                         }
                       </td>
                     </tr>
@@ -507,10 +509,10 @@ export function Settings() {
               {saving ? (
                 <span className="flex items-center gap-2">
                   <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Salvando...
+                  {t('settings.saving')}
                 </span>
               ) : (
-                <><Save size={16} /> Salvar configurações</>
+                <><Save size={16} /> {t('settings.saveSettings')}</>
               )}
             </button>
           </div>

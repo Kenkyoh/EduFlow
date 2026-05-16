@@ -6,16 +6,10 @@ import {
 } from 'lucide-react'
 import { mockGuardianStudents, mockReportCardData } from '../../data/mock'
 import { Header } from '../../components/Header'
+import { useTranslation } from '../../i18n'
 import clsx from 'clsx'
 
 type Tab = 'desempenho' | 'atividades' | 'frequencia'
-
-const STATUS_CONFIG = {
-  approved: { label: 'Aprovado',    className: 'bg-emerald-50 text-emerald-700 border border-emerald-200' },
-  recovery: { label: 'Recuperação', className: 'bg-amber-50 text-amber-700 border border-amber-200'      },
-  failed:   { label: 'Reprovado',   className: 'bg-red-50 text-red-700 border border-red-200'            },
-  pending:  { label: 'Aguardando',  className: 'bg-slate-100 text-slate-600 border border-slate-200'     },
-}
 
 const TABS: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: 'desempenho', label: 'Desempenho', icon: BarChart3 },
@@ -31,17 +25,25 @@ const MOCK_ACTIVITIES = [
   { id: 'a5', title: 'Apresentação — Rev. Industrial',    subject: 'História',   subjectColor: '#DC2626', status: 'upcoming', due: 'Em 14 dias'        },
 ]
 
+const STATUS_CONFIG = {
+  approved: { className: 'bg-emerald-50 text-emerald-700 border border-emerald-200' },
+  recovery: { className: 'bg-amber-50 text-amber-700 border border-amber-200'       },
+  failed:   { className: 'bg-red-50 text-red-700 border border-red-200'             },
+  pending:  { className: 'bg-slate-100 text-slate-600 border border-slate-200'      },
+}
+
 const ACTIVITY_STATUS = {
-  pending:  { label: 'Pendente',  className: 'bg-amber-50 text-amber-700 border border-amber-200'   },
-  upcoming: { label: 'Próxima',   className: 'bg-blue-50 text-blue-700 border border-blue-200'      },
-  late:     { label: 'Atrasada',  className: 'bg-red-50 text-red-700 border border-red-200'         },
-  graded:   { label: 'Corrigida', className: 'bg-emerald-50 text-emerald-700 border border-emerald-200' },
+  pending:  { className: 'bg-amber-50 text-amber-700 border border-amber-200'       },
+  upcoming: { className: 'bg-blue-50 text-blue-700 border border-blue-200'          },
+  late:     { className: 'bg-red-50 text-red-700 border border-red-200'             },
+  graded:   { className: 'bg-emerald-50 text-emerald-700 border border-emerald-200' },
 }
 
 export function GuardianStudentDetail() {
   const { studentId } = useParams<{ studentId: string }>()
   const navigate = useNavigate()
   const [tab, setTab] = useState<Tab>('desempenho')
+  const t = useTranslation()
 
   const student = studentId ? mockGuardianStudents[studentId] : undefined
 
@@ -52,7 +54,7 @@ export function GuardianStudentDetail() {
         <div className="text-center py-20">
           <GraduationCap size={40} className="mx-auto text-[#CBD5E1] mb-4" />
           <p className="text-[#64748B]">Aluno não encontrado.</p>
-          <button type="button" onClick={() => navigate('/guardian')} className="btn-secondary mt-4">Voltar</button>
+          <button type="button" onClick={() => navigate('/guardian')} className="btn-secondary mt-4">{t('common.back')}</button>
         </div>
       </>
     )
@@ -145,7 +147,7 @@ export function GuardianStudentDetail() {
                         'text-[10px] font-semibold px-2 py-0.5 rounded-full',
                         STATUS_CONFIG[sub.status].className
                       )}>
-                        {STATUS_CONFIG[sub.status].label}
+                        {sub.status === 'approved' ? t('common.approved') : sub.status === 'recovery' ? t('common.recovery') : sub.status === 'failed' ? t('common.failed') : t('common.pending')}
                       </span>
                     </div>
                   </div>
@@ -208,7 +210,7 @@ export function GuardianStudentDetail() {
                       'text-[10px] font-semibold px-2 py-0.5 rounded-full',
                       ACTIVITY_STATUS[act.status as keyof typeof ACTIVITY_STATUS].className
                     )}>
-                      {ACTIVITY_STATUS[act.status as keyof typeof ACTIVITY_STATUS].label}
+                      {act.status === 'pending' ? t('common.pending') : act.status === 'late' ? t('common.late') : act.status === 'graded' ? t('common.graded') : act.status === 'submitted' ? t('common.submitted') : act.status}
                     </span>
                   </div>
                 </div>

@@ -8,6 +8,7 @@ import { Header } from '../../components/Header'
 import { mockCoordinatorData } from '../../data/mock'
 import { useSettingsStore } from '../../store/settings'
 import { formatGrade, gradeColorClass, SCALE_INFO } from '../../utils/gradeFormat'
+import { useTranslation } from '../../i18n'
 import clsx from 'clsx'
 
 const BLUE = '#1E3A8A'
@@ -15,6 +16,7 @@ const BLUE = '#1E3A8A'
 export function CoordinatorAnalytics() {
   const { kpis, monthlyEvolution, subjectPerformance, classPerformance, attendanceByClass, gradeDistribution } = mockCoordinatorData
   const { gradeScale, approvalGrade, recoveryMin } = useSettingsStore()
+  const t = useTranslation()
 
   return (
     <>

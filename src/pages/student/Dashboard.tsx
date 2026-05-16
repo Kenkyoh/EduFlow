@@ -6,16 +6,8 @@ import {
 } from 'lucide-react'
 import { Header } from '../../components/Header'
 import { mockActivities, mockAnnouncements, mockSubjects, formatDueDate, getDaysUntil, getActivityTypeLabel } from '../../data/mock'
+import { useTranslation } from '../../i18n'
 import clsx from 'clsx'
-
-function CountdownBadge({ dueDate }: { dueDate: string }) {
-  const days = getDaysUntil(dueDate)
-  if (days < 0) return <span className="badge-danger">Atrasado</span>
-  if (days === 0) return <span className="badge-danger">Hoje</span>
-  if (days === 1) return <span className="badge-warning">Amanhã</span>
-  if (days <= 3) return <span className="badge-warning">{days} dias</span>
-  return <span className="badge-neutral">{days} dias</span>
-}
 
 const progressBySubject = [
   { subjectId: 'mat', name: 'Matemática', color: '#1E3A8A', progress: 72, grade: 8.1 },
@@ -27,6 +19,7 @@ const progressBySubject = [
 
 export function StudentDashboard() {
   const navigate = useNavigate()
+  const t = useTranslation()
   const pending = mockActivities.filter(a => a.status === 'pending' || a.status === 'upcoming' || a.status === 'late')
   const sorted = [...pending].sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
 
@@ -36,10 +29,26 @@ export function StudentDashboard() {
     { subject: 'Português', color: '#7C3AED', assessment: 'Trabalho', grade: 8.5, date: '3 dias' },
   ]
 
+  function CountdownBadge({ dueDate }: { dueDate: string }) {
+    const days = getDaysUntil(dueDate)
+    if (days < 0) return <span className="badge-danger">{t('student.activities.late2')}</span>
+    if (days === 0) return <span className="badge-danger">{t('common.today')}</span>
+    if (days === 1) return <span className="badge-warning">{t('common.tomorrow')}</span>
+    if (days <= 3) return <span className="badge-warning">{t('common.days', { n: days })}</span>
+    return <span className="badge-neutral">{t('common.days', { n: days })}</span>
+  }
+
+  const quickAccess = [
+    { label: t('student.dashboard.calendar'), icon: '📅', path: '/calendar' },
+    { label: t('student.dashboard.reportCard'), icon: '📊', path: '/student/report-card' },
+    { label: t('student.dashboard.messages'), icon: '💬', path: '/messages' },
+    { label: t('student.dashboard.classes'), icon: '📚', path: '/student/classes' },
+  ]
+
   return (
     <>
       <Header
-        title="Dashboard"
+        title={t('student.dashboard.title')}
         actions={
           <span className="text-xs text-[#94A3B8] hidden md:block">
             3º Ano A · 2º Bimestre
@@ -51,14 +60,14 @@ export function StudentDashboard() {
         {/* Welcome bar */}
         <div className="card p-4 bg-gradient-to-r from-[#1E3A8A] to-[#1e40af] text-white flex items-center justify-between">
           <div>
-            <h2 className="font-display font-semibold text-lg">Bom dia, Lucas! 👋</h2>
+            <h2 className="font-display font-semibold text-lg">{t('student.dashboard.goodMorning', { name: 'Lucas' })}</h2>
             <p className="text-blue-200 text-sm mt-0.5">
-              Você tem <span className="font-semibold text-white">{sorted.filter(a => getDaysUntil(a.dueDate) <= 3).length} atividades</span> nos próximos 3 dias
+              {t('student.dashboard.youHave')} <span className="font-semibold text-white">{sorted.filter(a => getDaysUntil(a.dueDate) <= 3).length} atividades</span> {t('student.dashboard.activitiesIn3Days')}
             </p>
           </div>
           <div className="flex items-center gap-3">
             <div className="text-right">
-              <p className="text-xs text-blue-200">Média geral</p>
+              <p className="text-xs text-blue-200">{t('student.dashboard.generalAverage')}</p>
               <p className="text-2xl font-bold">7,2</p>
             </div>
             <TrendingUp size={32} className="text-blue-300" />
@@ -69,21 +78,21 @@ export function StudentDashboard() {
           {/* Activities column */}
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="font-display font-semibold text-[#0F172A]">Próximas Atividades</h3>
+              <h3 className="font-display font-semibold text-[#0F172A]">{t('student.dashboard.upcomingActivities')}</h3>
               <button
                 type="button"
                 onClick={() => navigate('/student/activities')}
                 className="text-sm text-[#1E3A8A] hover:underline flex items-center gap-1"
               >
-                Ver todas <ArrowRight size={14} />
+                {t('student.dashboard.viewAll')} <ArrowRight size={14} />
               </button>
             </div>
 
             {sorted.length === 0 ? (
               <div className="card p-8 flex flex-col items-center justify-center gap-3 text-[#94A3B8]">
                 <CheckCircle size={36} strokeWidth={1.5} />
-                <p className="font-medium">Nenhuma atividade pendente</p>
-                <p className="text-sm">Você está em dia com todas as entregas!</p>
+                <p className="font-medium">{t('student.dashboard.noActivitiesPending')}</p>
+                <p className="text-sm">{t('student.dashboard.upToDate')}</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -106,7 +115,7 @@ export function StudentDashboard() {
                             >
                               {act.subjectName}
                             </span>
-                            <span className="text-xs text-[#94A3B8]">{getActivityTypeLabel(act.type)}</span>
+                            <span className="text-xs text-[#94A3B8]">{t('activityTypes.' + act.type)}</span>
                           </div>
                           <h4 className="text-sm font-medium text-[#0F172A] line-clamp-1">{act.title}</h4>
                           <div className="flex items-center gap-3 mt-1.5 text-xs text-[#64748B]">
@@ -116,14 +125,14 @@ export function StudentDashboard() {
                               {' '}às{' '}
                               {new Date(act.dueDate).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                             </span>
-                            <span>Peso: {act.weight}%</span>
+                            <span>{t('student.dashboard.weight', { w: act.weight })}</span>
                           </div>
                         </div>
                         <div className="flex flex-col items-end gap-2">
                           <CountdownBadge dueDate={act.dueDate} />
                           {act.status === 'late' && (
                             <span className="flex items-center gap-1 text-[11px] text-red-500">
-                              <AlertTriangle size={11} /> Atrasado
+                              <AlertTriangle size={11} /> {t('student.activities.late2')}
                             </span>
                           )}
                         </div>
@@ -136,7 +145,7 @@ export function StudentDashboard() {
 
             {/* Announcements */}
             <div className="flex items-center justify-between mt-2">
-              <h3 className="font-display font-semibold text-[#0F172A]">Mural de Avisos</h3>
+              <h3 className="font-display font-semibold text-[#0F172A]">{t('student.dashboard.bulletinBoard')}</h3>
             </div>
             <div className="space-y-3">
               {mockAnnouncements.slice(0, 3).map(ann => (
@@ -150,7 +159,7 @@ export function StudentDashboard() {
                   {ann.urgent && (
                     <div className="flex items-center gap-1.5 mb-2">
                       <Zap size={12} className="text-[#DC2626]" />
-                      <span className="text-xs font-bold text-[#DC2626] uppercase tracking-wide">Urgente</span>
+                      <span className="text-xs font-bold text-[#DC2626] uppercase tracking-wide">{t('student.dashboard.urgent')}</span>
                     </div>
                   )}
                   <h4 className="text-sm font-medium text-[#0F172A]">{ann.title}</h4>
@@ -158,7 +167,7 @@ export function StudentDashboard() {
                   <div className="flex items-center justify-between mt-2">
                     <span className="text-[11px] text-[#94A3B8]">{ann.author} · {ann.timestamp}</span>
                     {ann.type === 'enquete' && ann.pollOptions && (
-                      <span className="text-[11px] text-[#1E3A8A]">{ann.pollOptions.reduce((a, b) => a + b.votes, 0)} votos</span>
+                      <span className="text-[11px] text-[#1E3A8A]">{ann.pollOptions.reduce((a, b) => a + b.votes, 0)} {t('student.dashboard.votes')}</span>
                     )}
                   </div>
                   {ann.type === 'enquete' && ann.pollOptions && (
@@ -194,7 +203,7 @@ export function StudentDashboard() {
             <div className="card p-4">
               <div className="flex items-center gap-2 mb-3">
                 <Star size={16} className="text-[#D97706]" />
-                <h3 className="font-display font-semibold text-[#0F172A] text-sm">Notas Recentes</h3>
+                <h3 className="font-display font-semibold text-[#0F172A] text-sm">{t('student.dashboard.recentGrades')}</h3>
               </div>
               <div className="space-y-2.5">
                 {recentGrades.map((g, i) => (
@@ -223,7 +232,7 @@ export function StudentDashboard() {
                 onClick={() => navigate('/student/report-card')}
                 className="mt-3 w-full btn-ghost text-xs"
               >
-                Ver boletim completo
+                {t('student.dashboard.viewFullReportCard')}
               </button>
             </div>
 
@@ -231,7 +240,7 @@ export function StudentDashboard() {
             <div className="card p-4">
               <div className="flex items-center gap-2 mb-3">
                 <BookOpen size={16} className="text-[#1E3A8A]" />
-                <h3 className="font-display font-semibold text-[#0F172A] text-sm">Progresso por Disciplina</h3>
+                <h3 className="font-display font-semibold text-[#0F172A] text-sm">{t('student.dashboard.subjectProgress')}</h3>
               </div>
               <div className="space-y-3">
                 {progressBySubject.map(s => (
@@ -251,7 +260,7 @@ export function StudentDashboard() {
                         style={{ width: `${s.progress}%`, backgroundColor: s.color }}
                       />
                     </div>
-                    <p className="text-[11px] text-[#94A3B8] mt-0.5">{s.progress}% concluído</p>
+                    <p className="text-[11px] text-[#94A3B8] mt-0.5">{t('student.dashboard.completed', { pct: s.progress })}</p>
                   </div>
                 ))}
               </div>
@@ -259,14 +268,9 @@ export function StudentDashboard() {
 
             {/* Quick actions */}
             <div className="card p-4">
-              <h3 className="font-display font-semibold text-[#0F172A] text-sm mb-3">Acesso Rápido</h3>
+              <h3 className="font-display font-semibold text-[#0F172A] text-sm mb-3">{t('student.dashboard.quickAccess')}</h3>
               <div className="grid grid-cols-2 gap-2">
-                {[
-                  { label: 'Calendário', icon: '📅', path: '/calendar' },
-                  { label: 'Boletim', icon: '📊', path: '/student/report-card' },
-                  { label: 'Mensagens', icon: '💬', path: '/messages' },
-                  { label: 'Turmas', icon: '📚', path: '/student/classes' },
-                ].map(item => (
+                {quickAccess.map(item => (
                   <button
                     type="button"
                     key={item.path}

@@ -5,12 +5,14 @@ import { Header } from '../../components/Header'
 import { mockSubmissions } from '../../data/mock'
 import { useNotificationsStore } from '../../store/notifications'
 import { toast } from '../../components/Toast'
+import { useTranslation } from '../../i18n'
 import clsx from 'clsx'
 
 export function CorrectSubmission() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const addNotification = useNotificationsStore(s => s.addNotification)
+  const t = useTranslation()
 
   const uncorrected = mockSubmissions.filter(s => s.status === 'submitted')
   const currentIdx = uncorrected.findIndex(s => s.id === id)
@@ -66,7 +68,7 @@ export function CorrectSubmission() {
             onClick={() => navigate(-1)}
             className="flex items-center gap-1.5 text-sm text-[#64748B] hover:text-[#0F172A]"
           >
-            <ArrowLeft size={16} /> Voltar à fila
+            <ArrowLeft size={16} /> {t('common.back')}
           </button>
           <div className="flex items-center gap-3">
             <span className="text-sm text-[#64748B]">
@@ -277,7 +279,7 @@ export function CorrectSubmission() {
               ) : (
                 <div className="flex gap-3">
                   <button type="button" onClick={() => navigate(-1)} className="btn-ghost flex-1">
-                    Cancelar
+                    {t('common.cancel')}
                   </button>
                   <button
                     type="button"
@@ -288,7 +290,7 @@ export function CorrectSubmission() {
                     {saving ? (
                       <span className="flex items-center gap-2">
                         <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        Confirmando...
+                        {t('common.saving')}
                       </span>
                     ) : (
                       <><CheckCircle size={16} /> Confirmar nota</>

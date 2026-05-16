@@ -2,10 +2,12 @@ import { useNavigate } from 'react-router-dom'
 import { Header } from '../../components/Header'
 import { mockSubjects, mockReportCardData } from '../../data/mock'
 import { useSearchStore } from '../../store/search'
+import { useTranslation } from '../../i18n'
 import clsx from 'clsx'
 
 export function StudentClassList() {
   const navigate = useNavigate()
+  const t = useTranslation()
   const query = useSearchStore(s => s.query)
 
   const displayed = mockSubjects.slice(0, 5).filter(s =>
@@ -16,11 +18,11 @@ export function StudentClassList() {
 
   return (
     <>
-      <Header title="Minhas Turmas" />
+      <Header title={t('student.classList.title')} />
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {displayed.length === 0 ? (
           <p className="col-span-full text-center py-12 text-[#94A3B8] text-sm">
-            Nenhuma turma encontrada para "{query}"
+            {t('student.classList.noClassesFound', { query })}
           </p>
         ) : null}
         {displayed.map(s => {
@@ -39,10 +41,10 @@ export function StudentClassList() {
               </div>
               <h3 className="font-display font-semibold text-[#0F172A]">{s.name}</h3>
               <p className="text-sm text-[#64748B] mt-0.5">{s.teacher}</p>
-              <p className="text-xs text-[#94A3B8] mt-1">3º Ano A · 2º Bimestre</p>
+              <p className="text-xs text-[#94A3B8] mt-1">{t('student.classList.period')}</p>
               {reportData && (
                 <div className="mt-3 flex items-center justify-between">
-                  <span className="text-xs text-[#64748B]">Minha média</span>
+                  <span className="text-xs text-[#64748B]">{t('student.classList.myAverage')}</span>
                   <span className={clsx(
                     'text-lg font-bold font-display',
                     reportData.average >= 6 ? 'text-emerald-600'

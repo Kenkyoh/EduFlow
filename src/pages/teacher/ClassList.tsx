@@ -4,10 +4,12 @@ import { Header } from '../../components/Header'
 import { mockClasses } from '../../data/mock'
 import { useSearchStore } from '../../store/search'
 import clsx from 'clsx'
+import { useTranslation } from '../../i18n'
 
 export function TeacherClassList() {
   const navigate = useNavigate()
   const query = useSearchStore(s => s.query)
+  const t = useTranslation()
 
   const displayed = mockClasses.filter(cls =>
     !query ||
@@ -17,11 +19,11 @@ export function TeacherClassList() {
 
   return (
     <>
-      <Header title="Minhas Turmas" />
+      <Header title={t('teacher.classList.title')} />
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {displayed.length === 0 && (
           <p className="col-span-full text-center py-12 text-[#94A3B8] text-sm">
-            Nenhuma turma encontrada para "{query}"
+            {t('teacher.classList.noClassesFound', { query })}
           </p>
         )}
         {displayed.map(cls => (
@@ -41,11 +43,11 @@ export function TeacherClassList() {
             <div className="flex items-center justify-between mt-4">
               <div className="flex items-center gap-1.5 text-xs text-[#64748B]">
                 <Users size={13} />
-                <span>{cls.studentsCount} alunos</span>
+                <span>{t('teacher.classList.students', { n: cls.studentsCount })}</span>
               </div>
               <div className="flex items-center gap-1.5 text-xs font-medium text-emerald-600">
                 <TrendingUp size={13} />
-                <span>{cls.deliveryRate}% entrega</span>
+                <span>{cls.deliveryRate}% {t('teacher.classList.delivery')}</span>
               </div>
             </div>
             <div className="mt-2">

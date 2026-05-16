@@ -5,6 +5,7 @@ import { Header } from '../../components/Header'
 import { ActivityDrawer } from '../../components/ActivityDrawer'
 import { mockClasses, mockActivities, mockStudentGrades, mockAnnouncements, getActivityTypeLabel, getStatusBadge } from '../../data/mock'
 import { toast } from '../../components/Toast'
+import { useTranslation } from '../../i18n'
 import clsx from 'clsx'
 
 type Tab = 'mural' | 'materiais' | 'atividades' | 'alunos' | 'notas'
@@ -12,6 +13,7 @@ type Tab = 'mural' | 'materiais' | 'atividades' | 'alunos' | 'notas'
 export function TeacherClassView() {
   const { classId } = useParams<{ classId: string }>()
   const navigate = useNavigate()
+  const t = useTranslation()
   const [tab, setTab] = useState<Tab>('mural')
   const [drawerOpen, setDrawerOpen] = useState(false)
 
@@ -23,7 +25,7 @@ export function TeacherClassView() {
     { id: 'materiais', label: 'Materiais', icon: FileText },
     { id: 'atividades', label: 'Atividades', icon: ClipboardList },
     { id: 'alunos', label: 'Alunos', icon: Users },
-    { id: 'notas', label: 'Notas', icon: BarChart3 },
+    { id: 'notas', label: t('nav.grades'), icon: BarChart3 },
   ]
 
   return (

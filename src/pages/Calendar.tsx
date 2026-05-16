@@ -3,16 +3,13 @@ import { ChevronLeft, ChevronRight, Plus, X, Clock, BookOpen } from 'lucide-reac
 import { Header } from '../components/Header'
 import { ActivityDrawer } from '../components/ActivityDrawer'
 import { toast } from '../components/Toast'
-import { mockCalendarEvents, mockSubjects, getActivityTypeLabel } from '../data/mock'
+import { mockCalendarEvents, mockSubjects } from '../data/mock'
 import { useAuthStore } from '../store/auth'
+import { useTranslation } from '../i18n'
 import type { CalendarEvent } from '../types'
 import clsx from 'clsx'
 
 type ViewMode = 'month' | 'week' | 'agenda'
-
-const WEEKDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
-const MONTHS = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
 
 const TYPE_ICONS: Record<string, string> = {
   prova: '📝',
@@ -24,6 +21,7 @@ const TYPE_ICONS: Record<string, string> = {
 }
 
 function EventDetailDrawer({ event, onClose }: { event: CalendarEvent; onClose: () => void }) {
+  const t = useTranslation()
   return (
     <>
       <div className="drawer-overlay" onClick={onClose} />
@@ -33,7 +31,7 @@ function EventDetailDrawer({ event, onClose }: { event: CalendarEvent; onClose: 
             <span className="text-xl">{TYPE_ICONS[event.type]}</span>
             <div>
               <h2 className="font-display font-semibold text-[#0F172A]">{event.title}</h2>
-              <p className="text-xs text-[#64748B]">{getActivityTypeLabel(event.type)}</p>
+              <p className="text-xs text-[#64748B]">{t('activityTypes.' + event.type)}</p>
             </div>
           </div>
           <button type="button" onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-[#64748B]">
@@ -55,7 +53,7 @@ function EventDetailDrawer({ event, onClose }: { event: CalendarEvent; onClose: 
             </div>
           )}
           <div className="pt-4 border-t border-[#E2E8F0]">
-            <button type="button" className="btn-primary w-full" onClick={onClose}>Ver atividade completa</button>
+            <button type="button" className="btn-primary w-full" onClick={onClose}>{t('calendar.viewActivity')}</button>
           </div>
         </div>
       </div>
@@ -64,6 +62,10 @@ function EventDetailDrawer({ event, onClose }: { event: CalendarEvent; onClose: 
 }
 
 export function CalendarPage() {
+  const t = useTranslation()
+  const WEEKDAYS = t('calendar.weekdays') as string[]
+  const MONTHS = t('calendar.months') as string[]
+
   const user = useAuthStore(s => s.user)
   const isTeacher = user?.role === 'teacher' || user?.role === 'coordinator'
 
@@ -176,7 +178,7 @@ export function CalendarPage() {
                       </button>
                     ))}
                     {dayEvents.length > 3 && (
-                      <p className="text-[10px] text-[#94A3B8] pl-1">+{dayEvents.length - 3} mais</p>
+                      <p className="text-[10px] text-[#94A3B8] pl-1">+{t('calendar.more', { n: dayEvents.length - 3 })}</p>
                     )}
                   </div>
                 </div>
@@ -200,10 +202,10 @@ export function CalendarPage() {
       return (
         <div className="card p-12 flex flex-col items-center gap-3 text-[#94A3B8]">
           <BookOpen size={36} strokeWidth={1.5} />
-          <p className="font-medium">Nenhum evento encontrado</p>
+          <p className="font-medium">{t('calendar.noEventsFound')}</p>
           {isTeacher && (
             <button type="button" onClick={() => setDrawerOpen(true)} className="btn-primary text-sm">
-              Criar primeira atividade
+              {t('calendar.createFirstActivity')}
             </button>
           )}
         </div>
@@ -220,7 +222,7 @@ export function CalendarPage() {
               <div className={clsx('px-4 py-2.5 border-b border-[#E2E8F0]', isToday ? 'bg-[#1E3A8A]' : 'bg-[#F8FAFC]')}>
                 <p className={clsx('text-sm font-semibold', isToday ? 'text-white' : 'text-[#0F172A]')}>
                   {d.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
-                  {isToday && <span className="ml-2 text-xs bg-white/20 px-2 py-0.5 rounded-full">Hoje</span>}
+                  {isToday && <span className="ml-2 text-xs bg-white/20 px-2 py-0.5 rounded-full">{t('calendar.todayBtn')}</span>}
                 </p>
               </div>
               {events.map(ev => (
@@ -234,7 +236,7 @@ export function CalendarPage() {
                   <span className="w-1 h-8 rounded-full flex-shrink-0" style={{ backgroundColor: ev.color }} />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-[#0F172A] truncate">{ev.title}</p>
-                    <p className="text-xs text-[#64748B]">{ev.subjectName} · {getActivityTypeLabel(ev.type)}</p>
+                    <p className="text-xs text-[#64748B]">{ev.subjectName} · {t('activityTypes.' + ev.type)}</p>
                   </div>
                 </button>
               ))}
@@ -248,11 +250,11 @@ export function CalendarPage() {
   return (
     <>
       <Header
-        title="Calendário"
+        title={t('calendar.title')}
         actions={
           isTeacher ? (
             <button type="button" onClick={() => setDrawerOpen(true)} className="btn-primary text-sm">
-              <Plus size={16} /> Nova atividade
+              <Plus size={16} /> {t('calendar.newActivity')}
             </button>
           ) : undefined
         }
@@ -262,7 +264,7 @@ export function CalendarPage() {
         {/* Sidebar filters — desktop only */}
         <div className="hidden md:block w-48 flex-shrink-0 space-y-4">
           <div className="card p-3">
-            <p className="text-xs font-semibold text-[#64748B] mb-2">Disciplinas</p>
+            <p className="text-xs font-semibold text-[#64748B] mb-2">{t('calendar.subjects')}</p>
             <div className="space-y-1.5">
               {mockSubjects.map(s => (
                 <label key={s.id} className="flex items-center gap-2 cursor-pointer">
@@ -285,11 +287,11 @@ export function CalendarPage() {
           </div>
 
           <div className="card p-3">
-            <p className="text-xs font-semibold text-[#64748B] mb-2">Densidade de carga</p>
+            <p className="text-xs font-semibold text-[#64748B] mb-2">{t('calendar.density')}</p>
             <div className="space-y-1.5 text-[11px] text-[#64748B]">
-              <div className="flex items-center gap-2"><span className="w-4 h-1.5 rounded-full bg-emerald-200" />1 atividade</div>
-              <div className="flex items-center gap-2"><span className="w-4 h-1.5 rounded-full bg-amber-300" />2–3 atividades</div>
-              <div className="flex items-center gap-2"><span className="w-4 h-1.5 rounded-full bg-red-300" />4+ atividades</div>
+              <div className="flex items-center gap-2"><span className="w-4 h-1.5 rounded-full bg-emerald-200" />{t('calendar.activity1')}</div>
+              <div className="flex items-center gap-2"><span className="w-4 h-1.5 rounded-full bg-amber-300" />{t('calendar.activity23')}</div>
+              <div className="flex items-center gap-2"><span className="w-4 h-1.5 rounded-full bg-red-300" />{t('calendar.activity4')}</div>
             </div>
           </div>
 
@@ -298,7 +300,7 @@ export function CalendarPage() {
             onClick={() => toast('Exportando calendário .ics...')}
             className="btn-secondary w-full text-xs"
           >
-            Exportar .ics
+            {t('calendar.exportIcs')}
           </button>
         </div>
 
@@ -306,13 +308,13 @@ export function CalendarPage() {
         <div className="flex-1 space-y-4">
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <div className="flex items-center gap-2">
-              <button type="button" onClick={goToPrev} aria-label="Mês anterior" className="w-8 h-8 rounded-lg border border-[#E2E8F0] flex items-center justify-center hover:bg-slate-100 transition-colors">
+              <button type="button" onClick={goToPrev} aria-label={t('calendar.prevMonth')} className="w-8 h-8 rounded-lg border border-[#E2E8F0] flex items-center justify-center hover:bg-slate-100 transition-colors">
                 <ChevronLeft size={16} />
               </button>
               <h2 className="font-display font-semibold text-[#0F172A] min-w-[140px] md:min-w-[180px] text-center text-sm md:text-base">
                 {MONTHS[month]} {year}
               </h2>
-              <button type="button" onClick={goToNext} aria-label="Próximo mês" className="w-8 h-8 rounded-lg border border-[#E2E8F0] flex items-center justify-center hover:bg-slate-100 transition-colors">
+              <button type="button" onClick={goToNext} aria-label={t('calendar.nextMonth')} className="w-8 h-8 rounded-lg border border-[#E2E8F0] flex items-center justify-center hover:bg-slate-100 transition-colors">
                 <ChevronRight size={16} />
               </button>
               <button
@@ -320,7 +322,7 @@ export function CalendarPage() {
                 onClick={() => setCurrentDate(new Date())}
                 className="px-3 py-1 text-xs border border-[#E2E8F0] rounded-lg hover:bg-slate-100 transition-colors text-[#64748B]"
               >
-                Hoje
+                {t('calendar.todayBtn')}
               </button>
             </div>
             <div className="flex rounded-lg border border-[#E2E8F0] overflow-hidden">
@@ -334,7 +336,7 @@ export function CalendarPage() {
                     viewMode === v ? 'bg-[#1E3A8A] text-white' : 'bg-white text-[#64748B] hover:bg-slate-50'
                   )}
                 >
-                  {v === 'month' ? 'Mês' : v === 'week' ? 'Semana' : 'Agenda'}
+                  {v === 'month' ? t('calendar.month') : v === 'week' ? t('calendar.week') : t('calendar.agenda')}
                 </button>
               ))}
             </div>

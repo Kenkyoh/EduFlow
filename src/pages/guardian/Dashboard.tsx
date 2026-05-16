@@ -6,14 +6,8 @@ import {
 import { useAuthStore } from '../../store/auth'
 import { mockGuardianStudents } from '../../data/mock'
 import { Header } from '../../components/Header'
+import { useTranslation } from '../../i18n'
 import clsx from 'clsx'
-
-const STATUS_CONFIG = {
-  approved: { label: 'Aprovado',      className: 'bg-emerald-50 text-emerald-700' },
-  recovery: { label: 'Recuperação',   className: 'bg-amber-50 text-amber-700'     },
-  failed:   { label: 'Reprovado',     className: 'bg-red-50 text-red-700'         },
-  pending:  { label: 'Aguardando',    className: 'bg-slate-100 text-slate-600'    },
-}
 
 const EVENT_ICONS = {
   grade:      { icon: TrendingUp,    color: 'text-[#1E3A8A]', bg: 'bg-blue-50'    },
@@ -25,6 +19,14 @@ const EVENT_ICONS = {
 export function GuardianDashboard() {
   const user = useAuthStore(s => s.user)
   const navigate = useNavigate()
+  const t = useTranslation()
+
+  const STATUS_CONFIG = {
+    approved: { label: t('common.approved'),  className: 'bg-emerald-50 text-emerald-700' },
+    recovery: { label: t('common.recovery'),  className: 'bg-amber-50 text-amber-700'     },
+    failed:   { label: t('common.failed'),    className: 'bg-red-50 text-red-700'         },
+    pending:  { label: t('common.waiting'),   className: 'bg-slate-100 text-slate-600'    },
+  }
 
   const students = (user?.studentIds ?? [])
     .map(id => mockGuardianStudents[id])
@@ -32,22 +34,22 @@ export function GuardianDashboard() {
 
   return (
     <>
-      <Header title="Painel do Responsável" />
+      <Header title={t('guardian.dashboard.title')} />
 
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-display font-bold text-[#0F172A]">
-            Bem-vindo, {user?.name.split(' ')[0]}
+            {t('guardian.dashboard.welcome', { name: user?.name.split(' ')[0] ?? '' })}
           </h1>
           <p className="text-sm text-[#64748B] mt-0.5">
-            Acompanhe o desempenho e as atividades de seus filhos.
+            {t('guardian.dashboard.subtitle')}
           </p>
         </div>
 
         {students.length === 0 ? (
           <div className="card py-20 text-center">
             <GraduationCap size={40} className="mx-auto text-[#CBD5E1] mb-4" />
-            <p className="text-[#64748B]">Nenhum aluno vinculado à sua conta.</p>
+            <p className="text-[#64748B]">{t('guardian.dashboard.noStudents')}</p>
           </div>
         ) : (
           students.map(student => (
@@ -68,7 +70,7 @@ export function GuardianDashboard() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2 text-[#1E3A8A] text-sm font-medium">
-                    Ver detalhes
+                    {t('guardian.dashboard.viewDetails')}
                     <ChevronRight size={16} />
                   </div>
                 </div>
@@ -77,7 +79,7 @@ export function GuardianDashboard() {
                 <div className="grid grid-cols-4 gap-3 mt-5 pt-5 border-t border-[#F1F5F9]">
                   {[
                     {
-                      label: 'Média geral',
+                      label: t('guardian.dashboard.generalAverage'),
                       value: student.overallAverage.toFixed(1),
                       icon: TrendingUp,
                       color: '#1E3A8A',
@@ -85,7 +87,7 @@ export function GuardianDashboard() {
                       alert: student.overallAverage < 6,
                     },
                     {
-                      label: 'Frequência',
+                      label: t('guardian.dashboard.attendance'),
                       value: `${student.attendance}%`,
                       icon: Calendar,
                       color: student.attendance < 75 ? '#DC2626' : '#059669',
@@ -93,7 +95,7 @@ export function GuardianDashboard() {
                       alert: student.attendance < 75,
                     },
                     {
-                      label: 'Pendentes',
+                      label: t('guardian.dashboard.pending'),
                       value: student.pendingActivities,
                       icon: Clock,
                       color: '#D97706',
@@ -101,7 +103,7 @@ export function GuardianDashboard() {
                       alert: false,
                     },
                     {
-                      label: 'Atrasadas',
+                      label: t('guardian.dashboard.late'),
                       value: student.lateActivities,
                       icon: AlertTriangle,
                       color: student.lateActivities > 0 ? '#DC2626' : '#059669',
@@ -125,7 +127,7 @@ export function GuardianDashboard() {
                 <div className="card">
                   <div className="flex items-center gap-2 px-5 pt-5 pb-4 border-b border-[#F1F5F9]">
                     <BookOpen size={15} className="text-[#94A3B8]" />
-                    <h3 className="font-semibold text-sm text-[#0F172A]">Desempenho por disciplina</h3>
+                    <h3 className="font-semibold text-sm text-[#0F172A]">{t('guardian.dashboard.subjectPerformance')}</h3>
                   </div>
                   <div className="divide-y divide-[#F8FAFC]">
                     {student.subjects.map(sub => (
@@ -153,7 +155,7 @@ export function GuardianDashboard() {
                 <div className="card">
                   <div className="flex items-center gap-2 px-5 pt-5 pb-4 border-b border-[#F1F5F9]">
                     <Bell size={15} className="text-[#94A3B8]" />
-                    <h3 className="font-semibold text-sm text-[#0F172A]">Eventos recentes</h3>
+                    <h3 className="font-semibold text-sm text-[#0F172A]">{t('guardian.dashboard.recentEvents')}</h3>
                   </div>
                   <div className="divide-y divide-[#F8FAFC]">
                     {student.recentEvents.map(ev => {

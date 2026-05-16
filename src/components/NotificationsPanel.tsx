@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import clsx from 'clsx'
 import type { Notification } from '../types'
+import { useTranslation } from '../i18n'
 
 const typeIcons: Record<string, React.ReactNode> = {
   grade: <BookOpen size={16} className="text-[#1E3A8A]" />,
@@ -21,21 +22,23 @@ const typeColors: Record<string, string> = {
   system: 'bg-slate-50',
 }
 
-const filters = ['Tudo', 'Notas', 'Prazos', 'Avisos', 'Mensagens'] as const
-type Filter = typeof filters[number]
+type Filter = 'all' | 'grades' | 'deadlines' | 'warnings' | 'messages'
+
+const FILTERS: Filter[] = ['all', 'grades', 'deadlines', 'warnings', 'messages']
 
 const filterMap: Record<Filter, string | null> = {
-  Tudo: null,
-  Notas: 'grade',
-  Prazos: 'deadline',
-  Avisos: 'announcement',
-  Mensagens: 'message',
+  all: null,
+  grades: 'grade',
+  deadlines: 'deadline',
+  warnings: 'announcement',
+  messages: 'message',
 }
 
 export function NotificationsPanel() {
   const { notifications, isOpen, closePanel, markAsRead, markAllAsRead } = useNotificationsStore()
   const navigate = useNavigate()
-  const [filter, setFilter] = useState<Filter>('Tudo')
+  const t = useTranslation()
+  const [filter, setFilter] = useState<Filter>('all')
 
   if (!isOpen) return null
 
@@ -62,7 +65,7 @@ export function NotificationsPanel() {
         <div className="flex items-center justify-between p-4 border-b border-[#E2E8F0]">
           <div className="flex items-center gap-2">
             <Bell size={18} className="text-[#0F172A]" />
-            <h2 className="font-display font-semibold text-[#0F172A]">Notificações</h2>
+            <h2 className="font-display font-semibold text-[#0F172A]">{t('notifications.title')}</h2>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -70,11 +73,11 @@ export function NotificationsPanel() {
               onClick={markAllAsRead}
               className="text-xs text-[#1E3A8A] hover:underline flex items-center gap-1"
             >
-              <Check size={12} /> Marcar todas
+              <Check size={12} /> {t('notifications.markAllRead')}
             </button>
             <button
               type="button"
-              aria-label="Fechar notificações"
+              aria-label={t('notifications.closePanel')}
               onClick={closePanel}
               className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-slate-100 text-[#64748B]"
             >
@@ -85,7 +88,7 @@ export function NotificationsPanel() {
 
         {/* Filters */}
         <div className="flex gap-1 p-2 border-b border-[#E2E8F0] overflow-x-auto scrollbar-hide">
-          {filters.map(f => (
+          {FILTERS.map(f => (
             <button
               type="button"
               key={f}
@@ -97,7 +100,7 @@ export function NotificationsPanel() {
                   : 'bg-slate-100 text-[#64748B] hover:bg-slate-200'
               )}
             >
-              {f}
+              {t('notifications.filters.' + f)}
             </button>
           ))}
         </div>
@@ -107,7 +110,7 @@ export function NotificationsPanel() {
           {filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full gap-3 text-[#94A3B8]">
               <Bell size={32} strokeWidth={1.5} />
-              <p className="text-sm">Nenhuma notificação</p>
+              <p className="text-sm">{t('notifications.noNotifications')}</p>
             </div>
           ) : (
             <div className="divide-y divide-[#F1F5F9]">

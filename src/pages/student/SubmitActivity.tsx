@@ -4,11 +4,13 @@ import { Clock, Upload, FileText, CheckCircle, ArrowLeft, AlertTriangle, Edit3, 
 import { Header } from '../../components/Header'
 import { mockActivities, getDaysUntil, getActivityTypeLabel } from '../../data/mock'
 import { toast } from '../../components/Toast'
+import { useTranslation } from '../../i18n'
 import clsx from 'clsx'
 
 export function SubmitActivity() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const t = useTranslation()
   const activity = mockActivities.find(a => a.id === id) ?? mockActivities[1]
 
   const [mode, setMode] = useState<'upload' | 'editor'>('upload')
@@ -60,7 +62,7 @@ export function SubmitActivity() {
 
           <div className="flex gap-3">
             <button type="button" onClick={() => navigate(-1)} className="btn-secondary flex-1">
-              Voltar ao dashboard
+              {t('common.back')}
             </button>
             {activity.allowResubmit && (
               <button type="button" onClick={() => setSubmitted(false)} className="btn-ghost flex-1">
@@ -84,7 +86,7 @@ export function SubmitActivity() {
           onClick={() => navigate(-1)}
           className="flex items-center gap-1.5 text-sm text-[#64748B] hover:text-[#0F172A] transition-colors"
         >
-          <ArrowLeft size={16} /> Voltar
+          <ArrowLeft size={16} /> {t('common.back')}
         </button>
 
         {/* Activity info */}
@@ -242,7 +244,7 @@ export function SubmitActivity() {
         {/* Submit */}
         <div className="flex gap-3">
           <button type="button" onClick={() => navigate(-1)} className="btn-secondary flex-1">
-            Cancelar
+            {t('common.cancel')}
           </button>
           <button
             type="button"

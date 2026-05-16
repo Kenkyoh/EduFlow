@@ -3,9 +3,11 @@ import { Header } from '../../components/Header'
 import { mockCoordinatorClasses } from '../../data/mock'
 import { useSearchStore } from '../../store/search'
 import clsx from 'clsx'
+import { useTranslation } from '../../i18n'
 
 export function CoordinatorClassList() {
   const query = useSearchStore(s => s.query)
+  const t = useTranslation()
 
   const filtered = mockCoordinatorClasses.filter(cls =>
     !query ||
@@ -22,7 +24,7 @@ export function CoordinatorClassList() {
 
   return (
     <>
-      <Header title="Turmas" />
+      <Header title={t('coordinator.classList.title')} />
 
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="card p-4 flex items-center gap-3">
@@ -30,7 +32,7 @@ export function CoordinatorClassList() {
             <BookOpen size={18} className="text-blue-600" />
           </div>
           <div>
-            <p className="text-xs text-[#64748B]">Total de Turmas</p>
+            <p className="text-xs text-[#64748B]">{t('coordinator.classList.totalClasses')}</p>
             <p className="text-xl font-display font-bold text-[#0F172A]">{mockCoordinatorClasses.length}</p>
           </div>
         </div>
@@ -39,7 +41,7 @@ export function CoordinatorClassList() {
             <Users size={18} className="text-emerald-600" />
           </div>
           <div>
-            <p className="text-xs text-[#64748B]">Total de Alunos</p>
+            <p className="text-xs text-[#64748B]">{t('coordinator.classList.totalStudents')}</p>
             <p className="text-xl font-display font-bold text-[#0F172A]">{totalStudents}</p>
           </div>
         </div>
@@ -48,7 +50,7 @@ export function CoordinatorClassList() {
             <AlertTriangle size={18} className="text-amber-600" />
           </div>
           <div>
-            <p className="text-xs text-[#64748B]">Alunos em Risco</p>
+            <p className="text-xs text-[#64748B]">{t('coordinator.classList.atRisk')}</p>
             <p className="text-xl font-display font-bold text-[#0F172A]">{totalAtRisk}</p>
           </div>
         </div>
@@ -67,7 +69,7 @@ export function CoordinatorClassList() {
               {cls.atRisk > 0 && (
                 <span className="flex items-center gap-1 text-xs font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">
                   <AlertTriangle size={11} />
-                  {cls.atRisk} em risco
+                  {t('coordinator.classList.atRiskBadge', { n: cls.atRisk })}
                 </span>
               )}
             </div>
@@ -80,17 +82,17 @@ export function CoordinatorClassList() {
               <div className="flex items-center justify-between text-xs text-[#64748B]">
                 <div className="flex items-center gap-1">
                   <Users size={12} />
-                  <span>{cls.studentsCount} alunos</span>
+                  <span>{t('coordinator.classList.students', { n: cls.studentsCount })}</span>
                 </div>
                 <div className="flex items-center gap-1 font-medium" style={{ color: cls.average >= 7 ? '#059669' : cls.average >= 5 ? '#D97706' : '#DC2626' }}>
                   <TrendingUp size={12} />
-                  <span>Média {cls.average.toFixed(1)}</span>
+                  <span>{t('coordinator.classList.average', { avg: cls.average.toFixed(1) })}</span>
                 </div>
               </div>
 
               <div>
                 <div className="flex items-center justify-between text-xs mb-1">
-                  <span className="text-[#94A3B8]">Taxa de entrega</span>
+                  <span className="text-[#94A3B8]">{t('coordinator.classList.deliveryRate')}</span>
                   <span
                     className={clsx('font-medium', {
                       'text-emerald-600': cls.deliveryRate >= 80,
@@ -117,7 +119,7 @@ export function CoordinatorClassList() {
 
         {filtered.length === 0 && (
           <div className="col-span-full text-center py-12 text-[#94A3B8] text-sm">
-            Nenhuma turma encontrada para "{query}"
+            {t('coordinator.classList.noClassesFound', { query })}
           </div>
         )}
       </div>

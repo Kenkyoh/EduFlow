@@ -4,6 +4,7 @@ import { FileText, BookOpen, ClipboardList, BarChart3, Upload } from 'lucide-rea
 import { Header } from '../../components/Header'
 import { mockSubjects, mockActivities, mockAnnouncements, mockReportCardData, getActivityTypeLabel, getDaysUntil } from '../../data/mock'
 import { toast } from '../../components/Toast'
+import { useTranslation } from '../../i18n'
 import clsx from 'clsx'
 
 type Tab = 'mural' | 'materiais' | 'atividades' | 'notas'
@@ -11,6 +12,7 @@ type Tab = 'mural' | 'materiais' | 'atividades' | 'notas'
 export function StudentClassView() {
   const { classId } = useParams<{ classId: string }>()
   const navigate = useNavigate()
+  const t = useTranslation()
   const [tab, setTab] = useState<Tab>('mural')
 
   const subject = mockSubjects[0]
@@ -123,7 +125,7 @@ export function StudentClassView() {
                         'text-xs font-medium',
                         days < 0 ? 'text-red-500' : days <= 3 ? 'text-amber-600' : 'text-[#64748B]'
                       )}>
-                        {days < 0 ? 'Atrasado' : days === 0 ? 'Hoje' : `${days} dias`}
+                        {days < 0 ? t('common.late') : days === 0 ? t('common.today') : `${days} dias`}
                       </span>
                       {act.status === 'pending' || act.status === 'upcoming' ? (
                         <button
@@ -131,17 +133,17 @@ export function StudentClassView() {
                           onClick={() => navigate(`/student/submit/${act.id}`)}
                           className="btn-primary text-xs h-7 px-3"
                         >
-                          <Upload size={12} /> Entregar
+                          <Upload size={12} /> {t('student.activities.deliver')}
                         </button>
                       ) : act.status === 'submitted' ? (
-                        <span className="badge-success text-xs">Entregue</span>
+                        <span className="badge-success text-xs">{t('common.submitted')}</span>
                       ) : act.status === 'late' ? (
                         <button
                           type="button"
                           onClick={() => navigate(`/student/submit/${act.id}`)}
                           className="btn-danger text-xs h-7 px-3"
                         >
-                          Entregar (Atrasado)
+                          {t('student.activities.deliverLate')}
                         </button>
                       ) : null}
                     </div>

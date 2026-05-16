@@ -3,6 +3,7 @@ import { Save, User, Bell, Shield, Key, Check } from 'lucide-react'
 import { Header } from '../../components/Header'
 import { toast } from '../../components/Toast'
 import { useAuthStore } from '../../store/auth'
+import { useTranslation } from '../../i18n'
 import clsx from 'clsx'
 
 type Tab = 'conta' | 'notificacoes' | 'seguranca'
@@ -15,6 +16,7 @@ const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
 
 export function AdminSettings() {
   const user = useAuthStore(s => s.user)
+  const t = useTranslation()
   const [tab, setTab]     = useState<Tab>('conta')
   const [saving, setSaving] = useState(false)
 
@@ -27,23 +29,23 @@ export function AdminSettings() {
 
   return (
     <>
-      <Header title="Configurações" />
+      <Header title={t('nav.settings')} />
 
       {/* Mobile tab strip */}
       <div className="flex gap-1 border-b border-[#E2E8F0] mb-5 overflow-x-auto scrollbar-hide md:hidden">
-        {tabs.map(t => (
+        {tabs.map(tabItem => (
           <button
-            key={t.id}
+            key={tabItem.id}
             type="button"
-            onClick={() => setTab(t.id)}
+            onClick={() => setTab(tabItem.id)}
             className={clsx(
               'flex items-center gap-1.5 px-3 py-2.5 text-sm font-medium border-b-2 -mb-px whitespace-nowrap transition-all flex-shrink-0',
-              tab === t.id
+              tab === tabItem.id
                 ? 'border-[#1E3A8A] text-[#1E3A8A]'
                 : 'border-transparent text-[#64748B] hover:text-[#0F172A]'
             )}
           >
-            <t.icon size={14} /> {t.label}
+            <tabItem.icon size={14} /> {tabItem.label}
           </button>
         ))}
       </div>
@@ -52,20 +54,20 @@ export function AdminSettings() {
         {/* Sidebar nav — desktop only */}
         <div className="hidden md:block w-48 flex-shrink-0">
           <nav className="space-y-0.5">
-            {tabs.map(t => (
+            {tabs.map(tabItem => (
               <button
-                key={t.id}
+                key={tabItem.id}
                 type="button"
-                onClick={() => setTab(t.id)}
+                onClick={() => setTab(tabItem.id)}
                 className={clsx(
                   'w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-all',
-                  tab === t.id
+                  tab === tabItem.id
                     ? 'bg-blue-50 text-[#1E3A8A]'
                     : 'text-[#64748B] hover:bg-slate-100 hover:text-[#0F172A]'
                 )}
               >
-                <t.icon size={15} />
-                {t.label}
+                <tabItem.icon size={15} />
+                {tabItem.label}
               </button>
             ))}
           </nav>
@@ -219,10 +221,10 @@ export function AdminSettings() {
               {saving ? (
                 <span className="flex items-center gap-2">
                   <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Salvando...
+                  {t('common.saving')}
                 </span>
               ) : (
-                <><Save size={16} /> Salvar</>
+                <><Save size={16} /> {t('common.save')}</>
               )}
             </button>
           </div>

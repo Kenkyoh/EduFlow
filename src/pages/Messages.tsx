@@ -4,10 +4,12 @@ import { Header } from '../components/Header'
 import { mockConversations } from '../data/mock'
 import type { Conversation, Message } from '../types'
 import { useAuthStore } from '../store/auth'
+import { useTranslation } from '../i18n'
 import clsx from 'clsx'
 
 export function Messages() {
   const user = useAuthStore(s => s.user)
+  const t = useTranslation()
   const [conversations, setConversations] = useState(mockConversations)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [newMessage, setNewMessage] = useState('')
@@ -27,14 +29,14 @@ export function Messages() {
     const msg: Message = {
       id: `msg-${Date.now()}`,
       senderId: user?.id ?? 'me',
-      senderName: user?.name ?? 'Eu',
+      senderName: user?.name ?? t('messages.me'),
       content: newMessage,
       timestamp: new Date().toISOString(),
       read: false,
     }
     setConversations(prev => prev.map(c =>
       c.id === selectedId
-        ? { ...c, messages: [...c.messages, msg], lastMessage: newMessage, lastMessageTime: 'agora' }
+        ? { ...c, messages: [...c.messages, msg], lastMessage: newMessage, lastMessageTime: t('messages.now') }
         : c
     ))
     setNewMessage('')
@@ -52,7 +54,7 @@ export function Messages() {
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#94A3B8]" />
           <input
             className="input pl-8 h-8 text-sm"
-            placeholder="Buscar conversa..."
+            placeholder={t('messages.searchConversation')}
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
@@ -61,7 +63,7 @@ export function Messages() {
 
       <div className="flex-1 overflow-y-auto">
         {filtered.length === 0 ? (
-          <div className="p-6 text-center text-[#94A3B8] text-sm">Nenhuma conversa</div>
+          <div className="p-6 text-center text-[#94A3B8] text-sm">{t('messages.noConversation')}</div>
         ) : (
           filtered.map(conv => (
             <button
@@ -89,7 +91,7 @@ export function Messages() {
                 <p className="text-xs text-[#64748B] truncate mt-0.5">{conv.lastMessage}</p>
                 <div className="flex items-center justify-between mt-1">
                   <span className="text-[11px] text-[#94A3B8] capitalize">
-                    {conv.participantRole === 'teacher' ? 'Professor' : 'Coordenador'}
+                    {conv.participantRole === 'teacher' ? t('messages.teacher') : t('messages.coordinator')}
                   </span>
                   {conv.unreadCount > 0 && (
                     <span className="rounded-full bg-[#1E3A8A] text-white text-[10px] flex items-center justify-center font-bold px-1.5 py-0.5">
@@ -124,7 +126,7 @@ export function Messages() {
         <div>
           <p className="font-semibold text-[#0F172A] text-sm">{selected.participantName}</p>
           <p className="text-xs text-[#94A3B8]">
-            {selected.participantRole === 'teacher' ? 'Professor' : 'Coordenador'} · responde em 1–2 horas
+            {selected.participantRole === 'teacher' ? t('messages.teacher') : t('messages.coordinator')} · {t('messages.respondsIn')}
           </p>
         </div>
       </div>
@@ -169,19 +171,19 @@ export function Messages() {
       {/* Input */}
       <div className="px-4 py-3 border-t border-[#E2E8F0] bg-white flex-shrink-0">
         <div className="flex items-center gap-2">
-          <button type="button" title="Anexar arquivo" className="w-8 h-8 flex items-center justify-center text-[#94A3B8] hover:text-[#64748B] transition-colors">
+          <button type="button" title={t('messages.attach')} className="w-8 h-8 flex items-center justify-center text-[#94A3B8] hover:text-[#64748B] transition-colors">
             <Paperclip size={18} />
           </button>
           <input
             className="input flex-1 h-9"
-            placeholder="Escreva uma mensagem..."
+            placeholder={t('messages.typeMessage')}
             value={newMessage}
             onChange={e => setNewMessage(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
           />
           <button
             type="button"
-            title="Enviar mensagem"
+            title={t('messages.send')}
             onClick={handleSend}
             disabled={!newMessage.trim()}
             className="w-9 h-9 rounded-lg bg-[#1E3A8A] flex items-center justify-center text-white hover:bg-[#1e40af] transition-colors disabled:opacity-40"
@@ -195,14 +197,14 @@ export function Messages() {
     <div className="flex-1 flex items-center justify-center text-[#94A3B8]">
       <div className="text-center">
         <div className="text-5xl mb-3">💬</div>
-        <p className="font-medium">Selecione uma conversa</p>
+        <p className="font-medium">{t('messages.selectConversation')}</p>
       </div>
     </div>
   )
 
   return (
     <>
-      <Header title="Mensagens" />
+      <Header title={t('messages.title')} />
 
       <div className="card overflow-hidden flex h-[calc(100vh-140px)]">
         {/* Conversation list — full width on mobile when no thread selected, sidebar on desktop */}

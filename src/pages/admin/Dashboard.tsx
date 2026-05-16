@@ -3,10 +3,12 @@ import { Building2, Users, GraduationCap, TrendingUp, ChevronRight, Plus, BookOp
 import { useAuthStore } from '../../store/auth'
 import { mockSchools } from '../../data/mock'
 import { STATUS_CONFIG, PLAN_CONFIG } from './adminConfig'
+import { useTranslation } from '../../i18n'
 
 export function AdminDashboard() {
   const user = useAuthStore(s => s.user)
   const navigate = useNavigate()
+  const t = useTranslation()
 
   const activeSchools = mockSchools.filter(s => s.status === 'active').length
   const totalStudents = mockSchools.reduce((acc, s) => acc + s.studentsCount, 0)
@@ -14,24 +16,24 @@ export function AdminDashboard() {
   const totalClasses  = mockSchools.reduce((acc, s) => acc + s.classesCount, 0)
 
   const kpis = [
-    { label: 'Escolas Cadastradas', value: mockSchools.length,                      icon: Building2,     color: '#1E3A8A', bg: '#EFF6FF' },
-    { label: 'Escolas Ativas',       value: activeSchools,                           icon: TrendingUp,    color: '#059669', bg: '#ECFDF5' },
-    { label: 'Total de Alunos',      value: totalStudents.toLocaleString('pt-BR'),   icon: GraduationCap, color: '#7C3AED', bg: '#F5F3FF' },
-    { label: 'Total de Professores', value: totalTeachers,                           icon: Users,         color: '#D97706', bg: '#FFFBEB' },
+    { label: t('admin.dashboard.registeredSchools'), value: mockSchools.length,                      icon: Building2,     color: '#1E3A8A', bg: '#EFF6FF' },
+    { label: t('admin.dashboard.activeSchools'),      value: activeSchools,                           icon: TrendingUp,    color: '#059669', bg: '#ECFDF5' },
+    { label: t('admin.dashboard.totalStudents'),      value: totalStudents.toLocaleString('pt-BR'),   icon: GraduationCap, color: '#7C3AED', bg: '#F5F3FF' },
+    { label: t('admin.dashboard.totalTeachers'),      value: totalTeachers,                           icon: Users,         color: '#D97706', bg: '#FFFBEB' },
   ]
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-display font-bold text-[#0F172A]">Painel Administrativo</h1>
+          <h1 className="text-2xl font-display font-bold text-[#0F172A]">{t('admin.dashboard.title')}</h1>
           <p className="text-sm text-[#64748B] mt-0.5">
-            Bem-vindo, {user?.name}. Gerencie todas as escolas da plataforma.
+            {t('admin.dashboard.welcome', { name: user?.name ?? '' })}
           </p>
         </div>
         <button type="button" onClick={() => navigate('/admin/schools')} className="btn-primary gap-2">
           <Plus size={16} />
-          Nova Escola
+          {t('admin.dashboard.newSchool')}
         </button>
       </div>
 
@@ -52,15 +54,15 @@ export function AdminDashboard() {
       <div className="card">
         <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-[#F1F5F9]">
           <div>
-            <h2 className="font-display font-semibold text-[#0F172A]">Escolas Cadastradas</h2>
-            <p className="text-xs text-[#94A3B8] mt-0.5">{totalClasses} turmas · {totalStudents.toLocaleString('pt-BR')} alunos no total</p>
+            <h2 className="font-display font-semibold text-[#0F172A]">{t('admin.dashboard.registeredSchools')}</h2>
+            <p className="text-xs text-[#94A3B8] mt-0.5">{t('admin.dashboard.classesTotal', { classes: totalClasses, students: totalStudents.toLocaleString('pt-BR') })}</p>
           </div>
           <button
             type="button"
             onClick={() => navigate('/admin/schools')}
             className="text-xs text-[#1E3A8A] hover:underline flex items-center gap-1"
           >
-            Gerenciar todas
+            {t('admin.dashboard.manageAll')}
             <ChevronRight size={14} />
           </button>
         </div>
@@ -80,7 +82,7 @@ export function AdminDashboard() {
                 <p className="text-sm font-medium text-[#0F172A] truncate">{school.name}</p>
                 <p className="text-xs text-[#94A3B8]">
                   {school.city}, {school.state}
-                  {school.studentsCount > 0 && ` · ${school.studentsCount} alunos · ${school.teachersCount} professores`}
+                  {school.studentsCount > 0 && ` · ${school.studentsCount} ${t('common.students')} · ${school.teachersCount} ${t('common.teachers')}`}
                 </p>
               </div>
 
@@ -102,20 +104,20 @@ export function AdminDashboard() {
       {/* Summary cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {[
-          { label: 'Por Plano',  icon: TrendingUp, items: [
-            { name: 'Premium',  count: mockSchools.filter(s => s.plan === 'premium').length,  color: 'text-violet-600' },
-            { name: 'Standard', count: mockSchools.filter(s => s.plan === 'standard').length, color: 'text-blue-600' },
-            { name: 'Basic',    count: mockSchools.filter(s => s.plan === 'basic').length,    color: 'text-slate-500' },
+          { label: t('admin.dashboard.byPlan'),  icon: TrendingUp, items: [
+            { name: t('admin.dashboard.premium'),  count: mockSchools.filter(s => s.plan === 'premium').length,  color: 'text-violet-600' },
+            { name: t('admin.dashboard.standard'), count: mockSchools.filter(s => s.plan === 'standard').length, color: 'text-blue-600' },
+            { name: t('admin.dashboard.basic'),    count: mockSchools.filter(s => s.plan === 'basic').length,    color: 'text-slate-500' },
           ]},
-          { label: 'Por Status', icon: Building2, items: [
-            { name: 'Ativo',   count: mockSchools.filter(s => s.status === 'active').length,   color: 'text-emerald-600' },
-            { name: 'Trial',   count: mockSchools.filter(s => s.status === 'trial').length,    color: 'text-amber-600' },
-            { name: 'Inativo', count: mockSchools.filter(s => s.status === 'inactive').length, color: 'text-red-500' },
+          { label: t('admin.dashboard.byStatus'), icon: Building2, items: [
+            { name: t('admin.dashboard.active'),   count: mockSchools.filter(s => s.status === 'active').length,   color: 'text-emerald-600' },
+            { name: t('admin.dashboard.trial'),    count: mockSchools.filter(s => s.status === 'trial').length,    color: 'text-amber-600' },
+            { name: t('admin.dashboard.inactive'), count: mockSchools.filter(s => s.status === 'inactive').length, color: 'text-red-500' },
           ]},
-          { label: 'Turmas',    icon: BookOpen, items: [
-            { name: 'Total de turmas',    count: totalClasses,  color: 'text-[#1E3A8A]' },
-            { name: 'Média por escola',   count: Math.round(totalClasses / mockSchools.filter(s => s.classesCount > 0).length), color: 'text-[#64748B]' },
-            { name: 'Escolas com turmas', count: mockSchools.filter(s => s.classesCount > 0).length, color: 'text-[#64748B]' },
+          { label: t('admin.dashboard.classesCard'), icon: BookOpen, items: [
+            { name: t('admin.dashboard.totalClassesItem'), count: totalClasses,  color: 'text-[#1E3A8A]' },
+            { name: t('admin.dashboard.avgPerSchool'),     count: Math.round(totalClasses / mockSchools.filter(s => s.classesCount > 0).length), color: 'text-[#64748B]' },
+            { name: t('admin.dashboard.schoolsWithClasses'), count: mockSchools.filter(s => s.classesCount > 0).length, color: 'text-[#64748B]' },
           ]},
         ].map(({ label, icon: Icon, items }) => (
           <div key={label} className="card p-5">

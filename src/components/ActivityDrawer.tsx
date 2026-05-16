@@ -3,15 +3,9 @@ import { useState, useEffect } from 'react'
 import clsx from 'clsx'
 import { mockSubjects, mockClasses } from '../data/mock'
 import { toast } from './Toast'
+import { useTranslation } from '../i18n'
 
-const ACTIVITY_TYPES = [
-  { value: 'prova', label: 'Prova' },
-  { value: 'trabalho', label: 'Trabalho' },
-  { value: 'apresentacao', label: 'Apresentação' },
-  { value: 'leitura', label: 'Leitura' },
-  { value: 'aula_ao_vivo', label: 'Aula ao Vivo' },
-  { value: 'outro', label: 'Outro' },
-]
+const ACTIVITY_TYPE_VALUES = ['prova', 'trabalho', 'apresentacao', 'leitura', 'aula_ao_vivo', 'outro']
 
 interface ActivityDrawerProps {
   isOpen: boolean
@@ -37,6 +31,7 @@ export interface ActivityFormData {
 }
 
 export function ActivityDrawer({ isOpen, onClose, initialDate, onPublish }: ActivityDrawerProps) {
+  const t = useTranslation()
   const today = new Date().toISOString().split('T')[0]
 
   const [form, setForm] = useState<ActivityFormData>({
@@ -82,14 +77,14 @@ export function ActivityDrawer({ isOpen, onClose, initialDate, onPublish }: Acti
 
   const handlePublish = async () => {
     if (!form.title.trim()) {
-      toast('Informe o título da atividade', 'error')
+      toast(t('activityDrawer.titleRequired'), 'error')
       return
     }
     setPublishing(true)
     await new Promise(r => setTimeout(r, 1000))
     setPublishing(false)
     onPublish?.(form)
-    toast(`"${form.title}" publicada com sucesso!`)
+    toast(t('activityDrawer.publishedSuccess', { title: form.title }))
     onClose()
   }
 
@@ -102,12 +97,12 @@ export function ActivityDrawer({ isOpen, onClose, initialDate, onPublish }: Acti
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] flex-shrink-0">
           <div>
-            <h2 className="font-display font-semibold text-[#0F172A]">Nova Atividade</h2>
-            <p className="text-xs text-[#64748B] mt-0.5">Preencha os campos abaixo</p>
+            <h2 className="font-display font-semibold text-[#0F172A]">{t('activityDrawer.title')}</h2>
+            <p className="text-xs text-[#64748B] mt-0.5">{t('activityDrawer.subtitle')}</p>
           </div>
           <button
             type="button"
-            aria-label="Fechar"
+            aria-label={t('activityDrawer.close')}
             onClick={onClose}
             className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-[#64748B]"
           >
@@ -122,8 +117,8 @@ export function ActivityDrawer({ isOpen, onClose, initialDate, onPublish }: Acti
             <div className="flex items-start gap-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
               <AlertTriangle size={16} className="text-[#D97706] mt-0.5 flex-shrink-0" />
               <div>
-                <p className="text-sm font-medium text-amber-800">Conflito detectado</p>
-                <p className="text-xs text-amber-700 mt-0.5">Já existe uma prova no 3º Ano A neste dia.</p>
+                <p className="text-sm font-medium text-amber-800">{t('activityDrawer.conflictTitle')}</p>
+                <p className="text-xs text-amber-700 mt-0.5">{t('activityDrawer.conflictBody')}</p>
                 <div className="flex gap-2 mt-2">
                   {['+1 dia', '+3 dias', '+1 sem'].map(d => (
                     <button
@@ -142,7 +137,7 @@ export function ActivityDrawer({ isOpen, onClose, initialDate, onPublish }: Acti
           {/* Title */}
           <div>
             <label className="block text-xs font-medium text-[#64748B] mb-1.5">
-              Título <span className="text-[#DC2626]">*</span>
+              {t('activityDrawer.titleLabel')} <span className="text-[#DC2626]">*</span>
             </label>
             <input
               className="input"
@@ -157,7 +152,7 @@ export function ActivityDrawer({ isOpen, onClose, initialDate, onPublish }: Acti
           {/* Subject + Class */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-[#64748B] mb-1.5">Disciplina</label>
+              <label className="block text-xs font-medium text-[#64748B] mb-1.5">{t('activityDrawer.subjectLabel')}</label>
               <div className="relative">
                 <select
                   className="input appearance-none pr-8"
@@ -181,7 +176,7 @@ export function ActivityDrawer({ isOpen, onClose, initialDate, onPublish }: Acti
               )}
             </div>
             <div>
-              <label className="block text-xs font-medium text-[#64748B] mb-1.5">Turma(s)</label>
+              <label className="block text-xs font-medium text-[#64748B] mb-1.5">{t('activityDrawer.classLabel')}</label>
               <div className="space-y-1.5 max-h-24 overflow-y-auto">
                 {mockClasses.map(c => (
                   <label key={c.id} className="flex items-center gap-2 cursor-pointer">
@@ -207,21 +202,21 @@ export function ActivityDrawer({ isOpen, onClose, initialDate, onPublish }: Acti
 
           {/* Type */}
           <div>
-            <label className="block text-xs font-medium text-[#64748B] mb-1.5">Tipo</label>
+            <label className="block text-xs font-medium text-[#64748B] mb-1.5">{t('activityDrawer.typeLabel')}</label>
             <div className="flex flex-wrap gap-1.5">
-              {ACTIVITY_TYPES.map(t => (
+              {ACTIVITY_TYPE_VALUES.map(val => (
                 <button
                   type="button"
-                  key={t.value}
-                  onClick={() => setForm(f => ({ ...f, type: t.value }))}
+                  key={val}
+                  onClick={() => setForm(f => ({ ...f, type: val }))}
                   className={clsx(
                     'px-3 py-1.5 rounded-lg text-xs font-medium border transition-all',
-                    form.type === t.value
+                    form.type === val
                       ? 'bg-[#1E3A8A] text-white border-[#1E3A8A]'
                       : 'bg-white text-[#64748B] border-[#E2E8F0] hover:border-[#1E3A8A] hover:text-[#1E3A8A]'
                   )}
                 >
-                  {t.label}
+                  {t('activityTypes.' + val)}
                 </button>
               ))}
             </div>
@@ -232,7 +227,7 @@ export function ActivityDrawer({ isOpen, onClose, initialDate, onPublish }: Acti
             <div>
               <label className="block text-xs font-medium text-[#64748B] mb-1.5">
                 <Calendar size={12} className="inline mr-1" />
-                Data de início
+                {t('activityDrawer.startDateLabel')}
               </label>
               <input
                 type="date"
@@ -244,7 +239,7 @@ export function ActivityDrawer({ isOpen, onClose, initialDate, onPublish }: Acti
             <div>
               <label className="block text-xs font-medium text-[#64748B] mb-1.5">
                 <Clock size={12} className="inline mr-1" />
-                Data de entrega <span className="text-[#DC2626]">*</span>
+                {t('activityDrawer.dueDateLabel')} <span className="text-[#DC2626]">*</span>
               </label>
               <div className="flex gap-1.5">
                 <input
@@ -267,7 +262,7 @@ export function ActivityDrawer({ isOpen, onClose, initialDate, onPublish }: Acti
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label className="text-xs font-medium text-[#64748B]">
-                Peso na nota
+                {t('activityDrawer.weightLabel')}
               </label>
               <span className="text-sm font-semibold text-[#1E3A8A]">{form.weight}%</span>
             </div>
@@ -285,7 +280,7 @@ export function ActivityDrawer({ isOpen, onClose, initialDate, onPublish }: Acti
               impactPreview.over ? 'bg-red-50 text-red-700' : 'bg-blue-50 text-blue-700'
             )}>
               {impactPreview.over ? (
-                <span>⚠ Total de pesos: {impactPreview.total}% — excede 100%</span>
+                <span>{t('activityDrawer.weightOver', { total: impactPreview.total })}</span>
               ) : (
                 <span>
                   Preview: P1 (40%) + Trabalho ({form.weight}%) + Part. (30%) = {impactPreview.total}%
@@ -296,7 +291,7 @@ export function ActivityDrawer({ isOpen, onClose, initialDate, onPublish }: Acti
 
           {/* Description */}
           <div>
-            <label className="block text-xs font-medium text-[#64748B] mb-1.5">Descrição</label>
+            <label className="block text-xs font-medium text-[#64748B] mb-1.5">{t('activityDrawer.descriptionLabel')}</label>
             <textarea
               className="input resize-none"
               style={{ height: 80 }}
@@ -312,11 +307,11 @@ export function ActivityDrawer({ isOpen, onClose, initialDate, onPublish }: Acti
           <div>
             <label className="block text-xs font-medium text-[#64748B] mb-1.5">
               <Paperclip size={12} className="inline mr-1" />
-              Anexos (até 5 arquivos, 20MB cada)
+              {t('activityDrawer.attachmentsLabel')}
             </label>
             <label className="flex items-center justify-center gap-2 border-2 border-dashed border-[#E2E8F0] rounded-lg p-4 cursor-pointer hover:border-[#1E3A8A] hover:bg-blue-50/30 transition-all">
               <Paperclip size={16} className="text-[#94A3B8]" />
-              <span className="text-sm text-[#94A3B8]">Clique para selecionar ou arraste arquivos</span>
+              <span className="text-sm text-[#94A3B8]">{t('activityDrawer.attachmentsPlaceholder')}</span>
               <input type="file" multiple className="hidden" accept=".pdf,.doc,.docx,.ppt,.pptx,.png,.jpg" />
             </label>
           </div>
@@ -325,8 +320,8 @@ export function ActivityDrawer({ isOpen, onClose, initialDate, onPublish }: Acti
           <div className="space-y-2.5">
             <label className="flex items-center justify-between cursor-pointer">
               <div>
-                <p className="text-sm font-medium text-[#0F172A]">Permitir reentrega</p>
-                <p className="text-xs text-[#94A3B8]">Alunos podem enviar novamente</p>
+                <p className="text-sm font-medium text-[#0F172A]">{t('activityDrawer.allowResubmit')}</p>
+                <p className="text-xs text-[#94A3B8]">{t('activityDrawer.allowResubmitDesc')}</p>
               </div>
               <button
                 type="button"
@@ -346,8 +341,8 @@ export function ActivityDrawer({ isOpen, onClose, initialDate, onPublish }: Acti
 
             <label className="flex items-center justify-between cursor-pointer">
               <div>
-                <p className="text-sm font-medium text-[#0F172A]">Notificar alunos</p>
-                <p className="text-xs text-[#94A3B8]">Enviar alerta ao publicar</p>
+                <p className="text-sm font-medium text-[#0F172A]">{t('activityDrawer.notifyStudents')}</p>
+                <p className="text-xs text-[#94A3B8]">{t('activityDrawer.notifyStudentsDesc')}</p>
               </div>
               <button
                 type="button"
@@ -370,7 +365,7 @@ export function ActivityDrawer({ isOpen, onClose, initialDate, onPublish }: Acti
         {/* Footer */}
         <div className="flex items-center gap-3 px-5 py-4 border-t border-[#E2E8F0] flex-shrink-0">
           <button type="button" onClick={onClose} className="btn-secondary flex-1">
-            Cancelar
+            {t('activityDrawer.cancel')}
           </button>
           <button
             type="button"
@@ -381,9 +376,9 @@ export function ActivityDrawer({ isOpen, onClose, initialDate, onPublish }: Acti
             {publishing ? (
               <span className="flex items-center gap-2">
                 <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Publicando...
+                {t('activityDrawer.publishing')}
               </span>
-            ) : 'Publicar'}
+            ) : t('activityDrawer.publish')}
           </button>
         </div>
       </div>

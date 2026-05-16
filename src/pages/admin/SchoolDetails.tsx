@@ -8,6 +8,7 @@ import { mockSchools } from '../../data/mock'
 import type { School } from '../../types'
 import clsx from 'clsx'
 import { STATUS_CONFIG, PLAN_CONFIG } from './adminConfig'
+import { useTranslation } from '../../i18n'
 
 type Tab = 'overview' | 'users' | 'classes' | 'settings'
 
@@ -48,6 +49,7 @@ const ROLE_COLORS: Record<string, string> = {
 export function AdminSchoolDetails() {
   const { schoolId } = useParams<{ schoolId: string }>()
   const navigate = useNavigate()
+  const t = useTranslation()
   const [tab, setTab] = useState<Tab>('overview')
   const [school, setSchool] = useState<School | undefined>(mockSchools.find(s => s.id === schoolId))
   const [editing, setEditing] = useState(false)
@@ -62,7 +64,7 @@ export function AdminSchoolDetails() {
       <div className="text-center py-20">
         <Building2 size={40} className="mx-auto text-[#CBD5E1] mb-4" />
         <p className="text-[#64748B]">Escola não encontrada.</p>
-        <button type="button" onClick={() => navigate('/admin/schools')} className="btn-secondary mt-4">Voltar</button>
+        <button type="button" onClick={() => navigate('/admin/schools')} className="btn-secondary mt-4">{t('common.back')}</button>
       </div>
     )
   }
@@ -134,7 +136,7 @@ export function AdminSchoolDetails() {
             {saved && (
               <span className="flex items-center gap-1.5 text-xs text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200">
                 <Check size={12} />
-                Salvo
+                {t('common.save')}
               </span>
             )}
             <button type="button" onClick={startEdit} className="btn-secondary gap-2 text-sm">
@@ -170,10 +172,10 @@ export function AdminSchoolDetails() {
         <div className="space-y-4">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              { label: 'Alunos',     value: school.studentsCount, icon: GraduationCap, color: '#7C3AED', bg: '#F5F3FF' },
-              { label: 'Professores', value: school.teachersCount, icon: Users,         color: '#059669', bg: '#ECFDF5' },
-              { label: 'Turmas',     value: school.classesCount,  icon: BookOpen,       color: '#1E3A8A', bg: '#EFF6FF' },
-              { label: 'Plano',      value: PLAN_CONFIG[school.plan].label, icon: Settings, color: '#D97706', bg: '#FFFBEB' },
+              { label: t('common.students'), value: school.studentsCount, icon: GraduationCap, color: '#7C3AED', bg: '#F5F3FF' },
+              { label: t('common.teachers'), value: school.teachersCount, icon: Users,         color: '#059669', bg: '#ECFDF5' },
+              { label: 'Turmas',             value: school.classesCount,  icon: BookOpen,       color: '#1E3A8A', bg: '#EFF6FF' },
+              { label: 'Plano',              value: PLAN_CONFIG[school.plan].label, icon: Settings, color: '#D97706', bg: '#FFFBEB' },
             ].map(({ label, value, icon: Icon, color, bg }) => (
               <div key={label} className="card p-5">
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ backgroundColor: bg }}>
@@ -403,14 +405,14 @@ export function AdminSchoolDetails() {
                   value={editForm.status}
                   onChange={e => setEditForm(f => ({ ...f, status: e.target.value as School['status'] }))}
                 >
-                  <option value="active">Ativo</option>
+                  <option value="active">{t('common.active')}</option>
                   <option value="trial">Trial</option>
-                  <option value="inactive">Inativo</option>
+                  <option value="inactive">{t('common.inactive')}</option>
                 </select>
               </div>
               <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => setEditing(false)} className="btn-secondary flex-1">Cancelar</button>
-                <button type="button" onClick={saveEdit} className="btn-primary flex-1">Salvar alterações</button>
+                <button type="button" onClick={() => setEditing(false)} className="btn-secondary flex-1">{t('common.cancel')}</button>
+                <button type="button" onClick={saveEdit} className="btn-primary flex-1">{t('common.save')}</button>
               </div>
             </div>
           </div>

@@ -3,9 +3,9 @@ import { Camera, Save, Lock, Bell, User, Check, Eye, EyeOff } from 'lucide-react
 import { Header } from '../components/Header'
 import { UserAvatar } from '../components/UserAvatar'
 import { useAuthStore } from '../store/auth'
+import { useTranslation } from '../i18n'
 import { toast } from '../components/Toast'
 import clsx from 'clsx'
-import { ROLE_LABELS } from '../utils/roleLabels'
 
 type Tab = 'perfil' | 'seguranca' | 'preferencias'
 
@@ -13,12 +13,6 @@ const AVATAR_COLORS = [
   '#1E3A8A', '#7C3AED', '#059669', '#DC2626', '#D97706',
   '#0891B2', '#DB2777', '#65A30D', '#EA580C', '#6366F1',
   '#0F172A', '#64748B',
-]
-
-const TABS: { id: Tab; label: string; icon: React.ElementType }[] = [
-  { id: 'perfil',        label: 'Perfil',        icon: User  },
-  { id: 'seguranca',     label: 'Segurança',      icon: Lock  },
-  { id: 'preferencias',  label: 'Preferências',   icon: Bell  },
 ]
 
 const PREF_DEFAULTS: Record<string, boolean> = {
@@ -42,6 +36,13 @@ function strengthColor(i: number): string {
 export function Profile() {
   const user          = useAuthStore(s => s.user)
   const updateProfile = useAuthStore(s => s.updateProfile)
+  const t             = useTranslation()
+
+  const TABS: { id: Tab; label: string; icon: React.ElementType }[] = [
+    { id: 'perfil',       label: t('profile.tabs.profile'),      icon: User },
+    { id: 'seguranca',    label: t('profile.tabs.security'),     icon: Lock },
+    { id: 'preferencias', label: t('profile.tabs.preferences'),  icon: Bell },
+  ]
 
   const [tab, setTab]         = useState<Tab>('perfil')
   const [saving, setSaving]   = useState(false)
@@ -74,7 +75,7 @@ export function Profile() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    if (file.size > 3 * 1024 * 1024) { toast('Imagem muito grande (máx. 3 MB)', 'error'); return }
+    if (file.size > 3 * 1024 * 1024) { toast(t('profile.imageTooLarge'), 'error'); return }
     readerRef.current?.abort()
     const reader = new FileReader()
     readerRef.current = reader
@@ -86,7 +87,7 @@ export function Profile() {
     setSaving(true)
     await new Promise(r => setTimeout(r, 600))
     setSaving(false)
-    toast('Preferências salvas!', 'success')
+    toast(t('profile.preferencesUpdated'), 'success')
   }
 
   const handleSavePerfil = async () => {
@@ -95,24 +96,24 @@ export function Profile() {
     await new Promise(r => setTimeout(r, 800))
     updateProfile({ name: name.trim(), avatar: currentAvatar })
     setSaving(false)
-    toast('Perfil atualizado com sucesso!', 'success')
+    toast(t('profile.profileUpdated'), 'success')
   }
 
   const handleSaveSenha = async () => {
     setPwError('')
-    if (!currentPw) { setPwError('Informe a senha atual'); return }
-    if (newPw.length < 6) { setPwError('Nova senha deve ter ao menos 6 caracteres'); return }
-    if (newPw !== confirmPw) { setPwError('As senhas não coincidem'); return }
+    if (!currentPw) { setPwError(t('profile.currentPasswordRequired')); return }
+    if (newPw.length < 6) { setPwError(t('profile.passwordTooShort')); return }
+    if (newPw !== confirmPw) { setPwError(t('profile.passwordMismatch')); return }
     setSaving(true)
     await new Promise(r => setTimeout(r, 800))
     setSaving(false)
     setCurrentPw(''); setNewPw(''); setConfirmPw('')
-    toast('Senha alterada com sucesso!', 'success')
+    toast(t('profile.passwordChanged'), 'success')
   }
 
   return (
     <>
-      <Header title="Meu Perfil" />
+      <Header title={t('profile.title')} />
 
       <div className="max-w-2xl space-y-5">
         {/* Profile hero card */}
@@ -125,7 +126,7 @@ export function Profile() {
                 type="button"
                 onClick={() => fileRef.current?.click()}
                 className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-[#1E3A8A] border-2 border-white flex items-center justify-center text-white shadow-md hover:bg-[#1e40af] transition-colors"
-                title="Alterar foto"
+                title={t('profile.changePhotoTitle')}
               >
                 <Camera size={13} />
               </button>
@@ -134,7 +135,7 @@ export function Profile() {
                 type="file"
                 accept="image/*"
                 className="hidden"
-                aria-label="Foto de perfil"
+                aria-label={t('profile.profilePhoto')}
                 onChange={handleFileChange}
               />
             </div>
@@ -144,7 +145,7 @@ export function Profile() {
                 {user?.name}
               </p>
               <p className="text-sm text-[#64748B]">
-                {ROLE_LABELS[user?.role ?? ''] ?? user?.role}
+                {user?.role ? t(`roles.${user.role}`) : ''}
                 {user?.institution && <span className="text-[#CBD5E1]"> · {user.institution}</span>}
               </p>
               <p className="text-xs text-[#94A3B8] mt-0.5">{user?.email}</p>
@@ -177,7 +178,7 @@ export function Profile() {
           <div className="space-y-5">
             {/* Avatar color picker */}
             <div className="card p-5 space-y-4">
-              <h3 className="font-display font-semibold text-[#0F172A]">Foto de perfil</h3>
+              <h3 className="font-display font-semibold text-[#0F172A]">{t('profile.profilePhoto')}</h3>
 
               <div className="flex items-start gap-6">
                 {/* Big preview */}
@@ -186,7 +187,7 @@ export function Profile() {
                 <div className="flex-1 space-y-3">
                   {/* Color swatches */}
                   <div>
-                    <p className="text-xs font-medium text-[#64748B] mb-2">Cor do avatar</p>
+                    <p className="text-xs font-medium text-[#64748B] mb-2">{t('profile.avatarColor')}</p>
                     <div className="flex flex-wrap gap-2">
                       {AVATAR_COLORS.map(c => (
                         <button
@@ -214,7 +215,7 @@ export function Profile() {
                       className="btn-secondary text-sm gap-2"
                     >
                       <Camera size={14} />
-                      {previewImg ? 'Trocar foto' : 'Fazer upload'}
+                      {previewImg ? t('profile.changePhoto') : t('profile.uploadPhoto')}
                     </button>
                     {previewImg && (
                       <button
@@ -222,10 +223,10 @@ export function Profile() {
                         onClick={() => setPreviewImg(null)}
                         className="text-xs text-red-500 hover:underline"
                       >
-                        Remover foto
+                        {t('profile.removePhoto')}
                       </button>
                     )}
-                    <p className="text-xs text-[#94A3B8]">JPG, PNG ou GIF · máx. 3 MB</p>
+                    <p className="text-xs text-[#94A3B8]">{t('profile.uploadSpecs')}</p>
                   </div>
                 </div>
               </div>
@@ -233,37 +234,37 @@ export function Profile() {
 
             {/* Personal info */}
             <div className="card p-5 space-y-4">
-              <h3 className="font-display font-semibold text-[#0F172A]">Informações pessoais</h3>
+              <h3 className="font-display font-semibold text-[#0F172A]">{t('profile.personalInfo')}</h3>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2 sm:col-span-1">
-                  <label className="block text-xs font-medium text-[#64748B] mb-1.5">Nome completo</label>
+                  <label className="block text-xs font-medium text-[#64748B] mb-1.5">{t('profile.fullName')}</label>
                   <input
                     className="input"
                     value={name}
                     onChange={e => setName(e.target.value)}
-                    placeholder="Seu nome"
+                    placeholder={t('profile.namePlaceholder')}
                   />
                 </div>
                 <div className="col-span-2 sm:col-span-1">
                   <label className="block text-xs font-medium text-[#64748B] mb-1.5">
-                    E-mail
-                    <span className="ml-1.5 text-[10px] font-normal text-[#94A3B8] bg-slate-100 px-1.5 py-0.5 rounded">institucional</span>
+                    {t('profile.email')}
+                    <span className="ml-1.5 text-[10px] font-normal text-[#94A3B8] bg-slate-100 px-1.5 py-0.5 rounded">{t('profile.institutional')}</span>
                   </label>
                   <input
                     className="input bg-[#F8FAFC] text-[#94A3B8] cursor-not-allowed"
                     value={user?.email ?? ''}
                     readOnly
-                    title="Gerenciado pela instituição"
+                    title={t('profile.managedByInstitution')}
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-[#64748B] mb-1.5">Bio <span className="text-[#94A3B8]">(opcional)</span></label>
+                <label className="block text-xs font-medium text-[#64748B] mb-1.5">{t('profile.bio')} <span className="text-[#94A3B8]">({t('profile.optional')})</span></label>
                 <textarea
                   className="input resize-none h-20 text-sm"
-                  placeholder="Escreva algo sobre você..."
+                  placeholder={t('profile.bioPlaceholder')}
                   value={bio}
                   onChange={e => setBio(e.target.value)}
                   maxLength={200}
@@ -280,8 +281,8 @@ export function Profile() {
                 className="btn-primary gap-2"
               >
                 {saving
-                  ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Salvando...</>
-                  : <><Save size={15} /> Salvar alterações</>
+                  ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> {t('profile.saving')}</>
+                  : <><Save size={15} /> {t('profile.saveChanges')}</>
                 }
               </button>
             </div>
@@ -292,11 +293,11 @@ export function Profile() {
         {tab === 'seguranca' && (
           <div className="space-y-5">
             <div className="card p-5 space-y-4">
-              <h3 className="font-display font-semibold text-[#0F172A]">Alterar senha</h3>
+              <h3 className="font-display font-semibold text-[#0F172A]">{t('profile.changePassword')}</h3>
 
               <div className="max-w-sm space-y-3">
                 <div>
-                  <label className="block text-xs font-medium text-[#64748B] mb-1.5">Senha atual</label>
+                  <label className="block text-xs font-medium text-[#64748B] mb-1.5">{t('profile.currentPassword')}</label>
                   <div className="relative">
                     <input
                       type={showPw ? 'text' : 'password'}
@@ -313,22 +314,22 @@ export function Profile() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-[#64748B] mb-1.5">Nova senha</label>
+                  <label className="block text-xs font-medium text-[#64748B] mb-1.5">{t('profile.newPassword')}</label>
                   <input
                     type={showPw ? 'text' : 'password'}
                     className="input"
-                    placeholder="Mínimo 6 caracteres"
+                    placeholder={t('profile.newPasswordPlaceholder')}
                     value={newPw}
                     onChange={e => { setNewPw(e.target.value); setPwError('') }}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-[#64748B] mb-1.5">Confirmar nova senha</label>
+                  <label className="block text-xs font-medium text-[#64748B] mb-1.5">{t('profile.confirmPassword')}</label>
                   <input
                     type={showPw ? 'text' : 'password'}
                     className="input"
-                    placeholder="Repita a nova senha"
+                    placeholder={t('profile.confirmPasswordPlaceholder')}
                     value={confirmPw}
                     onChange={e => { setConfirmPw(e.target.value); setPwError('') }}
                   />
@@ -349,7 +350,7 @@ export function Profile() {
                       ))}
                     </div>
                     <p className="text-[10px] text-[#94A3B8]">
-                      {newPw.length < 3 ? 'Muito fraca' : newPw.length < 6 ? 'Fraca' : newPw.length < 9 ? 'Boa' : 'Forte'}
+                      {newPw.length < 3 ? t('profile.passwordStrength.veryWeak') : newPw.length < 6 ? t('profile.passwordStrength.weak') : newPw.length < 9 ? t('profile.passwordStrength.good') : t('profile.passwordStrength.strong')}
                     </p>
                   </div>
                 )}
@@ -363,7 +364,7 @@ export function Profile() {
 
                 {confirmPw.length > 0 && newPw === confirmPw && !pwError && (
                   <p className="text-xs text-emerald-600 flex items-center gap-1.5">
-                    <Check size={12} /> Senhas coincidem
+                    <Check size={12} /> {t('profile.passwordsMatch')}
                   </p>
                 )}
               </div>
@@ -377,8 +378,8 @@ export function Profile() {
                 className="btn-primary gap-2"
               >
                 {saving
-                  ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Salvando...</>
-                  : <><Lock size={15} /> Alterar senha</>
+                  ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> {t('profile.saving')}</>
+                  : <><Lock size={15} /> {t('profile.changePasswordBtn')}</>
                 }
               </button>
             </div>
@@ -388,30 +389,30 @@ export function Profile() {
         {/* ── Tab: Preferências ── */}
         {tab === 'preferencias' && (
           <div className="card p-5 space-y-5">
-            <h3 className="font-display font-semibold text-[#0F172A]">Notificações</h3>
+            <h3 className="font-display font-semibold text-[#0F172A]">{t('profile.notifications')}</h3>
 
             {[
               {
-                group: 'Atividades',
+                group: t('profile.prefGroups.activities'),
                 items: [
-                  { label: 'Nova nota lançada',       desc: 'Quando uma nota for publicada para você'         },
-                  { label: 'Prazo se aproximando',    desc: 'Lembrete 24h antes do vencimento de uma entrega' },
-                  { label: 'Atividade atrasada',      desc: 'Quando uma entrega passar do prazo'              },
+                  { key: 'Nova nota lançada',       label: t('profile.prefItems.newGrade.label'),          desc: t('profile.prefItems.newGrade.desc')          },
+                  { key: 'Prazo se aproximando',    label: t('profile.prefItems.upcomingDeadline.label'),  desc: t('profile.prefItems.upcomingDeadline.desc')  },
+                  { key: 'Atividade atrasada',      label: t('profile.prefItems.lateActivity.label'),      desc: t('profile.prefItems.lateActivity.desc')      },
                 ],
               },
               {
-                group: 'Comunicação',
+                group: t('profile.prefGroups.communication'),
                 items: [
-                  { label: 'Novas mensagens',         desc: 'Mensagens diretas recebidas'                     },
-                  { label: 'Avisos no mural',         desc: 'Publicações dos professores nas suas turmas'     },
-                  { label: 'Urgentes',                desc: 'Avisos marcados como urgentes'                   },
+                  { key: 'Novas mensagens',         label: t('profile.prefItems.newMessages.label'),       desc: t('profile.prefItems.newMessages.desc')       },
+                  { key: 'Avisos no mural',         label: t('profile.prefItems.bulletinBoard.label'),     desc: t('profile.prefItems.bulletinBoard.desc')     },
+                  { key: 'Urgentes',                label: t('profile.prefItems.urgent.label'),            desc: t('profile.prefItems.urgent.desc')            },
                 ],
               },
               {
-                group: 'Plataforma',
+                group: t('profile.prefGroups.platform'),
                 items: [
-                  { label: 'E-mail semanal',          desc: 'Resumo semanal de desempenho por e-mail'         },
-                  { label: 'Novidades do sistema',    desc: 'Atualizações e novos recursos do EduFlow'        },
+                  { key: 'E-mail semanal',          label: t('profile.prefItems.weeklyEmail.label'),       desc: t('profile.prefItems.weeklyEmail.desc')       },
+                  { key: 'Novidades do sistema',    label: t('profile.prefItems.systemNews.label'),        desc: t('profile.prefItems.systemNews.desc')        },
                 ],
               },
             ].map(({ group, items }) => (
@@ -420,11 +421,11 @@ export function Profile() {
                 <div className="divide-y divide-[#F8FAFC]">
                   {items.map(item => (
                     <PrefToggle
-                      key={item.label}
+                      key={item.key}
                       label={item.label}
                       desc={item.desc}
-                      on={prefs[item.label] ?? false}
-                      onToggle={() => setPrefs(p => ({ ...p, [item.label]: !p[item.label] }))}
+                      on={prefs[item.key] ?? false}
+                      onToggle={() => setPrefs(p => ({ ...p, [item.key]: !p[item.key] }))}
                     />
                   ))}
                 </div>
@@ -439,8 +440,8 @@ export function Profile() {
                 className="btn-primary gap-2"
               >
                 {saving
-                  ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Salvando...</>
-                  : <><Save size={15} /> Salvar preferências</>
+                  ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> {t('profile.saving')}</>
+                  : <><Save size={15} /> {t('profile.savePreferences')}</>
                 }
               </button>
             </div>
@@ -467,7 +468,7 @@ function PrefToggle({ label, desc, on, onToggle }: { label: string; desc: string
         )}
         role="switch"
         aria-label={label}
-        aria-checked={on ? 'true' : 'false'}
+        aria-checked={on}
       >
         <span className={clsx(
           'absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all',

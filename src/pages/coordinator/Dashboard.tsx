@@ -8,6 +8,7 @@ import { mockCoordinatorData } from '../../data/mock'
 import { useSettingsStore } from '../../store/settings'
 import { formatGrade, SCALE_INFO } from '../../utils/gradeFormat'
 import clsx from 'clsx'
+import { useTranslation } from '../../i18n'
 
 function KpiCard({ label, value, unit, change, icon: Icon, iconColor, iconBg }: {
   label: string
@@ -18,6 +19,7 @@ function KpiCard({ label, value, unit, change, icon: Icon, iconColor, iconBg }: 
   iconColor: string
   iconBg: string
 }) {
+  const t = useTranslation()
   return (
     <div className="kpi-card">
       <div className="flex items-center justify-between">
@@ -36,7 +38,7 @@ function KpiCard({ label, value, unit, change, icon: Icon, iconColor, iconBg }: 
           change > 0 ? 'text-emerald-600' : change < 0 ? 'text-red-500' : 'text-[#94A3B8]'
         )}>
           {change > 0 ? <TrendingUp size={12} /> : change < 0 ? <TrendingDown size={12} /> : null}
-          <span>{change > 0 ? '+' : ''}{change} em relação ao bimestre anterior</span>
+          <span>{change > 0 ? '+' : ''}{change} {t('coordinator.dashboard.vsLastPeriod')}</span>
         </div>
       )}
     </div>
@@ -46,6 +48,7 @@ function KpiCard({ label, value, unit, change, icon: Icon, iconColor, iconBg }: 
 export function CoordinatorDashboard() {
   const { kpis, gradeDistribution, monthlyEvolution, atRisk } = mockCoordinatorData
   const { gradeScale } = useSettingsStore()
+  const t = useTranslation()
 
   return (
     <>
@@ -55,7 +58,7 @@ export function CoordinatorDashboard() {
         {/* KPI row */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <KpiCard
-            label={`Média Geral (${SCALE_INFO[gradeScale].short})`}
+            label={`${t('coordinator.dashboard.generalAverage')} (${SCALE_INFO[gradeScale].short})`}
             value={formatGrade(kpis.generalAverage, gradeScale)}
             change={kpis.changes.generalAverage}
             icon={BarChart3}
@@ -63,7 +66,7 @@ export function CoordinatorDashboard() {
             iconBg="bg-blue-50"
           />
           <KpiCard
-            label="Taxa de Entrega"
+            label={t('coordinator.dashboard.deliveryRate')}
             value={kpis.deliveryRate}
             unit="%"
             change={kpis.changes.deliveryRate}
@@ -72,7 +75,7 @@ export function CoordinatorDashboard() {
             iconBg="bg-emerald-50"
           />
           <KpiCard
-            label="Alunos em Risco"
+            label={t('coordinator.dashboard.atRiskStudents')}
             value={kpis.atRiskStudents}
             change={kpis.changes.atRiskStudents}
             icon={AlertTriangle}
@@ -80,7 +83,7 @@ export function CoordinatorDashboard() {
             iconBg="bg-amber-50"
           />
           <KpiCard
-            label="Frequência Média"
+            label={t('coordinator.dashboard.avgAttendance')}
             value={kpis.attendance}
             unit="%"
             change={kpis.changes.attendance}
@@ -93,7 +96,7 @@ export function CoordinatorDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Grade distribution */}
           <div className="card p-5">
-            <h3 className="font-display font-semibold text-[#0F172A] mb-4">Distribuição de Médias</h3>
+            <h3 className="font-display font-semibold text-[#0F172A] mb-4">{t('coordinator.dashboard.gradeDistribution')}</h3>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={gradeDistribution} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
@@ -101,27 +104,27 @@ export function CoordinatorDashboard() {
                 <YAxis tick={{ fontSize: 11, fill: '#94A3B8' }} />
                 <Tooltip
                   contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #E2E8F0' }}
-                  formatter={(v) => [v, 'Alunos']}
+                  formatter={(v) => [v, t('coordinator.dashboard.students')]}
                 />
                 <Bar dataKey="count" fill="#1E3A8A" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
             <div className="mt-3 flex items-center gap-4 text-xs text-[#64748B]">
               <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded bg-emerald-500" /> Aprovados (&gt;=6)
+                <span className="w-3 h-3 rounded bg-emerald-500" /> {t('coordinator.dashboard.approved')}
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded bg-amber-400" /> Recuperação (4–6)
+                <span className="w-3 h-3 rounded bg-amber-400" /> {t('coordinator.dashboard.recovery')}
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-3 h-3 rounded bg-red-400" /> Reprovados (&lt;4)
+                <span className="w-3 h-3 rounded bg-red-400" /> {t('coordinator.dashboard.failed')}
               </span>
             </div>
           </div>
 
           {/* Monthly evolution */}
           <div className="card p-5">
-            <h3 className="font-display font-semibold text-[#0F172A] mb-4">Evolução Mensal da Média</h3>
+            <h3 className="font-display font-semibold text-[#0F172A] mb-4">{t('coordinator.dashboard.monthlyEvolution')}</h3>
             <ResponsiveContainer width="100%" height={200}>
               <AreaChart data={monthlyEvolution} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
                 <defs>
@@ -135,7 +138,7 @@ export function CoordinatorDashboard() {
                 <YAxis domain={[5, 10]} tick={{ fontSize: 11, fill: '#94A3B8' }} />
                 <Tooltip
                   contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #E2E8F0' }}
-                  formatter={(v) => [v, 'Média']}
+                  formatter={(v) => [v, t('coordinator.dashboard.average')]}
                 />
                 <Area
                   type="monotone"
@@ -155,19 +158,19 @@ export function CoordinatorDashboard() {
           <div className="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0]">
             <div className="flex items-center gap-2">
               <AlertTriangle size={16} className="text-amber-500" />
-              <h3 className="font-display font-semibold text-[#0F172A]">Alunos em Situação de Risco</h3>
+              <h3 className="font-display font-semibold text-[#0F172A]">{t('coordinator.dashboard.atRiskSection')}</h3>
             </div>
-            <span className="badge-warning">{atRisk.length} alunos</span>
+            <span className="badge-warning">{atRisk.length} {t('coordinator.dashboard.studentsBadge')}</span>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="text-left bg-[#F8FAFC]">
-                  <th className="px-5 py-3 text-xs font-medium text-[#64748B]">Aluno</th>
-                  <th className="px-5 py-3 text-xs font-medium text-[#64748B]">Turma</th>
-                  <th className="px-5 py-3 text-xs font-medium text-[#64748B]">Disciplinas em risco</th>
-                  <th className="px-5 py-3 text-xs font-medium text-[#64748B]">Último acesso</th>
-                  <th className="px-5 py-3 text-xs font-medium text-[#64748B]">Ação</th>
+                  <th className="px-5 py-3 text-xs font-medium text-[#64748B]">{t('coordinator.dashboard.studentCol')}</th>
+                  <th className="px-5 py-3 text-xs font-medium text-[#64748B]">{t('coordinator.dashboard.classCol')}</th>
+                  <th className="px-5 py-3 text-xs font-medium text-[#64748B]">{t('coordinator.dashboard.subjectsAtRisk')}</th>
+                  <th className="px-5 py-3 text-xs font-medium text-[#64748B]">{t('coordinator.dashboard.lastAccess')}</th>
+                  <th className="px-5 py-3 text-xs font-medium text-[#64748B]">{t('coordinator.dashboard.actionCol')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#F1F5F9]">
@@ -187,13 +190,15 @@ export function CoordinatorDashboard() {
                         'badge-neutral',
                         student.subjects >= 3 ? 'badge-danger' : student.subjects >= 2 ? 'badge-warning' : 'badge-neutral'
                       )}>
-                        {student.subjects} disciplina{student.subjects > 1 ? 's' : ''}
+                        {student.subjects > 1
+                          ? t('coordinator.dashboard.subjectPlural', { n: student.subjects })
+                          : t('coordinator.dashboard.subjectSingular', { n: student.subjects })}
                       </span>
                     </td>
-                    <td className="px-5 py-3 text-sm text-[#64748B]">há {student.lastAccess}</td>
+                    <td className="px-5 py-3 text-sm text-[#64748B]">{t('coordinator.dashboard.since', { t: student.lastAccess })}</td>
                     <td className="px-5 py-3">
                       <button type="button" className="text-xs text-[#1E3A8A] hover:underline">
-                        Contatar
+                        {t('coordinator.dashboard.contact')}
                       </button>
                     </td>
                   </tr>
@@ -206,10 +211,10 @@ export function CoordinatorDashboard() {
         {/* Quick stats row */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { label: 'Total de turmas', value: '12', icon: '📚' },
-            { label: 'Professores ativos', value: '8', icon: '👩‍🏫' },
-            { label: 'Total de alunos', value: '284', icon: '🎓' },
-            { label: 'Atividades este mês', value: '47', icon: '📋' },
+            { label: t('coordinator.dashboard.totalClasses'), value: '12', icon: '📚' },
+            { label: t('coordinator.dashboard.activeTeachers'), value: '8', icon: '👩‍🏫' },
+            { label: t('coordinator.dashboard.totalStudents'), value: '284', icon: '🎓' },
+            { label: t('coordinator.dashboard.activitiesThisMonth'), value: '47', icon: '📋' },
           ].map(stat => (
             <div key={stat.label} className="card p-4 flex items-center gap-3">
               <span className="text-2xl">{stat.icon}</span>
