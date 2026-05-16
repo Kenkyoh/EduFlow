@@ -1,0 +1,206 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --sidebar-width: 240px;
+    --header-height: 60px;
+    --drawer-width: 480px;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background-color: #F8FAFC;
+    color: #0F172A;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  }
+
+  :focus-visible {
+    outline: 3px solid #1E3A8A;
+    outline-offset: 2px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #CBD5E1;
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #94A3B8;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-[#1E3A8A] text-white text-sm font-medium h-10 px-4
+    hover:bg-[#1e40af] transition-colors focus-visible:outline-[#1E3A8A] disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-[#1E3A8A] text-[#1E3A8A] text-sm font-medium h-10 px-4
+    hover:bg-blue-50 transition-colors focus-visible:outline-[#1E3A8A] disabled:opacity-50;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg text-[#64748B] text-sm font-medium h-10 px-4
+    hover:bg-slate-100 hover:text-[#0F172A] transition-colors;
+  }
+
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-[#DC2626] text-white text-sm font-medium h-10 px-4
+    hover:bg-red-700 transition-colors;
+  }
+
+  .input {
+    @apply w-full h-10 rounded-lg border border-[#E2E8F0] px-3 text-sm text-[#0F172A] bg-white
+    placeholder:text-[#94A3B8] focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/30 focus:border-[#1E3A8A]
+    transition-all;
+  }
+
+  .card {
+    @apply bg-white rounded-xl border border-[#E2E8F0] shadow-card;
+  }
+
+  .badge-success {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700;
+  }
+
+  .badge-warning {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700;
+  }
+
+  .badge-danger {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700;
+  }
+
+  .badge-neutral {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600;
+  }
+
+  .sidebar-item {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[#64748B]
+    hover:bg-slate-100 hover:text-[#0F172A] transition-all cursor-pointer;
+  }
+
+  .sidebar-item-active {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium bg-blue-50 text-[#1E3A8A];
+  }
+
+  .grade-cell {
+    @apply px-3 py-2 text-sm text-center border-b border-[#E2E8F0] cursor-pointer
+    hover:bg-slate-50 transition-colors;
+  }
+
+  .grade-cell-editing {
+    @apply ring-2 ring-[#1E3A8A] ring-inset rounded;
+  }
+
+  .grade-cell-saved {
+    @apply animate-flash-green;
+  }
+
+  .subject-pill {
+    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium;
+  }
+
+  .drawer-overlay {
+    @apply fixed inset-0 bg-black/40 z-40 animate-fade-in;
+  }
+
+  .drawer {
+    @apply fixed top-0 right-0 h-full w-[480px] bg-white shadow-modal z-50 flex flex-col animate-slide-in-right;
+  }
+
+  .drawer-mobile {
+    @apply fixed inset-0 bg-white z-50 flex flex-col animate-slide-in-right;
+  }
+
+  .toast-container {
+    @apply fixed bottom-4 right-4 z-[100] flex flex-col gap-2;
+  }
+
+  .toast {
+    @apply flex items-center gap-3 px-4 py-3 bg-[#0F172A] text-white rounded-xl shadow-modal text-sm
+    animate-slide-down;
+  }
+
+  .notification-item {
+    @apply flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer;
+  }
+
+  .activity-card {
+    @apply card p-4 border-l-4 hover:shadow-md transition-shadow cursor-pointer;
+  }
+
+  .tab-button {
+    @apply px-4 py-2 text-sm font-medium text-[#64748B] border-b-2 border-transparent
+    hover:text-[#0F172A] hover:border-slate-300 transition-all;
+  }
+
+  .tab-button-active {
+    @apply px-4 py-2 text-sm font-medium text-[#1E3A8A] border-b-2 border-[#1E3A8A];
+  }
+
+  .kpi-card {
+    @apply card p-5 flex flex-col gap-1;
+  }
+
+  .calendar-event-pill {
+    @apply text-xs font-medium px-1.5 py-0.5 rounded truncate cursor-pointer hover:opacity-90 transition-opacity;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .min-touch {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+.grade-flash {
+  animation: flashGreen 800ms ease-out forwards;
+}
+
+@keyframes flashGreen {
+  0% { background-color: #D1FAE5; }
+  100% { background-color: transparent; }
+}
+
+.slide-in-right {
+  animation: slideInRight 250ms ease-out;
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
