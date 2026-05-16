@@ -28,6 +28,6 @@ export const useSettingsStore = create<SettingsStore>()(
       setRecoveryRange: (recoveryMin, recoveryMax) => set({ recoveryMin, recoveryMax }),
       setMinAttendance: (minAttendance) => set({ minAttendance }),
     }),
-    { name: 'eduflow-settings' }
+    { name: 'vekta-settings' }
   )
 )

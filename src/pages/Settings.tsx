@@ -123,7 +123,7 @@ export function Settings() {
                   <div className="flex items-center gap-0">
                     <input className="input rounded-r-none border-r-0 max-w-32 text-sm" defaultValue="escola" />
                     <span className="h-10 px-3 flex items-center bg-[#F8FAFC] border border-[#E2E8F0] rounded-r-lg text-sm text-[#64748B] whitespace-nowrap">
-                      .eduflow.app
+                      .vekta.app
                     </span>
                   </div>
                 </div>
@@ -476,10 +476,10 @@ export function Settings() {
                 </thead>
                 <tbody className="divide-y divide-[#F1F5F9]">
                   {[
-                    { name: 'Profa. Ana Lima', email: 'ana.lima@escola.eduflow.app', role: 'Professor', active: true },
-                    { name: 'Prof. Roberto Souza', email: 'roberto@escola.eduflow.app', role: 'Professor', active: true },
-                    { name: 'Lucas Mendes', email: 'lucas@escola.eduflow.app', role: 'Aluno', active: true },
-                    { name: 'Maria Silva', email: 'maria@escola.eduflow.app', role: 'Aluno', active: false },
+                    { name: 'Profa. Ana Lima', email: 'ana.lima@escola.vekta.app', role: 'Professor', active: true },
+                    { name: 'Prof. Roberto Souza', email: 'roberto@escola.vekta.app', role: 'Professor', active: true },
+                    { name: 'Lucas Mendes', email: 'lucas@escola.vekta.app', role: 'Aluno', active: true },
+                    { name: 'Maria Silva', email: 'maria@escola.vekta.app', role: 'Aluno', active: false },
                   ].map(u => (
                     <tr key={u.email} className="hover:bg-[#F8FAFC]">
                       <td className="py-2.5 font-medium text-[#0F172A]">{u.name}</td>

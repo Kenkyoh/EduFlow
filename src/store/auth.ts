@@ -16,7 +16,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
       student: 'Lucas Mendes',
       teacher: 'Profa. Ana Lima',
       coordinator: 'Dir. Carlos Santos',
-      admin: 'Admin EduFlow',
+      admin: 'Admin Vekta',
       guardian: 'Responsável',
     }
     const found = mockUsers.find(u => u.role === role) ?? {
@@ -24,7 +24,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
       name: fallbackName[role] ?? role,
       email,
       role,
-      institution: role === 'admin' ? 'EduFlow' : 'Colégio Estadual São Paulo',
+      institution: role === 'admin' ? 'Vekta' : 'Colégio Estadual São Paulo',
     }
     set({ user: { ...found, email } })
   },

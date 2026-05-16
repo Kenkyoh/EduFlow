@@ -1,4 +1,4 @@
-# EduFlow
+# Vekta
 
 Plataforma educacional unificada construída com React + TypeScript. Reúne alunos, professores, coordenadores, responsáveis e administradores em um único sistema — cada perfil com sua própria visão e funcionalidades.
 
@@ -12,9 +12,9 @@ Acesse os perfis de demonstração com um clique na tela de login (sem senha):
 
 | Perfil | E-mail | Acesso a |
 |---|---|---|
-| Aluno | `lucas@escola.eduflow.app` | Turmas, atividades, boletim, calendário |
-| Professor | `ana.lima@escola.eduflow.app` | Turmas, lançamento de notas, correção |
-| Coordenador | `carlos@escola.eduflow.app` | Analytics, visão geral das turmas |
+| Aluno | `lucas@escola.vekta.app` | Turmas, atividades, boletim, calendário |
+| Professor | `ana.lima@escola.vekta.app` | Turmas, lançamento de notas, correção |
+| Coordenador | `carlos@escola.vekta.app` | Analytics, visão geral das turmas |
 | Responsável | `fernanda.mendes@gmail.com` | Desempenho, frequência e atividades dos filhos |
 
 ### Acesso Administrativo
@@ -23,8 +23,8 @@ O administrador **não aparece no acesso rápido** e requer credenciais específ
 
 | Campo | Valor |
 |---|---|
-| E-mail | `admin@eduflow.app` |
-| Senha | `EduFlow@2025#Admin` |
+| E-mail | `admin@vekta.app` |
+| Senha | `Vekta@2025#Admin` |
 
 ---
 
@@ -88,8 +88,8 @@ O administrador **não aparece no acesso rápido** e requer credenciais específ
 
 ```bash
 # 1. Clone o repositório
-git clone https://github.com/Kenkyoh/EduFlow.git
-cd EduFlow
+git clone https://github.com/Kenkyoh/Vekta.git
+cd Vekta
 
 # 2. Instale as dependências
 npm install

@@ -14,6 +14,6 @@ export const useLanguageStore = create<LanguageStore>()(
       language: 'pt',
       setLanguage: (language) => set({ language }),
     }),
-    { name: 'eduflow-language' }
+    { name: 'vekta-language' }
   )
 )

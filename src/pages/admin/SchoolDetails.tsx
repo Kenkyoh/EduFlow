@@ -14,16 +14,16 @@ type Tab = 'overview' | 'users' | 'classes' | 'settings'
 
 const MOCK_USERS_BY_SCHOOL: Record<string, { id: string; name: string; role: string; email: string; joinedAt: string }[]> = {
   'school-1': [
-    { id: 'u1', name: 'Dir. Carlos Santos',   role: 'Coordenador', email: 'carlos.santos@escola.eduflow.app', joinedAt: '2023-02-15' },
-    { id: 'u2', name: 'Profa. Ana Lima',       role: 'Professor',   email: 'ana.lima@escola.eduflow.app',      joinedAt: '2023-02-16' },
-    { id: 'u3', name: 'Prof. Roberto Souza',   role: 'Professor',   email: 'roberto@escola.eduflow.app',       joinedAt: '2023-02-16' },
-    { id: 'u4', name: 'Lucas Mendes',          role: 'Aluno',       email: 'lucas@escola.eduflow.app',         joinedAt: '2023-02-20' },
-    { id: 'u5', name: 'Maria Silva',           role: 'Aluno',       email: 'maria@escola.eduflow.app',         joinedAt: '2023-02-20' },
-    { id: 'u6', name: 'Pedro Oliveira',        role: 'Aluno',       email: 'pedro@escola.eduflow.app',         joinedAt: '2023-02-20' },
+    { id: 'u1', name: 'Dir. Carlos Santos',   role: 'Coordenador', email: 'carlos.santos@escola.vekta.app', joinedAt: '2023-02-15' },
+    { id: 'u2', name: 'Profa. Ana Lima',       role: 'Professor',   email: 'ana.lima@escola.vekta.app',      joinedAt: '2023-02-16' },
+    { id: 'u3', name: 'Prof. Roberto Souza',   role: 'Professor',   email: 'roberto@escola.vekta.app',       joinedAt: '2023-02-16' },
+    { id: 'u4', name: 'Lucas Mendes',          role: 'Aluno',       email: 'lucas@escola.vekta.app',         joinedAt: '2023-02-20' },
+    { id: 'u5', name: 'Maria Silva',           role: 'Aluno',       email: 'maria@escola.vekta.app',         joinedAt: '2023-02-20' },
+    { id: 'u6', name: 'Pedro Oliveira',        role: 'Aluno',       email: 'pedro@escola.vekta.app',         joinedAt: '2023-02-20' },
   ],
   'school-2': [
-    { id: 'u7', name: 'Dir. Fernanda Costa',   role: 'Coordenador', email: 'fernanda.costa@rj.eduflow.app',    joinedAt: '2023-08-20' },
-    { id: 'u8', name: 'Prof. Marcos Leal',     role: 'Professor',   email: 'marcos@rj.eduflow.app',            joinedAt: '2023-08-22' },
+    { id: 'u7', name: 'Dir. Fernanda Costa',   role: 'Coordenador', email: 'fernanda.costa@rj.vekta.app',    joinedAt: '2023-08-20' },
+    { id: 'u8', name: 'Prof. Marcos Leal',     role: 'Professor',   email: 'marcos@rj.vekta.app',            joinedAt: '2023-08-22' },
   ],
 }
 

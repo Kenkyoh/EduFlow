@@ -8,14 +8,14 @@ import type { UserRole } from '../types'
 import clsx from 'clsx'
 
 const EMAIL_ROLE: Record<string, UserRole> = {
-  'lucas@escola.eduflow.app':    'student',
-  'ana.lima@escola.eduflow.app': 'teacher',
-  'carlos@escola.eduflow.app':   'coordinator',
+  'lucas@escola.vekta.app':    'student',
+  'ana.lima@escola.vekta.app': 'teacher',
+  'carlos@escola.vekta.app':   'coordinator',
   'fernanda.mendes@gmail.com':   'guardian',
 }
 
-const ADMIN_EMAIL    = 'admin@eduflow.app'
-const ADMIN_PASSWORD = 'EduFlow@2025#Admin'
+const ADMIN_EMAIL    = 'admin@vekta.app'
+const ADMIN_PASSWORD = 'Vekta@2025#Admin'
 
 const LANG_OPTIONS: { code: 'pt' | 'en' | 'es'; flag: string; label: string }[] = [
   { code: 'pt', flag: '🇧🇷', label: 'PT' },
@@ -29,7 +29,7 @@ export function Login() {
   const { language, setLanguage } = useLanguageStore()
   const t = useTranslation()
 
-  const [email, setEmail] = useState('lucas@escola.eduflow.app')
+  const [email, setEmail] = useState('lucas@escola.vekta.app')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -37,9 +37,9 @@ export function Login() {
   const [selectedRole, setSelectedRole] = useState<UserRole>('student')
 
   const DEMO_PROFILES: { role: UserRole; label: string; email: string; color: string; emoji: string }[] = [
-    { role: 'student',     label: t('roles.student'),     email: 'lucas@escola.eduflow.app',    color: 'bg-blue-50 border-blue-200 text-blue-700',        emoji: '🎓' },
-    { role: 'teacher',     label: t('roles.teacher'),     email: 'ana.lima@escola.eduflow.app', color: 'bg-purple-50 border-purple-200 text-purple-700',  emoji: '👩‍🏫' },
-    { role: 'coordinator', label: t('roles.coordinator'), email: 'carlos@escola.eduflow.app',   color: 'bg-emerald-50 border-emerald-200 text-emerald-700', emoji: '📊' },
+    { role: 'student',     label: t('roles.student'),     email: 'lucas@escola.vekta.app',    color: 'bg-blue-50 border-blue-200 text-blue-700',        emoji: '🎓' },
+    { role: 'teacher',     label: t('roles.teacher'),     email: 'ana.lima@escola.vekta.app', color: 'bg-purple-50 border-purple-200 text-purple-700',  emoji: '👩‍🏫' },
+    { role: 'coordinator', label: t('roles.coordinator'), email: 'carlos@escola.vekta.app',   color: 'bg-emerald-50 border-emerald-200 text-emerald-700', emoji: '📊' },
     { role: 'guardian',    label: t('roles.guardian'),    email: 'fernanda.mendes@gmail.com',   color: 'bg-rose-50 border-rose-200 text-rose-700',        emoji: '👪' },
   ]
 
@@ -108,7 +108,7 @@ export function Login() {
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-white shadow-lg mb-4">
             <GraduationCap className="w-8 h-8 text-[#1E3A8A]" />
           </div>
-          <h1 className="font-display font-bold text-white text-3xl tracking-tight">EduFlow</h1>
+          <h1 className="font-display font-bold text-white text-3xl tracking-tight">Vekta</h1>
           <p className="text-blue-200 mt-1 text-sm">{t('login.subtitle')}</p>
           <div className="mt-1 text-xs text-blue-300">{t('login.schoolUrl')}</div>
         </div>

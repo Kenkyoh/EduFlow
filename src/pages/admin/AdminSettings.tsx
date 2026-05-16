@@ -89,7 +89,7 @@ export function AdminSettings() {
                   </div>
                   <div>
                     <p className="text-sm font-medium text-[#0F172A]">{user?.name}</p>
-                    <p className="text-xs text-[#94A3B8]">Administrador · EduFlow</p>
+                    <p className="text-xs text-[#94A3B8]">Administrador · Vekta</p>
                   </div>
                 </div>
 

@@ -35,7 +35,7 @@ export const mockUsers: User[] = [
   {
     id: 'student-1',
     name: 'Lucas Mendes',
-    email: 'lucas@escola.eduflow.app',
+    email: 'lucas@escola.vekta.app',
     role: 'student',
     institution: 'Colégio Estadual São Paulo',
     schoolId: 'school-1',
@@ -43,7 +43,7 @@ export const mockUsers: User[] = [
   {
     id: 'teacher-1',
     name: 'Profa. Ana Lima',
-    email: 'ana.lima@escola.eduflow.app',
+    email: 'ana.lima@escola.vekta.app',
     role: 'teacher',
     institution: 'Colégio Estadual São Paulo',
     schoolId: 'school-1',
@@ -51,7 +51,7 @@ export const mockUsers: User[] = [
   {
     id: 'coordinator-1',
     name: 'Dir. Carlos Santos',
-    email: 'carlos.santos@escola.eduflow.app',
+    email: 'carlos.santos@escola.vekta.app',
     role: 'coordinator',
     institution: 'Colégio Estadual São Paulo',
     schoolId: 'school-1',
@@ -59,7 +59,7 @@ export const mockUsers: User[] = [
   {
     id: 'student-2',
     name: 'Maria Silva',
-    email: 'maria@escola.eduflow.app',
+    email: 'maria@escola.vekta.app',
     role: 'student',
     institution: 'Colégio Estadual São Paulo',
     schoolId: 'school-1',
@@ -75,10 +75,10 @@ export const mockUsers: User[] = [
   },
   {
     id: 'admin-1',
-    name: 'Admin EduFlow',
-    email: 'admin@eduflow.app',
+    name: 'Admin Vekta',
+    email: 'admin@vekta.app',
     role: 'admin',
-    institution: 'EduFlow',
+    institution: 'Vekta',
   },
 ]
 
@@ -95,7 +95,7 @@ export const mockSchools: School[] = [
     teachersCount: 32,
     classesCount: 18,
     coordinatorName: 'Dir. Carlos Santos',
-    coordinatorEmail: 'carlos.santos@escola.eduflow.app',
+    coordinatorEmail: 'carlos.santos@escola.vekta.app',
   },
   {
     id: 'school-2',
@@ -109,7 +109,7 @@ export const mockSchools: School[] = [
     teachersCount: 21,
     classesCount: 12,
     coordinatorName: 'Dir. Fernanda Costa',
-    coordinatorEmail: 'fernanda.costa@rj.eduflow.app',
+    coordinatorEmail: 'fernanda.costa@rj.vekta.app',
   },
   {
     id: 'school-3',
@@ -123,7 +123,7 @@ export const mockSchools: School[] = [
     teachersCount: 45,
     classesCount: 24,
     coordinatorName: 'Dir. Ricardo Alves',
-    coordinatorEmail: 'ricardo.alves@bh.eduflow.app',
+    coordinatorEmail: 'ricardo.alves@bh.vekta.app',
   },
   {
     id: 'school-4',
@@ -137,7 +137,7 @@ export const mockSchools: School[] = [
     teachersCount: 8,
     classesCount: 4,
     coordinatorName: 'Dir. Patricia Lima',
-    coordinatorEmail: 'patricia.lima@cwb.eduflow.app',
+    coordinatorEmail: 'patricia.lima@cwb.vekta.app',
   },
   {
     id: 'school-5',

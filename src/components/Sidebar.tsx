@@ -99,7 +99,7 @@ export function Sidebar() {
               <GraduationCap className="w-5 h-5 text-white" />
             </div>
             <span className={clsx('font-display font-600 text-[#0F172A] text-lg tracking-tight', collapsed && 'md:hidden')}>
-              EduFlow
+              Vekta
             </span>
           </div>
 
