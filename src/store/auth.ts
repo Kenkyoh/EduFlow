@@ -1,35 +1,83 @@
 import { create } from 'zustand'
-import type { User, UserRole } from '../types'
-import { mockUsers } from '../data/mock'
+import type { User } from '../types'
+import { api, setToken, clearToken, getToken } from '../lib/api'
+
+interface LoginResponse {
+  user: ApiUser
+  token: string
+  refreshToken: string
+}
+
+interface MeResponse {
+  user: ApiUser
+}
+
+interface ApiUser {
+  id: string
+  name: string
+  email: string
+  role: User['role']
+  institution: string
+  schoolId: string | null
+  avatar: string | null
+  bio: string | null
+}
+
+function mapApiUser(apiUser: ApiUser): User {
+  return {
+    id: apiUser.id,
+    name: apiUser.name,
+    email: apiUser.email,
+    role: apiUser.role,
+    institution: apiUser.institution ?? 'Vekta',
+    schoolId: apiUser.schoolId ?? undefined,
+    avatar: apiUser.avatar ?? undefined,
+    bio: apiUser.bio ?? undefined,
+  }
+}
 
 interface AuthStore {
   user: User | null
-  login: (email: string, role: UserRole) => void
-  logout: () => void
+  loginWithCredentials: (email: string, password: string) => Promise<void>
+  logout: () => Promise<void>
+  restoreSession: () => Promise<void>
   updateProfile: (updates: { name?: string; avatar?: string; bio?: string }) => void
 }
 
 export const useAuthStore = create<AuthStore>((set) => ({
   user: null,
-  login: (email: string, role: UserRole) => {
-    const fallbackName: Record<string, string> = {
-      student: 'Lucas Mendes',
-      teacher: 'Profa. Ana Lima',
-      coordinator: 'Dir. Carlos Santos',
-      admin: 'Admin Vekta',
-      guardian: 'Responsável',
-    }
-    const found = mockUsers.find(u => u.role === role) ?? {
-      id: `${role}-0`,
-      name: fallbackName[role] ?? role,
-      email,
-      role,
-      institution: role === 'admin' ? 'Vekta' : 'Colégio Estadual São Paulo',
-    }
-    set({ user: { ...found, email } })
+
+  loginWithCredentials: async (email, password) => {
+    const { user: apiUser, token } = await api.post<LoginResponse>('/api/auth/login', { email, password })
+    setToken(token)
+    set({ user: mapApiUser(apiUser) })
   },
-  logout: () => set({ user: null }),
-  updateProfile: (updates) => set(state => ({
-    user: state.user ? { ...state.user, ...updates } : null,
-  })),
+
+  logout: async () => {
+    try {
+      if (getToken()) {
+        await api.post('/api/auth/logout')
+      }
+    } catch {
+      // ignora erros de rede no logout
+    } finally {
+      clearToken()
+      set({ user: null })
+    }
+  },
+
+  restoreSession: async () => {
+    if (!getToken()) return
+    try {
+      const { user: apiUser } = await api.get<MeResponse>('/api/auth/me')
+      set({ user: mapApiUser(apiUser) })
+    } catch {
+      clearToken()
+    }
+  },
+
+  updateProfile: (updates) =>
+    set((state) => ({
+      user: state.user ? { ...state.user, ...updates } : null,
+    })),
 }))

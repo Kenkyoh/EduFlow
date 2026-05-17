@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Clock, Upload, Filter, CheckCircle, AlertTriangle } from 'lucide-react'
+import { Clock, Upload, CheckCircle, AlertTriangle } from 'lucide-react'
 import { Header } from '../../components/Header'
-import { mockActivities, getActivityTypeLabel, getDaysUntil, mockSubjects } from '../../data/mock'
+import { getDaysUntil } from '../../data/mock'
 import { useSearchStore } from '../../store/search'
 import { useTranslation } from '../../i18n'
+import { useActivities } from '../../hooks/useActivities'
 import clsx from 'clsx'
 
 export function StudentActivities() {
@@ -13,8 +14,13 @@ export function StudentActivities() {
   const query = useSearchStore(s => s.query)
   const [filter, setFilter] = useState<'all' | 'pending' | 'late' | 'submitted'>('all')
   const [subjectFilter, setSubjectFilter] = useState<string>('all')
+  const { data: activities = [], isLoading } = useActivities()
 
-  const filtered = mockActivities.filter(a => {
+  const subjects = Array.from(
+    new Map(activities.map(a => [a.subjectId, { id: a.subjectId, name: a.subjectName }])).values()
+  )
+
+  const filtered = activities.filter(a => {
     if (filter === 'pending') return a.status === 'pending' || a.status === 'upcoming'
     if (filter === 'late') return a.status === 'late' || getDaysUntil(a.dueDate) < 0
     if (filter === 'submitted') return a.status === 'submitted' || a.status === 'graded'
@@ -59,10 +65,11 @@ export function StudentActivities() {
           <select
             className="input h-9 text-sm w-40"
             value={subjectFilter}
+            title={t('student.activities.allSubjects')}
             onChange={e => setSubjectFilter(e.target.value)}
           >
             <option value="all">{t('student.activities.allSubjects')}</option>
-            {mockSubjects.map(s => (
+            {subjects.map(s => (
               <option key={s.id} value={s.id}>{s.name}</option>
             ))}
           </select>
@@ -71,9 +78,9 @@ export function StudentActivities() {
         {/* Stats */}
         <div className="grid grid-cols-3 gap-3">
           {[
-            { label: t('student.activities.stats.pending'), value: mockActivities.filter(a => a.status === 'pending' || a.status === 'upcoming').length, color: 'text-amber-600', bg: 'bg-amber-50' },
-            { label: t('student.activities.stats.late'), value: mockActivities.filter(a => a.status === 'late').length, color: 'text-red-600', bg: 'bg-red-50' },
-            { label: t('student.activities.stats.submitted'), value: mockActivities.filter(a => a.status === 'submitted' || a.status === 'graded').length, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+            { label: t('student.activities.stats.pending'), value: activities.filter(a => a.status === 'pending' || a.status === 'upcoming').length, color: 'text-amber-600', bg: 'bg-amber-50' },
+            { label: t('student.activities.stats.late'), value: activities.filter(a => a.status === 'late').length, color: 'text-red-600', bg: 'bg-red-50' },
+            { label: t('student.activities.stats.submitted'), value: activities.filter(a => a.status === 'submitted' || a.status === 'graded').length, color: 'text-emerald-600', bg: 'bg-emerald-50' },
           ].map(stat => (
             <div key={stat.label} className={clsx('card p-4 flex items-center gap-3', stat.bg)}>
               <p className={clsx('text-2xl font-bold font-display', stat.color)}>{stat.value}</p>
@@ -83,7 +90,11 @@ export function StudentActivities() {
         </div>
 
         {/* Activities list */}
-        {sorted.length === 0 ? (
+        {isLoading ? (
+          <div className="flex items-center justify-center py-16">
+            <span className="w-6 h-6 border-2 border-[#1E3A8A]/20 border-t-[#1E3A8A] rounded-full animate-spin" />
+          </div>
+        ) : sorted.length === 0 ? (
           <div className="card p-12 flex flex-col items-center gap-3 text-[#94A3B8]">
             <CheckCircle size={40} strokeWidth={1.5} />
             <p className="font-medium">{t('student.activities.noActivitiesFound')}</p>

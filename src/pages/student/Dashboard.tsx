@@ -1,26 +1,36 @@
-import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Clock, CheckCircle, AlertTriangle, ArrowRight, BookOpen,
-  TrendingUp, Bell, Star, Zap
+  TrendingUp, Star, Zap
 } from 'lucide-react'
 import { Header } from '../../components/Header'
-import { mockActivities, mockAnnouncements, mockSubjects, formatDueDate, getDaysUntil, getActivityTypeLabel } from '../../data/mock'
+import { mockAnnouncements, getDaysUntil } from '../../data/mock'
+import { useClasses } from '../../hooks/useClasses'
+import { useActivities } from '../../hooks/useActivities'
+import { useAuthStore } from '../../store/auth'
 import { useTranslation } from '../../i18n'
 import clsx from 'clsx'
-
-const progressBySubject = [
-  { subjectId: 'mat', name: 'Matemática', color: '#1E3A8A', progress: 72, grade: 8.1 },
-  { subjectId: 'port', name: 'Português', color: '#7C3AED', progress: 68, grade: 7.6 },
-  { subjectId: 'hist', name: 'História', color: '#DC2626', progress: 55, grade: 6.0 },
-  { subjectId: 'bio', name: 'Biologia', color: '#059669', progress: 85, grade: 9.2 },
-  { subjectId: 'fis', name: 'Física', color: '#D97706', progress: 48, grade: 4.9 },
-]
 
 export function StudentDashboard() {
   const navigate = useNavigate()
   const t = useTranslation()
-  const pending = mockActivities.filter(a => a.status === 'pending' || a.status === 'upcoming' || a.status === 'late')
+  const user = useAuthStore(s => s.user)
+  const { data: classes = [] } = useClasses()
+  const { data: activities = [] } = useActivities()
+
+  const progressBySubject = classes.map(c => ({
+    subjectId: c.subjectId,
+    name: c.subjectName,
+    color: c.color,
+    progress: c.deliveryRate,
+    grade: c.average ?? 0,
+  }))
+
+  const generalAverage = progressBySubject.filter(s => s.grade > 0).length
+    ? progressBySubject.filter(s => s.grade > 0).reduce((a, s) => a + s.grade, 0) /
+      progressBySubject.filter(s => s.grade > 0).length
+    : 0
+  const pending = activities.filter(a => a.status === 'pending' || a.status === 'upcoming' || a.status === 'late')
   const sorted = [...pending].sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
 
   const recentGrades = [
@@ -60,7 +70,7 @@ export function StudentDashboard() {
         {/* Welcome bar */}
         <div className="card p-4 bg-gradient-to-r from-[#1E3A8A] to-[#1e40af] text-white flex items-center justify-between">
           <div>
-            <h2 className="font-display font-semibold text-lg">{t('student.dashboard.goodMorning', { name: 'Lucas' })}</h2>
+            <h2 className="font-display font-semibold text-lg">{t('student.dashboard.goodMorning', { name: user?.name.split(' ')[0] ?? '' })}</h2>
             <p className="text-blue-200 text-sm mt-0.5">
               {t('student.dashboard.youHave')} <span className="font-semibold text-white">{sorted.filter(a => getDaysUntil(a.dueDate) <= 3).length} atividades</span> {t('student.dashboard.activitiesIn3Days')}
             </p>
@@ -68,7 +78,7 @@ export function StudentDashboard() {
           <div className="flex items-center gap-3">
             <div className="text-right">
               <p className="text-xs text-blue-200">{t('student.dashboard.generalAverage')}</p>
-              <p className="text-2xl font-bold">7,2</p>
+              <p className="text-2xl font-bold">{generalAverage > 0 ? generalAverage.toFixed(1).replace('.', ',') : '—'}</p>
             </div>
             <TrendingUp size={32} className="text-blue-300" />
           </div>

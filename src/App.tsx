@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from './store/auth'
 import { Layout } from './components/Layout'
@@ -45,6 +46,12 @@ function DefaultRedirect() {
 }
 
 export default function App() {
+  const restoreSession = useAuthStore(s => s.restoreSession)
+
+  useEffect(() => {
+    restoreSession()
+  }, [restoreSession])
+
   return (
     <>
       <Routes>

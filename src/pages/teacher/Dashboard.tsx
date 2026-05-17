@@ -5,7 +5,8 @@ import {
 } from 'lucide-react'
 import { Header } from '../../components/Header'
 import { ActivityDrawer } from '../../components/ActivityDrawer'
-import { mockActivities, mockClasses, mockSubmissions } from '../../data/mock'
+import { mockActivities, mockSubmissions } from '../../data/mock'
+import { useClasses } from '../../hooks/useClasses'
 import { useState } from 'react'
 import { toast } from '../../components/Toast'
 import clsx from 'clsx'
@@ -16,8 +17,12 @@ export function TeacherDashboard() {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const t = useTranslation()
 
+  const { data: activeClasses = [] } = useClasses()
   const corrections = mockSubmissions.filter(s => s.status === 'submitted')
-  const activeClasses = mockClasses
+  const totalStudents = activeClasses.reduce((a, c) => a + c.studentsCount, 0)
+  const avgDeliveryRate = activeClasses.length
+    ? Math.round(activeClasses.reduce((a, c) => a + c.deliveryRate, 0) / activeClasses.length)
+    : 0
 
   const pendingActivities = mockActivities.filter(a => a.submissionsCount !== undefined && a.totalStudents !== undefined)
     .map(a => ({
@@ -64,14 +69,14 @@ export function TeacherDashboard() {
             {
               label: t('teacher.dashboard.activeClasses'),
               value: activeClasses.length,
-              sub: t('teacher.dashboard.studentsTotal', { n: activeClasses.reduce((a, c) => a + c.studentsCount, 0) }),
+              sub: t('teacher.dashboard.studentsTotal', { n: totalStudents }),
               icon: Users,
               color: 'text-[#1E3A8A]',
               bg: 'bg-blue-50',
             },
             {
               label: t('teacher.dashboard.deliveryRate'),
-              value: '78%',
+              value: `${avgDeliveryRate}%`,
               sub: t('teacher.dashboard.vsLastPeriod'),
               icon: TrendingUp,
               color: 'text-emerald-500',

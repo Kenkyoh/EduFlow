@@ -5,6 +5,7 @@ import {
 import { TrendingUp, TrendingDown, Users, AlertTriangle, CheckCircle, BarChart3 } from 'lucide-react'
 import { Header } from '../../components/Header'
 import { mockCoordinatorData } from '../../data/mock'
+import { useClasses } from '../../hooks/useClasses'
 import { useSettingsStore } from '../../store/settings'
 import { formatGrade, SCALE_INFO } from '../../utils/gradeFormat'
 import clsx from 'clsx'
@@ -46,9 +47,29 @@ function KpiCard({ label, value, unit, change, icon: Icon, iconColor, iconBg }: 
 }
 
 export function CoordinatorDashboard() {
-  const { kpis, gradeDistribution, monthlyEvolution, atRisk } = mockCoordinatorData
+  const { gradeDistribution, monthlyEvolution, atRisk } = mockCoordinatorData
   const { gradeScale } = useSettingsStore()
   const t = useTranslation()
+  const { data: classes = [] } = useClasses()
+
+  const totalStudents   = classes.reduce((a, c) => a + c.studentsCount, 0)
+  const totalAtRisk     = classes.reduce((a, c) => a + (c.atRisk ?? 0), 0)
+  const avgDelivery     = classes.length
+    ? Math.round(classes.reduce((a, c) => a + c.deliveryRate, 0) / classes.length)
+    : 0
+  const classesWithAvg  = classes.filter(c => c.average !== null)
+  const generalAverage  = classesWithAvg.length
+    ? classesWithAvg.reduce((a, c) => a + (c.average ?? 0), 0) / classesWithAvg.length
+    : 0
+  const uniqueTeachers  = new Set(classes.map(c => c.teacherId)).size
+
+  const kpis = {
+    generalAverage,
+    deliveryRate: avgDelivery,
+    atRiskStudents: totalAtRisk,
+    attendance: mockCoordinatorData.kpis.attendance,
+    changes: mockCoordinatorData.kpis.changes,
+  }
 
   return (
     <>
@@ -211,10 +232,10 @@ export function CoordinatorDashboard() {
         {/* Quick stats row */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { label: t('coordinator.dashboard.totalClasses'), value: '12', icon: '📚' },
-            { label: t('coordinator.dashboard.activeTeachers'), value: '8', icon: '👩‍🏫' },
-            { label: t('coordinator.dashboard.totalStudents'), value: '284', icon: '🎓' },
-            { label: t('coordinator.dashboard.activitiesThisMonth'), value: '47', icon: '📋' },
+            { label: t('coordinator.dashboard.totalClasses'), value: String(classes.length), icon: '📚' },
+            { label: t('coordinator.dashboard.activeTeachers'), value: String(uniqueTeachers), icon: '👩‍🏫' },
+            { label: t('coordinator.dashboard.totalStudents'), value: String(totalStudents), icon: '🎓' },
+            { label: t('coordinator.dashboard.activitiesThisMonth'), value: '—', icon: '📋' },
           ].map(stat => (
             <div key={stat.label} className="card p-4 flex items-center gap-3">
               <span className="text-2xl">{stat.icon}</span>

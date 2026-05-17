@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { GraduationCap, Eye, EyeOff, Chrome } from 'lucide-react'
 import { useAuthStore } from '../store/auth'
@@ -7,15 +7,7 @@ import { useTranslation } from '../i18n'
 import type { UserRole } from '../types'
 import clsx from 'clsx'
 
-const EMAIL_ROLE: Record<string, UserRole> = {
-  'lucas@escola.vekta.app':    'student',
-  'ana.lima@escola.vekta.app': 'teacher',
-  'carlos@escola.vekta.app':   'coordinator',
-  'fernanda.mendes@gmail.com':   'guardian',
-}
-
-const ADMIN_EMAIL    = 'admin@vekta.app'
-const ADMIN_PASSWORD = 'Vekta@2025#Admin'
+const DEMO_PASSWORD = 'Demo@2025#'
 
 const LANG_OPTIONS: { code: 'pt' | 'en' | 'es'; flag: string; label: string }[] = [
   { code: 'pt', flag: '🇧🇷', label: 'PT' },
@@ -25,51 +17,52 @@ const LANG_OPTIONS: { code: 'pt' | 'en' | 'es'; flag: string; label: string }[] 
 
 export function Login() {
   const navigate = useNavigate()
-  const login = useAuthStore(s => s.login)
+  const { user, loginWithCredentials } = useAuthStore()
   const { language, setLanguage } = useLanguageStore()
   const t = useTranslation()
 
-  const [email, setEmail] = useState('lucas@escola.vekta.app')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [selectedRole, setSelectedRole] = useState<UserRole>('student')
+
+  // Redireciona se já autenticado
+  useEffect(() => {
+    if (!user) return
+    if (user.role === 'student')       navigate('/student',      { replace: true })
+    else if (user.role === 'teacher')  navigate('/teacher',      { replace: true })
+    else if (user.role === 'guardian') navigate('/guardian',     { replace: true })
+    else if (user.role === 'admin')    navigate('/admin',        { replace: true })
+    else                               navigate('/coordinator',  { replace: true })
+  }, [user, navigate])
 
   const DEMO_PROFILES: { role: UserRole; label: string; email: string; color: string; emoji: string }[] = [
-    { role: 'student',     label: t('roles.student'),     email: 'lucas@escola.vekta.app',    color: 'bg-blue-50 border-blue-200 text-blue-700',        emoji: '🎓' },
-    { role: 'teacher',     label: t('roles.teacher'),     email: 'ana.lima@escola.vekta.app', color: 'bg-purple-50 border-purple-200 text-purple-700',  emoji: '👩‍🏫' },
+    { role: 'student',     label: t('roles.student'),     email: 'lucas@escola.vekta.app',    color: 'bg-blue-50 border-blue-200 text-blue-700',         emoji: '🎓' },
+    { role: 'teacher',     label: t('roles.teacher'),     email: 'ana.lima@escola.vekta.app', color: 'bg-purple-50 border-purple-200 text-purple-700',   emoji: '👩‍🏫' },
     { role: 'coordinator', label: t('roles.coordinator'), email: 'carlos@escola.vekta.app',   color: 'bg-emerald-50 border-emerald-200 text-emerald-700', emoji: '📊' },
-    { role: 'guardian',    label: t('roles.guardian'),    email: 'fernanda.mendes@gmail.com',   color: 'bg-rose-50 border-rose-200 text-rose-700',        emoji: '👪' },
+    { role: 'guardian',    label: t('roles.guardian'),    email: 'fernanda.mendes@gmail.com', color: 'bg-rose-50 border-rose-200 text-rose-700',          emoji: '👪' },
   ]
 
-  const handleLogin = async (overrideRole?: UserRole, quickEmail?: string) => {
+  const handleLogin = async (demoEmail?: string, demoPassword?: string) => {
     setError('')
-    const loginEmail = (quickEmail ?? email).trim().toLowerCase()
+    const loginEmail    = (demoEmail    ?? email).trim().toLowerCase()
+    const loginPassword = demoPassword  ?? password
 
-    if (loginEmail === ADMIN_EMAIL) {
-      if (password !== ADMIN_PASSWORD) {
-        setError(t('login.wrongCredentials'))
-        return
-      }
-      setLoading(true)
-      await new Promise(r => setTimeout(r, 800))
-      login(loginEmail, 'admin')
-      setLoading(false)
-      navigate('/admin')
+    if (!loginEmail || !loginPassword) {
+      setError(t('login.wrongCredentials'))
       return
     }
 
-    const role = overrideRole ?? EMAIL_ROLE[loginEmail] ?? selectedRole
     setLoading(true)
-    await new Promise(r => setTimeout(r, 800))
-    login(loginEmail, role)
-    setLoading(false)
-
-    if (role === 'student')       navigate('/student')
-    else if (role === 'teacher')  navigate('/teacher')
-    else if (role === 'guardian') navigate('/guardian')
-    else navigate('/coordinator')
+    try {
+      await loginWithCredentials(loginEmail, loginPassword)
+      // navegação fica no useEffect acima
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('login.wrongCredentials'))
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -125,14 +118,10 @@ export function Login() {
                 <button
                   key={p.role}
                   type="button"
-                  onClick={() => {
-                    setSelectedRole(p.role)
-                    setEmail(p.email)
-                    handleLogin(p.role, p.email)
-                    setError('')
-                  }}
+                  disabled={loading}
+                  onClick={() => handleLogin(p.email, DEMO_PASSWORD)}
                   className={clsx(
-                    'flex items-center gap-2 py-2 px-3 rounded-lg border text-xs font-medium transition-all hover:scale-[1.02]',
+                    'flex items-center gap-2 py-2 px-3 rounded-lg border text-xs font-medium transition-all hover:scale-[1.02] disabled:opacity-60',
                     p.color
                   )}
                 >
@@ -159,6 +148,7 @@ export function Login() {
                 placeholder={t('login.emailPlaceholder')}
                 value={email}
                 onChange={e => setEmail(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleLogin()}
               />
             </div>
 
@@ -171,6 +161,7 @@ export function Login() {
                   placeholder={t('login.passwordPlaceholder')}
                   value={password}
                   onChange={e => setPassword(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleLogin()}
                 />
                 <button
                   type="button"

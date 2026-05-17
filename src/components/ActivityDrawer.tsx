@@ -1,9 +1,11 @@
 import { X, AlertTriangle, Calendar, Clock, Paperclip, ChevronDown } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import clsx from 'clsx'
-import { mockSubjects, mockClasses } from '../data/mock'
 import { toast } from './Toast'
 import { useTranslation } from '../i18n'
+import { useSubjects } from '../hooks/useSubjects'
+import { useClasses } from '../hooks/useClasses'
+import { useCreateActivity } from '../hooks/useActivities'
 
 const ACTIVITY_TYPE_VALUES = ['prova', 'trabalho', 'apresentacao', 'leitura', 'aula_ao_vivo', 'outro']
 
@@ -33,11 +35,14 @@ export interface ActivityFormData {
 export function ActivityDrawer({ isOpen, onClose, initialDate, onPublish }: ActivityDrawerProps) {
   const t = useTranslation()
   const today = new Date().toISOString().split('T')[0]
+  const { data: subjects = [] } = useSubjects()
+  const { data: classes = [] } = useClasses()
+  const createActivity = useCreateActivity()
 
   const [form, setForm] = useState<ActivityFormData>({
     title: '',
-    subjectId: 'mat',
-    classIds: ['turma-a'],
+    subjectId: '',
+    classIds: [],
     type: 'trabalho',
     startDate: initialDate ?? today,
     dueDate: initialDate ?? today,
@@ -50,7 +55,6 @@ export function ActivityDrawer({ isOpen, onClose, initialDate, onPublish }: Acti
     visibility: 'now',
   })
   const [conflict, setConflict] = useState(false)
-  const [publishing, setPublishing] = useState(false)
 
   useEffect(() => {
     if (initialDate) {
@@ -66,7 +70,7 @@ export function ActivityDrawer({ isOpen, onClose, initialDate, onPublish }: Acti
     }
   }, [form.type, form.dueDate])
 
-  const selectedSubject = mockSubjects.find(s => s.id === form.subjectId)
+  const selectedSubject = subjects.find(s => s.id === form.subjectId)
 
   const impactPreview = (() => {
     const currentWeights = 70
@@ -80,12 +84,18 @@ export function ActivityDrawer({ isOpen, onClose, initialDate, onPublish }: Acti
       toast(t('activityDrawer.titleRequired'), 'error')
       return
     }
-    setPublishing(true)
-    await new Promise(r => setTimeout(r, 1000))
-    setPublishing(false)
-    onPublish?.(form)
-    toast(t('activityDrawer.publishedSuccess', { title: form.title }))
-    onClose()
+    if (!form.classIds.length) {
+      toast(t('activityDrawer.classRequired') ?? 'Selecione ao menos uma turma', 'error')
+      return
+    }
+    try {
+      await createActivity.mutateAsync(form)
+      onPublish?.(form)
+      toast(t('activityDrawer.publishedSuccess', { title: form.title }))
+      onClose()
+    } catch (err) {
+      toast((err as Error).message ?? 'Erro ao publicar atividade', 'error')
+    }
   }
 
   if (!isOpen) return null
@@ -158,8 +168,10 @@ export function ActivityDrawer({ isOpen, onClose, initialDate, onPublish }: Acti
                   className="input appearance-none pr-8"
                   value={form.subjectId}
                   onChange={e => setForm(f => ({ ...f, subjectId: e.target.value }))}
+                  title={t('activityDrawer.subjectLabel')}
                 >
-                  {mockSubjects.map(s => (
+                  <option value="">— Selecione —</option>
+                  {subjects.map(s => (
                     <option key={s.id} value={s.id}>{s.name}</option>
                   ))}
                 </select>
@@ -178,12 +190,16 @@ export function ActivityDrawer({ isOpen, onClose, initialDate, onPublish }: Acti
             <div>
               <label className="block text-xs font-medium text-[#64748B] mb-1.5">{t('activityDrawer.classLabel')}</label>
               <div className="space-y-1.5 max-h-24 overflow-y-auto">
-                {mockClasses.map(c => (
+                {classes.length === 0 && (
+                  <p className="text-xs text-[#94A3B8]">Carregando turmas...</p>
+                )}
+                {classes.map(c => (
                   <label key={c.id} className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"
                       className="w-3.5 h-3.5 rounded border-[#E2E8F0] text-[#1E3A8A] accent-[#1E3A8A]"
                       checked={form.classIds.includes(c.id)}
+                      aria-label={c.name}
                       onChange={e => {
                         setForm(f => ({
                           ...f,
@@ -370,10 +386,10 @@ export function ActivityDrawer({ isOpen, onClose, initialDate, onPublish }: Acti
           <button
             type="button"
             onClick={handlePublish}
-            disabled={publishing}
+            disabled={createActivity.isPending}
             className="btn-primary flex-1"
           >
-            {publishing ? (
+            {createActivity.isPending ? (
               <span className="flex items-center gap-2">
                 <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 {t('activityDrawer.publishing')}
