@@ -64,6 +64,7 @@ function CreateClassModal({
   const [name, setName] = useState('')
   const [subjectId, setSubjectId] = useState('')
   const [newSubjectName, setNewSubjectName] = useState('')
+  const [newSubjectColor, setNewSubjectColor] = useState(SUBJECT_COLORS[0])
   const [teacherEmail, setTeacherEmail] = useState('')
   const [gradingType, setGradingType] = useState<'numeric' | 'mencao'>('numeric')
   const [period, setPeriod] = useState(PERIODS[0])
@@ -85,6 +86,7 @@ function CreateClassModal({
     setName('')
     setSubjectId('')
     setNewSubjectName('')
+    setNewSubjectColor(SUBJECT_COLORS[0])
     setTeacherEmail('')
     setGradingType('numeric')
     setPeriod(PERIODS[0])
@@ -122,10 +124,9 @@ function CreateClassModal({
       // 2. Criar nova disciplina se necessário
       let finalSubjectId = subjectId
       if (!finalSubjectId) {
-        const pick = SUBJECT_COLORS[Math.floor(Math.random() * SUBJECT_COLORS.length)]
         const { data: newSub, error: subErr } = await supabase
           .from('subjects')
-          .insert({ school_id: schoolId, name: newSubjectName.trim(), color: pick.color, color_light: pick.light })
+          .insert({ school_id: schoolId, name: newSubjectName.trim(), color: newSubjectColor.color, color_light: newSubjectColor.light })
           .select('id')
           .single()
         if (subErr || !newSub) {
@@ -213,18 +214,58 @@ function CreateClassModal({
                 value={subjectId}
                 onChange={e => setSubjectId(e.target.value)}
               >
-                <option value="">— Nova disciplina —</option>
+                <option value="">+ Nova disciplina personalizada</option>
                 {subjects.map(s => (
                   <option key={s.id} value={s.id}>{s.name}</option>
                 ))}
               </select>
+
+              {/* Custom subject form */}
               {!subjectId && (
-                <input
-                  className="input mt-2"
-                  placeholder="Nome da nova disciplina"
-                  value={newSubjectName}
-                  onChange={e => setNewSubjectName(e.target.value)}
-                />
+                <div className="mt-3 p-3 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] space-y-3">
+                  <div>
+                    <label className="block text-xs font-medium text-[#64748B] mb-1.5">Nome da disciplina</label>
+                    <input
+                      className="input"
+                      placeholder="Ex.: Filosofia, Artes, Física..."
+                      value={newSubjectName}
+                      onChange={e => setNewSubjectName(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-[#64748B] mb-2">Cor da disciplina</label>
+                    <div className="flex flex-wrap gap-2">
+                      {SUBJECT_COLORS.map(c => (
+                        <button
+                          key={c.color}
+                          type="button"
+                          title={c.color}
+                          onClick={() => setNewSubjectColor(c)}
+                          className="w-8 h-8 rounded-lg transition-transform hover:scale-110 focus-visible:outline-none"
+                          style={{ backgroundColor: c.color, outline: newSubjectColor.color === c.color ? `3px solid ${c.color}` : undefined, outlineOffset: newSubjectColor.color === c.color ? '2px' : undefined }}
+                        >
+                          {newSubjectColor.color === c.color && (
+                            <span className="flex items-center justify-center w-full h-full">
+                              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                <path d="M2 6l3 3 5-5" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                            </span>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="mt-2 flex items-center gap-2">
+                      <div className="w-5 h-5 rounded flex-shrink-0" style={{ backgroundColor: newSubjectColor.color }} />
+                      <span className="text-xs text-[#64748B]">Prévia: </span>
+                      <span
+                        className="text-xs font-medium px-2 py-0.5 rounded-full"
+                        style={{ backgroundColor: newSubjectColor.light, color: newSubjectColor.color }}
+                      >
+                        {newSubjectName || 'Nova Disciplina'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
 
