@@ -75,7 +75,7 @@ function CreateClassModal({
   const [teacherEmail, setTeacherEmail] = useState('')
   const { gradeScale } = useSettingsStore()
   const grading_type: 'numeric' | 'mencao' = gradeScale === 'mencao' ? 'mencao' : 'numeric'
-  const [year, setYear] = useState(new Date().getFullYear().toString())
+  const currentYear = new Date().getFullYear().toString()
   const [saving, setSaving] = useState(false)
   const [emailError, setEmailError] = useState('')
 
@@ -95,7 +95,6 @@ function CreateClassModal({
     setNewSubjectName('')
     setNewSubjectColor(SUBJECT_COLORS[0])
     setTeacherEmail('')
-    setYear(new Date().getFullYear().toString())
     setEmailError('')
   }
 
@@ -150,7 +149,7 @@ function CreateClassModal({
           teacher_id: teacher.id,
           name: name.trim(),
           grading_type,
-          year,
+          year: currentYear,
           period: currentPeriod(),
         })
 
@@ -309,25 +308,22 @@ function CreateClassModal({
               <p className="text-[11px] text-[#94A3B8] mt-1">Definido na aba Aprovação das configurações da escola</p>
             </div>
 
-            {/* Ano + período automático */}
+            {/* Ano letivo e período — automáticos */}
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-medium text-[#64748B] mb-1.5">Ano letivo</label>
-                <input
-                  className="input"
-                  value={year}
-                  onChange={e => setYear(e.target.value)}
-                  placeholder="2025"
-                />
+                <div className="input flex items-center text-[#64748B] bg-slate-50 cursor-default select-none">
+                  {currentYear}
+                </div>
               </div>
               <div>
                 <label className="block text-xs font-medium text-[#64748B] mb-1.5">Período</label>
                 <div className="input flex items-center text-[#64748B] bg-slate-50 cursor-default select-none">
                   {currentPeriod()}
                 </div>
-                <p className="text-[11px] text-[#94A3B8] mt-1">Definido pela data atual</p>
               </div>
             </div>
+            <p className="text-[11px] text-[#94A3B8] -mt-2">Ano e período definidos automaticamente pela data atual</p>
           </div>
 
           {/* Footer */}
