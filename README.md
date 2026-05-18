@@ -1,14 +1,12 @@
 # Vekta
 
-Plataforma educacional unificada construída com React + TypeScript. Reúne alunos, professores, coordenadores, responsáveis e administradores em um único sistema — cada perfil com sua própria visão e funcionalidades.
-
-> Projeto de portfólio / protótipo front-end com dados mockados.
+Plataforma educacional unificada construída com React + TypeScript + Node.js + Supabase. Reúne alunos, professores, coordenadores, responsáveis e administradores em um único sistema — cada perfil com sua própria visão e funcionalidades.
 
 ---
 
 ## Demonstração rápida
 
-Acesse os perfis de demonstração com um clique na tela de login (sem senha):
+Acesse os perfis de demonstração com um clique na tela de login (senha: `Demo@2025#`):
 
 | Perfil | E-mail | Acesso a |
 |---|---|---|
@@ -24,7 +22,7 @@ O administrador **não aparece no acesso rápido** e requer credenciais específ
 | Campo | Valor |
 |---|---|
 | E-mail | `admin@vekta.app` |
-| Senha | `Vekta@2025#Admin` |
+| Senha | `Demo@2025#` |
 
 ---
 
@@ -39,6 +37,7 @@ O administrador **não aparece no acesso rápido** e requer credenciais específ
 
 ### Professor
 - Gerenciamento de turmas
+- Criação e publicação de atividades com múltiplas turmas
 - Lançamento de notas (sistema numérico e por menção/objetivos)
 - Correção de entregas com feedback
 - Publicação de avisos e materiais no mural
@@ -61,15 +60,19 @@ O administrador **não aparece no acesso rápido** e requer credenciais específ
 - Dashboard com KPIs consolidados de toda a plataforma
 
 ### Geral
+- Autenticação real via Supabase Auth com JWT
 - Sistema de notificações em tempo real (painel lateral)
 - Mensagens diretas entre usuários
 - Personalização de perfil: foto, cor do avatar, senha
 - Barra lateral colapsável com navegação por papel
+- Internacionalização: Português, Inglês e Espanhol
 - Design responsivo
 
 ---
 
 ## Stack
+
+### Frontend
 
 | Categoria | Tecnologia |
 |---|---|
@@ -78,23 +81,80 @@ O administrador **não aparece no acesso rápido** e requer credenciais específ
 | Estilização | Tailwind CSS 3 |
 | Roteamento | React Router v6 |
 | Estado global | Zustand |
+| Data fetching | TanStack Query (React Query) |
 | Gráficos | Recharts |
 | Ícones | Lucide React |
 | Utilitários | clsx, date-fns |
+
+### Backend
+
+| Categoria | Tecnologia |
+|---|---|
+| Runtime | Node.js + Express |
+| Linguagem | TypeScript (tsx) |
+| Banco de dados | PostgreSQL via Supabase |
+| Autenticação | Supabase Auth + JWT |
+| ORM | Supabase JS Client |
 
 ---
 
 ## Rodando localmente
 
+### Pré-requisitos
+
+- Node.js 18+
+- Conta no [Supabase](https://supabase.com) com projeto criado
+
+### 1. Clone o repositório
+
 ```bash
-# 1. Clone o repositório
 git clone https://github.com/Kenkyoh/Vekta.git
 cd Vekta
+```
 
-# 2. Instale as dependências
+### 2. Configure o frontend
+
+```bash
+# Instale as dependências
 npm install
 
-# 3. Inicie o servidor de desenvolvimento
+# Crie o arquivo de variáveis de ambiente
+cp .env.example .env
+# Edite .env e defina VITE_API_URL=http://localhost:3001
+```
+
+### 3. Configure o backend
+
+```bash
+cd backend
+npm install
+
+# Crie o arquivo de variáveis de ambiente
+cp .env.example .env
+# Edite .env com sua URL e service_role key do Supabase
+```
+
+### 4. Configure o banco de dados
+
+Execute os arquivos SQL na ordem no **SQL Editor** do Supabase:
+
+```
+backend/supabase/01_schema.sql          # Tabelas e triggers
+backend/supabase/02_demo_seed.sql       # Usuários de demonstração
+backend/supabase/03_classes_subjects.sql # Turmas e disciplinas
+backend/supabase/04_classes_seed.sql    # Dados de exemplo
+backend/supabase/05_activities.sql      # Atividades
+```
+
+### 5. Inicie os servidores
+
+```bash
+# Terminal 1 — backend (porta 3001)
+cd backend
+npm run dev
+
+# Terminal 2 — frontend (porta 5173)
+cd ..
 npm run dev
 ```
 
@@ -103,7 +163,7 @@ Acesse **http://localhost:5173** no navegador.
 ### Outros comandos
 
 ```bash
-npm run build    # Build de produção
+npm run build    # Build de produção (frontend)
 npm run preview  # Prévia do build
 ```
 
@@ -112,36 +172,28 @@ npm run preview  # Prévia do build
 ## Estrutura do projeto
 
 ```
-src/
-├── components/        # Componentes compartilhados
-│   ├── Header.tsx
-│   ├── Sidebar.tsx
-│   ├── Layout.tsx
-│   ├── UserAvatar.tsx
-│   ├── Toast.tsx
-│   └── NotificationsPanel.tsx
-├── pages/
-│   ├── student/       # Páginas do aluno
-│   ├── teacher/       # Páginas do professor
-│   ├── coordinator/   # Páginas do coordenador
-│   ├── guardian/      # Páginas do responsável
-│   ├── admin/         # Páginas do administrador
-│   ├── Login.tsx
-│   ├── Profile.tsx
-│   ├── Messages.tsx
-│   ├── Calendar.tsx
-│   └── Settings.tsx
-├── store/             # Estado global (Zustand)
-│   ├── auth.ts
-│   ├── grades.ts
-│   └── notifications.ts
-├── data/
-│   └── mock.ts        # Dados simulados
-├── types/
-│   └── index.ts       # Tipos TypeScript
-└── utils/
-    ├── roleLabels.ts
-    └── gradeFormat.ts
+├── backend/
+│   ├── src/
+│   │   ├── config/        # Cliente Supabase (admin + auth)
+│   │   ├── middleware/    # Autenticação JWT
+│   │   ├── routes/        # auth, subjects, classes, activities
+│   │   ├── types/         # Tipos TypeScript
+│   │   └── server.ts      # Entry point Express
+│   └── supabase/          # Migrations SQL (01–05)
+│
+└── src/
+    ├── components/        # Componentes compartilhados
+    ├── hooks/             # React Query hooks (useClasses, useActivities…)
+    ├── lib/               # Cliente HTTP (api.ts)
+    ├── pages/
+    │   ├── student/       # Páginas do aluno
+    │   ├── teacher/       # Páginas do professor
+    │   ├── coordinator/   # Páginas do coordenador
+    │   ├── guardian/      # Páginas do responsável
+    │   └── admin/         # Páginas do administrador
+    ├── store/             # Estado global Zustand (auth, grades…)
+    ├── types/             # Tipos TypeScript
+    └── utils/             # Formatação de notas, labels de papéis
 ```
 
 ---
