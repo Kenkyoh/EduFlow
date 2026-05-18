@@ -29,6 +29,7 @@ import { AdminSettings } from './pages/admin/AdminSettings'
 import { GuardianDashboard } from './pages/guardian/Dashboard'
 import { GuardianStudentDetail } from './pages/guardian/StudentDetail'
 import { Profile } from './pages/Profile'
+import { NotFound } from './pages/NotFound'
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const user = useAuthStore(s => s.user)
@@ -97,9 +98,13 @@ export default function App() {
           <Route path="calendar" element={<CalendarPage />} />
           <Route path="messages" element={<Messages />} />
           <Route path="settings" element={<Settings />} />
+
+          {/* 404 dentro do layout autenticado */}
+          <Route path="*" element={<NotFound />} />
         </Route>
 
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        {/* 404 fora do layout (rotas não autenticadas desconhecidas) */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
       <ToastContainer />
     </>
