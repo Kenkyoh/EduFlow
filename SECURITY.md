@@ -15,7 +15,7 @@ Only the latest release on the `main` branch receives security fixes.
 
 Report security issues by e-mail to:
 
-📧 **suporte@vekta.app**
+📧 **luizfelipescaramuzza@gmail.com**
 
 Include in your report:
 
