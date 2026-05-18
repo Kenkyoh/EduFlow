@@ -4,6 +4,7 @@ import { Header } from '../../components/Header'
 import { useClasses } from '../../hooks/useClasses'
 import { useSearchStore } from '../../store/search'
 import { useTranslation } from '../../i18n'
+import { SkClassGrid } from '../../components/Skeleton'
 
 export function TeacherClassList() {
   const navigate = useNavigate()
@@ -21,11 +22,7 @@ export function TeacherClassList() {
     <>
       <Header title={t('teacher.classList.title')} />
 
-      {isLoading && (
-        <div className="flex items-center justify-center py-16">
-          <span className="w-6 h-6 border-2 border-[#1E3A8A]/20 border-t-[#1E3A8A] rounded-full animate-spin" />
-        </div>
-      )}
+      {isLoading && <SkClassGrid count={4} />}
 
       {isError && (
         <p className="text-center py-12 text-red-500 text-sm">Erro ao carregar turmas.</p>

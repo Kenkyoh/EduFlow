@@ -3,6 +3,7 @@ import { Header } from '../../components/Header'
 import { useClasses } from '../../hooks/useClasses'
 import { useSearchStore } from '../../store/search'
 import { useTranslation } from '../../i18n'
+import { SkClassGrid } from '../../components/Skeleton'
 import clsx from 'clsx'
 
 export function StudentClassList() {
@@ -22,11 +23,7 @@ export function StudentClassList() {
     <>
       <Header title={t('student.classList.title')} />
 
-      {isLoading && (
-        <div className="flex items-center justify-center py-16">
-          <span className="w-6 h-6 border-2 border-[#1E3A8A]/20 border-t-[#1E3A8A] rounded-full animate-spin" />
-        </div>
-      )}
+      {isLoading && <SkClassGrid count={6} />}
 
       {isError && (
         <p className="text-center py-12 text-red-500 text-sm">Erro ao carregar turmas.</p>

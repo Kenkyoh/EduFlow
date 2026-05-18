@@ -4,6 +4,7 @@ import { useClasses } from '../../hooks/useClasses'
 import { useSearchStore } from '../../store/search'
 import clsx from 'clsx'
 import { useTranslation } from '../../i18n'
+import { SkClassGrid } from '../../components/Skeleton'
 
 export function CoordinatorClassList() {
   const query = useSearchStore(s => s.query)
@@ -57,11 +58,7 @@ export function CoordinatorClassList() {
         </div>
       </div>
 
-      {isLoading && (
-        <div className="flex items-center justify-center py-16">
-          <span className="w-6 h-6 border-2 border-[#1E3A8A]/20 border-t-[#1E3A8A] rounded-full animate-spin" />
-        </div>
-      )}
+      {isLoading && <SkClassGrid count={8} cols={4} />}
 
       {isError && (
         <p className="text-center py-12 text-red-500 text-sm">Erro ao carregar turmas.</p>

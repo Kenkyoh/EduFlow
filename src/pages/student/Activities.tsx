@@ -6,6 +6,7 @@ import { getDaysUntil } from '../../data/mock'
 import { useSearchStore } from '../../store/search'
 import { useTranslation } from '../../i18n'
 import { useActivities } from '../../hooks/useActivities'
+import { SkActivityRow } from '../../components/Skeleton'
 import clsx from 'clsx'
 
 export function StudentActivities() {
@@ -91,8 +92,8 @@ export function StudentActivities() {
 
         {/* Activities list */}
         {isLoading ? (
-          <div className="flex items-center justify-center py-16">
-            <span className="w-6 h-6 border-2 border-[#1E3A8A]/20 border-t-[#1E3A8A] rounded-full animate-spin" />
+          <div className="space-y-3">
+            {[0, 1, 2, 3].map(i => <SkActivityRow key={i} />)}
           </div>
         ) : sorted.length === 0 ? (
           <div className="card p-12 flex flex-col items-center gap-3 text-[#94A3B8]">
