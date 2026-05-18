@@ -24,6 +24,7 @@ Alunos, professores, coordenadores, responsáveis e administradores — tudo em 
 | 🔐 **Autenticação real** | Login com Supabase Auth + JWT, sessão persistente, Row Level Security no banco — não é demo, é produção |
 | 🏫 **Multi-tenant** | Suporte a múltiplas escolas desde a arquitetura — cada escola isolada, com seu próprio conjunto de turmas, usuários e dados |
 | ⚡ **Stack moderna e escalável** | React 18 + TypeScript + Node.js + PostgreSQL. Código limpo, sem dependências pesadas, fácil de customizar e estender |
+| ✨ **UX de nível produção** | Skeleton loaders, empty states com SVG, tema claro/escuro, página 404 personalizada e acesso rápido com 1 clique |
 
 ---
 
@@ -51,21 +52,15 @@ Alunos, professores, coordenadores, responsáveis e administradores — tudo em 
 
 ## Demonstração rápida
 
-Acesse os perfis de demonstração com um clique na tela de login (senha: `Demo@2025#`):
+Todos os 5 perfis estão disponíveis como **botões de 1 clique** na tela de login — cada botão já exibe o e-mail da conta:
 
-| Perfil | E-mail | O que pode ver |
-|---|---|---|
-| 🎓 Aluno | `lucas@escola.vekta.app` | Turmas, atividades, boletim, calendário |
-| 👩‍🏫 Professor | `ana.lima@escola.vekta.app` | Turmas, lançamento de notas, correção |
-| 📊 Coordenador | `carlos@escola.vekta.app` | Analytics, visão geral das turmas |
-| 👨‍👩‍👧 Responsável | `fernanda.mendes@gmail.com` | Desempenho e atividades dos filhos |
-
-**Acesso administrativo** (formulário de login):
-
-| Campo | Valor |
-|---|---|
-| E-mail | `admin@vekta.app` |
-| Senha | `Vekta@2025#Admin` |
+| Perfil | E-mail | Senha | O que pode ver |
+|---|---|---|---|
+| 🎓 Aluno | `lucas@escola.vekta.app` | `Demo@2025#` | Turmas, atividades, boletim, calendário |
+| 👩‍🏫 Professor | `ana.lima@escola.vekta.app` | `Demo@2025#` | Turmas, lançamento de notas, correção |
+| 📊 Coordenador | `carlos@escola.vekta.app` | `Demo@2025#` | Analytics, visão geral das turmas |
+| 👨‍👩‍👧 Responsável | `fernanda.mendes@gmail.com` | `Demo@2025#` | Desempenho e atividades dos filhos |
+| ⚙️ Administrador | `admin@vekta.app` | `Vekta@2025#Admin` | Multi-escola, KPIs da plataforma |
 
 ---
 
@@ -128,7 +123,12 @@ Acesse os perfis de demonstração com um clique na tela de login (senha: `Demo@
 | 💬 | Mensagens diretas entre usuários |
 | 🎨 | Personalização de perfil: foto, cor do avatar, senha |
 | 📱 | Design responsivo (mobile-first) |
-| 🌙 | Barra lateral colapsável com navegação por papel |
+| 📌 | Barra lateral colapsável com navegação por papel |
+| 🌙 | Tema claro/escuro com toggle no header, persistência em `localStorage` e detecção automática da preferência do sistema |
+| 💀 | Skeleton loaders em todos os dashboards e listas durante o carregamento |
+| 📭 | Empty states com ilustrações SVG e botão de ação sugerida em cada página |
+| 🔍 | Página 404 personalizada com redirecionamento inteligente por perfil |
+| ⚡ | Acesso rápido no login: 5 perfis demo com 1 clique, e-mail visível em cada botão |
 
 ---
 
