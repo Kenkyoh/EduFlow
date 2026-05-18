@@ -1,24 +1,264 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Plus, Users, FileText, BookOpen, ClipboardList, BarChart3, Zap } from 'lucide-react'
+import { Plus, Users, FileText, BookOpen, ClipboardList, BarChart3, Zap, X, Loader2, UserPlus, Trash2 } from 'lucide-react'
 import { Header } from '../../components/Header'
 import { ActivityDrawer } from '../../components/ActivityDrawer'
-import { mockClasses, mockActivities, mockStudentGrades, mockAnnouncements, getActivityTypeLabel, getStatusBadge } from '../../data/mock'
+import { supabase } from '../../lib/supabase'
+import { useAuthStore } from '../../store/auth'
+import { mockActivities, mockAnnouncements, getActivityTypeLabel } from '../../data/mock'
 import { toast } from '../../components/Toast'
 import { useTranslation } from '../../i18n'
 import clsx from 'clsx'
 
+// ─── Types ────────────────────────────────────────────────────
+
+interface ClassData {
+  id: string
+  name: string
+  year: string
+  period: string
+  grading_type: 'numeric' | 'mencao'
+  students_count: number
+  delivery_rate: number
+  average: number | null
+  at_risk: number
+  subjects: { id: string; name: string; color: string; color_light: string } | null
+}
+
+interface EnrolledStudent {
+  student_id: string
+  enrolled_at: string
+  profiles: { id: string; name: string; email: string | null } | null
+}
+
 type Tab = 'mural' | 'materiais' | 'atividades' | 'alunos' | 'notas'
+
+// ─── Enroll Student Modal ─────────────────────────────────────
+
+function EnrollStudentModal({
+  open,
+  onClose,
+  classId,
+  schoolId,
+  onEnrolled,
+}: {
+  open: boolean
+  onClose: () => void
+  classId: string
+  schoolId: string
+  onEnrolled: () => void
+}) {
+  const [email, setEmail] = useState('')
+  const [preview, setPreview] = useState<{ id: string; name: string } | null>(null)
+  const [lookupError, setLookupError] = useState('')
+  const [looking, setLooking] = useState(false)
+  const [enrolling, setEnrolling] = useState(false)
+
+  const reset = () => { setEmail(''); setPreview(null); setLookupError(''); setLooking(false); setEnrolling(false) }
+  const handleClose = () => { reset(); onClose() }
+
+  const handleLookup = async () => {
+    if (!email.trim()) return
+    setLooking(true)
+    setLookupError('')
+    setPreview(null)
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id, name, role')
+      .eq('email', email.trim().toLowerCase())
+      .eq('school_id', schoolId)
+      .single()
+
+    setLooking(false)
+    if (error || !data) {
+      setLookupError('Aluno não encontrado. Verifique o e-mail e se pertence a esta escola.')
+      return
+    }
+    if (data.role !== 'student') {
+      setLookupError('O perfil encontrado não é um aluno.')
+      return
+    }
+    setPreview({ id: data.id, name: data.name })
+  }
+
+  const handleEnroll = async () => {
+    if (!preview) return
+    setEnrolling(true)
+
+    const { error } = await supabase
+      .from('class_students')
+      .insert({ class_id: classId, student_id: preview.id })
+
+    if (error) {
+      if (error.code === '23505') {
+        toast('Aluno já está matriculado nesta turma.', 'info')
+      } else {
+        toast('Erro ao matricular aluno.', 'error')
+      }
+      setEnrolling(false)
+      return
+    }
+
+    // Update students_count
+    await supabase.rpc('increment_students_count', { class_id_param: classId }).catch(() => {
+      supabase
+        .from('classes')
+        .select('students_count')
+        .eq('id', classId)
+        .single()
+        .then(({ data }) => {
+          if (data) {
+            supabase.from('classes').update({ students_count: data.students_count + 1 }).eq('id', classId)
+          }
+        })
+    })
+
+    toast(`${preview.name} matriculado(a) com sucesso!`, 'success')
+    onEnrolled()
+    handleClose()
+  }
+
+  if (!open) return null
+
+  return (
+    <>
+      <div className="fixed inset-0 bg-black/40 z-40" onClick={handleClose} />
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-modal w-full max-w-sm flex flex-col">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0]">
+            <h2 className="font-display font-semibold text-[#0F172A]">Adicionar Aluno</h2>
+            <button
+              type="button"
+              onClick={handleClose}
+              aria-label="Fechar"
+              className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-slate-100 text-[#64748B]"
+            >
+              <X size={16} />
+            </button>
+          </div>
+
+          <div className="px-6 py-4 space-y-4">
+            <div>
+              <label className="block text-xs font-medium text-[#64748B] mb-1.5">
+                E-mail do aluno
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="email"
+                  className={clsx('input flex-1', lookupError && 'border-red-400')}
+                  placeholder="aluno@escola.vekta.app"
+                  value={email}
+                  onChange={e => { setEmail(e.target.value); setLookupError(''); setPreview(null) }}
+                  onKeyDown={e => e.key === 'Enter' && handleLookup()}
+                />
+                <button
+                  type="button"
+                  onClick={handleLookup}
+                  disabled={!email.trim() || looking}
+                  className="btn-secondary text-sm px-3 flex-shrink-0"
+                >
+                  {looking ? <Loader2 size={14} className="animate-spin" /> : 'Buscar'}
+                </button>
+              </div>
+              {lookupError && (
+                <p className="text-xs text-red-500 mt-1">{lookupError}</p>
+              )}
+            </div>
+
+            {preview && (
+              <div className="flex items-center gap-3 p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg border border-emerald-200 dark:border-emerald-700">
+                <div className="w-9 h-9 rounded-full bg-[#1E3A8A]/10 flex items-center justify-center text-[#1E3A8A] font-semibold text-sm flex-shrink-0">
+                  {preview.name.charAt(0)}
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-[#0F172A]">{preview.name}</p>
+                  <p className="text-xs text-emerald-600">Aluno encontrado</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="px-6 py-4 border-t border-[#E2E8F0] flex gap-3 justify-end flex-shrink-0">
+            <button type="button" onClick={handleClose} className="btn-secondary text-sm">
+              Cancelar
+            </button>
+            <button
+              type="button"
+              onClick={handleEnroll}
+              disabled={!preview || enrolling}
+              className="btn-primary text-sm"
+            >
+              {enrolling
+                ? <><Loader2 size={14} className="animate-spin" /> Matriculando...</>
+                : <><UserPlus size={14} /> Matricular</>}
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
+  )
+}
+
+// ─── Main Component ───────────────────────────────────────────
 
 export function TeacherClassView() {
   const { classId } = useParams<{ classId: string }>()
   const navigate = useNavigate()
   const t = useTranslation()
+  const user = useAuthStore(s => s.user)
   const [tab, setTab] = useState<Tab>('mural')
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [enrollModalOpen, setEnrollModalOpen] = useState(false)
 
-  const cls = mockClasses.find(c => c.id === classId) ?? mockClasses[0]
-  const classActivities = mockActivities.filter(a => a.classIds.includes(cls.id))
+  const [cls, setCls] = useState<ClassData | null>(null)
+  const [clsLoading, setClsLoading] = useState(true)
+
+  const [students, setStudents] = useState<EnrolledStudent[]>([])
+  const [studentsLoading, setStudentsLoading] = useState(false)
+
+  const loadClass = useCallback(async () => {
+    if (!classId) return
+    setClsLoading(true)
+    const { data } = await supabase
+      .from('classes')
+      .select('id, name, year, period, grading_type, students_count, delivery_rate, average, at_risk, subjects(id, name, color, color_light)')
+      .eq('id', classId)
+      .single()
+    setCls(data as unknown as ClassData | null)
+    setClsLoading(false)
+  }, [classId])
+
+  const loadStudents = useCallback(async () => {
+    if (!classId) return
+    setStudentsLoading(true)
+    const { data } = await supabase
+      .from('class_students')
+      .select('student_id, enrolled_at, profiles!student_id(id, name, email)')
+      .eq('class_id', classId)
+      .order('enrolled_at', { ascending: true })
+    setStudents((data ?? []) as unknown as EnrolledStudent[])
+    setStudentsLoading(false)
+  }, [classId])
+
+  useEffect(() => { loadClass() }, [loadClass])
+  useEffect(() => { if (tab === 'alunos') loadStudents() }, [tab, loadStudents])
+
+  const handleRemoveStudent = async (studentId: string, studentName: string) => {
+    if (!classId) return
+    const { error } = await supabase
+      .from('class_students')
+      .delete()
+      .eq('class_id', classId)
+      .eq('student_id', studentId)
+
+    if (error) { toast('Erro ao remover aluno.', 'error'); return }
+    setStudents(prev => prev.filter(s => s.student_id !== studentId))
+    toast(`${studentName} removido(a) da turma.`, 'success')
+  }
+
+  const classActivities = mockActivities.filter(a => cls && a.classIds.includes(cls.id))
+  const subjectColor = cls?.subjects?.color ?? '#1E3A8A'
 
   const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
     { id: 'mural', label: 'Mural', icon: BookOpen },
@@ -28,10 +268,32 @@ export function TeacherClassView() {
     { id: 'notas', label: t('nav.grades'), icon: BarChart3 },
   ]
 
+  if (clsLoading) {
+    return (
+      <>
+        <Header title="Carregando..." />
+        <div className="flex items-center justify-center py-24 text-[#94A3B8]">
+          <Loader2 size={28} className="animate-spin" />
+        </div>
+      </>
+    )
+  }
+
+  if (!cls) {
+    return (
+      <>
+        <Header title="Turma não encontrada" />
+        <div className="card p-10 text-center text-[#94A3B8]">
+          <p>Turma não encontrada ou sem permissão de acesso.</p>
+        </div>
+      </>
+    )
+  }
+
   return (
     <>
       <Header
-        title={`${cls.name} — ${cls.subjectName}`}
+        title={`${cls.name} — ${cls.subjects?.name ?? ''}`}
         actions={
           <button type="button" onClick={() => setDrawerOpen(true)} className="btn-primary text-sm">
             <Plus size={16} /> Nova atividade
@@ -41,22 +303,22 @@ export function TeacherClassView() {
 
       <div className="space-y-4">
         {/* Class header */}
-        <div className="card p-4 flex items-center justify-between" style={{ borderLeft: `4px solid ${cls.color}` }}>
+        <div className="card p-4 flex items-center justify-between" style={{ borderLeft: `4px solid ${subjectColor}` }}>
           <div className="flex items-center gap-4">
             <div
               className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-lg"
-              style={{ backgroundColor: cls.color }}
+              style={{ backgroundColor: subjectColor }}
             >
               {cls.name.substring(0, 2)}
             </div>
             <div>
               <h2 className="font-display font-semibold text-[#0F172A]">{cls.name}</h2>
-              <p className="text-sm text-[#64748B]">{cls.subjectName} · {cls.studentsCount} alunos · {cls.period}</p>
+              <p className="text-sm text-[#64748B]">{cls.subjects?.name ?? '—'} · {cls.students_count} alunos · {cls.period}</p>
             </div>
           </div>
           <div className="flex items-center gap-6 text-center">
             <div>
-              <p className="text-lg font-bold text-[#0F172A]">{cls.deliveryRate}%</p>
+              <p className="text-lg font-bold text-[#0F172A]">{cls.delivery_rate}%</p>
               <p className="text-xs text-[#94A3B8]">Entrega</p>
             </div>
             <div>
@@ -64,7 +326,7 @@ export function TeacherClassView() {
               <p className="text-xs text-[#94A3B8]">Atividades</p>
             </div>
             <div>
-              <p className="text-lg font-bold text-[#0F172A]">7.4</p>
+              <p className="text-lg font-bold text-[#0F172A]">{cls.average?.toFixed(1) ?? '—'}</p>
               <p className="text-xs text-[#94A3B8]">Média turma</p>
             </div>
           </div>
@@ -72,20 +334,20 @@ export function TeacherClassView() {
 
         {/* Tabs */}
         <div className="flex border-b border-[#E2E8F0]">
-          {tabs.map(t => (
+          {tabs.map(tabItem => (
             <button
-              key={t.id}
+              key={tabItem.id}
               type="button"
-              onClick={() => setTab(t.id)}
+              onClick={() => setTab(tabItem.id)}
               className={clsx(
                 'flex items-center gap-1.5 px-4 py-3 text-sm font-medium border-b-2 transition-all',
-                tab === t.id
+                tab === tabItem.id
                   ? 'border-[#1E3A8A] text-[#1E3A8A]'
                   : 'border-transparent text-[#64748B] hover:text-[#0F172A] hover:border-slate-300'
               )}
             >
-              <t.icon size={15} />
-              {t.label}
+              <tabItem.icon size={15} />
+              {tabItem.label}
             </button>
           ))}
         </div>
@@ -112,13 +374,7 @@ export function TeacherClassView() {
             </div>
 
             {mockAnnouncements.map(ann => (
-              <div
-                key={ann.id}
-                className={clsx(
-                  'card p-4',
-                  ann.urgent && 'border-red-300 border-2'
-                )}
-              >
+              <div key={ann.id} className={clsx('card p-4', ann.urgent && 'border-red-300 border-2')}>
                 {ann.urgent && (
                   <div className="flex items-center gap-1.5 mb-2">
                     <Zap size={12} className="text-[#DC2626]" />
@@ -218,53 +474,95 @@ export function TeacherClassView() {
 
         {/* Alunos */}
         {tab === 'alunos' && (
-          <div className="card overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-[#F8FAFC] border-b border-[#E2E8F0]">
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-[#64748B]">Aluno</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-[#64748B]">Situação</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-[#64748B]">Média</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-[#64748B]">Entregas</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#F1F5F9]">
-                {mockStudentGrades.map(s => {
-                  const badge = getStatusBadge(s.status)
-                  return (
-                    <tr key={s.studentId} className={clsx('hover:bg-[#F8FAFC] transition-colors', s.inactive && 'opacity-60')}>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-full bg-[#1E3A8A]/10 flex items-center justify-center text-[#1E3A8A] text-xs font-semibold">
-                            {s.studentName.charAt(0)}
-                          </div>
-                          <span className="text-sm font-medium text-[#0F172A]">{s.studentName}</span>
-                          {s.inactive && <span className="badge-neutral text-[10px]">Inativo</span>}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={badge.className}>{badge.label}</span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={clsx(
-                          'text-sm font-bold',
-                          (s.average ?? 0) >= 6 ? 'text-emerald-600' : (s.average ?? 0) >= 4 ? 'text-amber-600' : 'text-red-600'
-                        )}>
-                          {s.average?.toFixed(1) ?? '—'}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-[#64748B]">
-                        {s.grades.filter(g => g.score !== null).length}/{s.grades.length}
-                      </td>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-[#64748B]">
+                {studentsLoading ? 'Carregando...' : `${students.length} aluno${students.length !== 1 ? 's' : ''} matriculado${students.length !== 1 ? 's' : ''}`}
+              </p>
+              <button
+                type="button"
+                onClick={() => setEnrollModalOpen(true)}
+                className="btn-primary text-sm"
+              >
+                <UserPlus size={14} /> Adicionar Aluno
+              </button>
+            </div>
+
+            {studentsLoading ? (
+              <div className="card overflow-hidden">
+                <div className="divide-y divide-[#F1F5F9]">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="px-4 py-3 flex items-center gap-3 animate-pulse">
+                      <div className="w-7 h-7 rounded-full bg-slate-100 flex-shrink-0" />
+                      <div className="flex-1 space-y-1.5">
+                        <div className="h-3 bg-slate-100 rounded w-32" />
+                        <div className="h-2.5 bg-slate-100 rounded w-48" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : students.length === 0 ? (
+              <div className="card p-10 flex flex-col items-center gap-3 text-[#94A3B8]">
+                <Users size={36} strokeWidth={1.5} />
+                <p className="font-medium">Nenhum aluno matriculado</p>
+                <button
+                  type="button"
+                  onClick={() => setEnrollModalOpen(true)}
+                  className="btn-primary text-sm"
+                >
+                  <UserPlus size={14} /> Adicionar primeiro aluno
+                </button>
+              </div>
+            ) : (
+              <div className="card overflow-hidden">
+                <table className="w-full">
+                  <thead className="bg-[#F8FAFC] border-b border-[#E2E8F0]">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-[#64748B]">Aluno</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-[#64748B]">E-mail</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-[#64748B]">Desde</th>
+                      <th className="px-4 py-3 w-12 sr-only">Ações</th>
                     </tr>
-                  )
-                })}
-              </tbody>
-            </table>
+                  </thead>
+                  <tbody className="divide-y divide-[#F1F5F9]">
+                    {students.map(s => {
+                      const name = s.profiles?.name ?? 'Desconhecido'
+                      const email = s.profiles?.email ?? '—'
+                      const since = new Date(s.enrolled_at).toLocaleDateString('pt-BR')
+                      return (
+                        <tr key={s.student_id} className="hover:bg-[#F8FAFC] transition-colors">
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-2">
+                              <div className="w-7 h-7 rounded-full bg-[#1E3A8A]/10 flex items-center justify-center text-[#1E3A8A] text-xs font-semibold">
+                                {name.charAt(0)}
+                              </div>
+                              <span className="text-sm font-medium text-[#0F172A]">{name}</span>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 text-sm text-[#64748B]">{email}</td>
+                          <td className="px-4 py-3 text-sm text-[#94A3B8]">{since}</td>
+                          <td className="px-4 py-3">
+                            <button
+                              type="button"
+                              title="Remover aluno"
+                              onClick={() => handleRemoveStudent(s.student_id, name)}
+                              className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-red-50 text-[#94A3B8] hover:text-red-500 transition-colors"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         )}
 
-        {/* Notas - redirect to grade table */}
+        {/* Notas */}
         {tab === 'notas' && (
           <div className="card p-6 text-center">
             <BarChart3 size={36} className="text-[#1E3A8A] mx-auto mb-3" strokeWidth={1.5} />
@@ -310,9 +608,14 @@ export function TeacherClassView() {
         )}
       </div>
 
-      <ActivityDrawer
-        isOpen={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
+      <ActivityDrawer isOpen={drawerOpen} onClose={() => setDrawerOpen(false)} />
+
+      <EnrollStudentModal
+        open={enrollModalOpen}
+        onClose={() => setEnrollModalOpen(false)}
+        classId={cls.id}
+        schoolId={user?.schoolId ?? ''}
+        onEnrolled={() => { loadStudents(); loadClass() }}
       />
     </>
   )
