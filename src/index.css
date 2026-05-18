@@ -20,6 +20,11 @@
     -webkit-font-smoothing: antialiased;
   }
 
+  .dark body {
+    background-color: #0F172A;
+    color: #F1F5F9;
+  }
+
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
   }
@@ -56,12 +61,14 @@
 
   .btn-secondary {
     @apply inline-flex items-center justify-center gap-2 rounded-lg border border-[#1E3A8A] text-[#1E3A8A] text-sm font-medium h-10 px-4
-    hover:bg-blue-50 transition-colors focus-visible:outline-[#1E3A8A] disabled:opacity-50;
+    hover:bg-blue-50 transition-colors focus-visible:outline-[#1E3A8A] disabled:opacity-50
+    dark:border-blue-400 dark:text-blue-400 dark:hover:bg-blue-900/20;
   }
 
   .btn-ghost {
     @apply inline-flex items-center justify-center gap-2 rounded-lg text-[#64748B] text-sm font-medium h-10 px-4
-    hover:bg-slate-100 hover:text-[#0F172A] transition-colors;
+    hover:bg-slate-100 hover:text-[#0F172A] transition-colors
+    dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-100;
   }
 
   .btn-danger {
@@ -72,11 +79,12 @@
   .input {
     @apply w-full h-10 rounded-lg border border-[#E2E8F0] px-3 text-sm text-[#0F172A] bg-white
     placeholder:text-[#94A3B8] focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]/30 focus:border-[#1E3A8A]
-    transition-all;
+    transition-all
+    dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100 dark:placeholder:text-slate-500;
   }
 
   .card {
-    @apply bg-white rounded-xl border border-[#E2E8F0] shadow-card;
+    @apply bg-white rounded-xl border border-[#E2E8F0] shadow-card dark:bg-slate-800 dark:border-slate-700;
   }
 
   .badge-success {
@@ -97,11 +105,13 @@
 
   .sidebar-item {
     @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[#64748B]
-    hover:bg-slate-100 hover:text-[#0F172A] transition-all cursor-pointer;
+    hover:bg-slate-100 hover:text-[#0F172A] transition-all cursor-pointer
+    dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-100;
   }
 
   .sidebar-item-active {
-    @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium bg-blue-50 text-[#1E3A8A];
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium bg-blue-50 text-[#1E3A8A]
+    dark:bg-blue-900/20 dark:text-blue-400;
   }
 
   .grade-cell {
@@ -139,11 +149,12 @@
 
   .toast {
     @apply flex items-center gap-3 px-4 py-3 bg-[#0F172A] text-white rounded-xl shadow-modal text-sm
-    animate-slide-down;
+    animate-slide-down dark:bg-slate-700 dark:text-slate-100;
   }
 
   .notification-item {
-    @apply flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer;
+    @apply flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer
+    dark:hover:bg-slate-700;
   }
 
   .activity-card {
@@ -204,3 +215,43 @@
   from { transform: translateX(100%); }
   to { transform: translateX(0); }
 }
+
+/* ─── Dark mode: override hardcoded Tailwind arbitrary values ─────────────
+   These selectors match the exact CSS class names Tailwind JIT generates.
+   Two-class specificity (0-2-0) beats the base one-class rules (0-1-0).    */
+
+/* Text colours */
+.dark .text-\[\#0F172A\] { color: #F1F5F9; }
+.dark .text-\[\#64748B\] { color: #94A3B8; }
+.dark .text-\[\#94A3B8\] { color: #64748B; }
+.dark .text-\[\#CBD5E1\] { color: #475569; }
+
+/* Hover text */
+.dark .hover\:text-\[\#0F172A\]:hover { color: #F1F5F9; }
+
+/* Backgrounds — light surfaces become dark */
+.dark .bg-white          { background-color: #1E293B; }
+.dark .bg-\[\#F8FAFC\]   { background-color: #1E293B; }
+.dark .bg-\[\#F1F5F9\]   { background-color: #334155; }
+.dark .bg-\[\#E2E8F0\]   { background-color: #334155; }
+.dark .bg-\[\#EFF6FF\]   { background-color: rgba(30, 58, 138, 0.2); }
+.dark .bg-slate-50       { background-color: #1E293B; }
+.dark .bg-slate-100      { background-color: #334155; }
+
+/* Hover backgrounds */
+.dark .hover\:bg-\[\#F8FAFC\]:hover  { background-color: #334155; }
+.dark .hover\:bg-slate-50:hover      { background-color: #334155; }
+.dark .hover\:bg-slate-100:hover     { background-color: #475569; }
+
+/* Borders */
+.dark .border-\[\#E2E8F0\] { border-color: #334155; }
+.dark .border-\[\#F1F5F9\] { border-color: #334155; }
+
+/* Divide utilities */
+.dark .divide-\[\#F1F5F9\] > :not([hidden]) ~ :not([hidden]) { border-color: #334155; }
+.dark .divide-\[\#F8FAFC\] > :not([hidden]) ~ :not([hidden]) { border-color: #1E293B; }
+.dark .divide-\[\#E2E8F0\] > :not([hidden]) ~ :not([hidden]) { border-color: #334155; }
+
+/* Scrollbar */
+.dark ::-webkit-scrollbar-thumb       { background: #475569; }
+.dark ::-webkit-scrollbar-thumb:hover { background: #64748B; }

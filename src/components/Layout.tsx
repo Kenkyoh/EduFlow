@@ -9,7 +9,7 @@ export function Layout() {
   const collapsed = useSidebarStore(s => s.collapsed)
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-900">
       <Sidebar />
       <main className={clsx(
         'min-h-screen pt-[60px] transition-all duration-300',

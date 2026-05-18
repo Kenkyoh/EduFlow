@@ -1,4 +1,4 @@
-import { Bell, Search, Menu } from 'lucide-react'
+import { Bell, Search, Menu, Sun, Moon } from 'lucide-react'
 import { useNotificationsStore } from '../store/notifications'
 import { useAuthStore } from '../store/auth'
 import { useSidebarStore } from '../store/sidebar'
@@ -7,6 +7,7 @@ import { UserAvatar } from './UserAvatar'
 import { useTranslation } from '../i18n'
 import { useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { useThemeStore } from '../store/theme'
 import clsx from 'clsx'
 
 interface HeaderProps {
@@ -20,6 +21,7 @@ export function Header({ title, actions }: HeaderProps) {
   const openNotifications = useNotificationsStore(s => s.openPanel)
   const { collapsed, openMobile } = useSidebarStore()
   const { query, setQuery } = useSearchStore()
+  const { theme, toggleTheme } = useThemeStore()
   const t = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
@@ -28,7 +30,7 @@ export function Header({ title, actions }: HeaderProps) {
 
   return (
     <header className={clsx(
-      'fixed top-0 right-0 h-[60px] bg-white border-b border-[#E2E8F0] flex items-center px-3 md:px-6 gap-3 z-20 transition-all duration-300',
+      'fixed top-0 right-0 h-[60px] bg-white border-b border-[#E2E8F0] flex items-center px-3 md:px-6 gap-3 z-20 transition-all duration-300 dark:bg-slate-900 dark:border-slate-700',
       'left-0',
       collapsed ? 'md:left-16' : 'md:left-60'
     )}>
@@ -59,6 +61,16 @@ export function Header({ title, actions }: HeaderProps) {
 
       <div className="flex items-center gap-1 md:gap-2 ml-auto">
         {actions}
+
+        {/* Theme toggle */}
+        <button
+          type="button"
+          onClick={toggleTheme}
+          className="w-9 h-9 flex items-center justify-center rounded-lg text-[#64748B] hover:bg-slate-100 hover:text-[#0F172A] transition-all dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-100"
+          aria-label={theme === 'dark' ? 'Modo claro' : 'Modo escuro'}
+        >
+          {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+        </button>
 
         {/* Notification Bell */}
         <button

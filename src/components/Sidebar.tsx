@@ -86,14 +86,14 @@ export function Sidebar() {
 
       <aside
         className={clsx(
-          'fixed left-0 top-0 h-full bg-white border-r border-[#E2E8F0] flex flex-col z-30 transition-all duration-300',
+          'fixed left-0 top-0 h-full bg-white border-r border-[#E2E8F0] flex flex-col z-30 transition-all duration-300 dark:bg-slate-900 dark:border-slate-700',
           collapsed ? 'md:w-16' : 'md:w-60',
           'w-72',
           mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         )}
       >
         {/* Logo */}
-        <div className="h-[60px] flex items-center px-4 border-b border-[#E2E8F0] flex-shrink-0">
+        <div className="h-[60px] flex items-center px-4 border-b border-[#E2E8F0] dark:border-slate-700 flex-shrink-0">
           <div className={clsx('flex items-center gap-2', collapsed && 'md:justify-center')}>
             <div className="w-8 h-8 rounded-lg bg-[#1E3A8A] flex items-center justify-center flex-shrink-0">
               <GraduationCap className="w-5 h-5 text-white" />
@@ -125,8 +125,8 @@ export function Sidebar() {
                 clsx(
                   'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all',
                   isActive
-                    ? 'bg-blue-50 text-[#1E3A8A]'
-                    : 'text-[#64748B] hover:bg-slate-100 hover:text-[#0F172A]'
+                    ? 'bg-blue-50 text-[#1E3A8A] dark:bg-blue-900/20 dark:text-blue-400'
+                    : 'text-[#64748B] hover:bg-slate-100 hover:text-[#0F172A] dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-100'
                 )
               }
               title={collapsed ? label : undefined}
@@ -140,7 +140,7 @@ export function Sidebar() {
           <button
             type="button"
             onClick={openNotifications}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[#64748B] hover:bg-slate-100 hover:text-[#0F172A] transition-all relative"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[#64748B] hover:bg-slate-100 hover:text-[#0F172A] transition-all relative dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-100"
             title={collapsed ? t('nav.notifications') : undefined}
           >
             <Bell size={18} className="flex-shrink-0" />
@@ -154,12 +154,12 @@ export function Sidebar() {
         </nav>
 
         {/* User section */}
-        <div className="border-t border-[#E2E8F0] p-3 space-y-1">
+        <div className="border-t border-[#E2E8F0] dark:border-slate-700 p-3 space-y-1">
           {/* Collapse toggle — desktop only */}
           <button
             type="button"
             onClick={toggleCollapsed}
-            className="hidden md:flex w-full items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs text-[#94A3B8] hover:bg-slate-100 hover:text-[#64748B] transition-all"
+            className="hidden md:flex w-full items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs text-[#94A3B8] hover:bg-slate-100 hover:text-[#64748B] transition-all dark:hover:bg-slate-700 dark:hover:text-slate-300"
           >
             {collapsed ? <ChevronRight size={14} /> : (
               <>
@@ -185,7 +185,7 @@ export function Sidebar() {
 
           {/* Expanded: full user row */}
           <div className={clsx(
-            'flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-[#F8FAFC] transition-colors',
+            'flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-[#F8FAFC] transition-colors dark:hover:bg-slate-800',
             collapsed && 'md:hidden'
           )}>
             {user?.role !== 'admin' ? (
