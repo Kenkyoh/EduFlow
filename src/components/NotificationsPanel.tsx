@@ -15,11 +15,11 @@ const typeIcons: Record<string, React.ReactNode> = {
 }
 
 const typeColors: Record<string, string> = {
-  grade: 'bg-blue-50',
-  deadline: 'bg-amber-50',
-  message: 'bg-purple-50',
-  announcement: 'bg-emerald-50',
-  system: 'bg-slate-50',
+  grade: 'bg-blue-50 dark:bg-blue-900/30',
+  deadline: 'bg-amber-50 dark:bg-amber-900/30',
+  message: 'bg-purple-50 dark:bg-purple-900/30',
+  announcement: 'bg-emerald-50 dark:bg-emerald-900/30',
+  system: 'bg-slate-50 dark:bg-slate-700',
 }
 
 type Filter = 'all' | 'grades' | 'deadlines' | 'warnings' | 'messages'
@@ -60,7 +60,7 @@ export function NotificationsPanel() {
         className="fixed inset-0 bg-black/20 z-40"
         onClick={closePanel}
       />
-      <div className="fixed top-0 right-0 h-full w-80 bg-white border-l border-[#E2E8F0] z-50 flex flex-col shadow-modal animate-slide-in-right">
+      <div className="fixed top-0 right-0 h-full w-80 bg-white dark:bg-slate-900 border-l border-[#E2E8F0] z-50 flex flex-col shadow-modal animate-slide-in-right">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-[#E2E8F0]">
           <div className="flex items-center gap-2">
@@ -97,7 +97,7 @@ export function NotificationsPanel() {
                 'px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all',
                 filter === f
                   ? 'bg-[#1E3A8A] text-white'
-                  : 'bg-slate-100 text-[#64748B] hover:bg-slate-200'
+                  : 'bg-slate-100 text-[#64748B] hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
               )}
             >
               {t('notifications.filters.' + f)}
@@ -120,8 +120,8 @@ export function NotificationsPanel() {
                   key={n.id}
                   onClick={() => handleClick(n)}
                   className={clsx(
-                    'w-full text-left flex items-start gap-3 p-4 hover:bg-slate-50 transition-colors',
-                    !n.read && 'bg-blue-50/30'
+                    'w-full text-left flex items-start gap-3 p-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors',
+                    !n.read && 'bg-blue-50/30 dark:bg-blue-900/10'
                   )}
                 >
                   <div className={clsx(

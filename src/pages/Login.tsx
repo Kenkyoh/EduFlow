@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { GraduationCap, Eye, EyeOff, Chrome, ChevronRight } from 'lucide-react'
+import { GraduationCap, Eye, EyeOff, Chrome, ChevronRight, Sun, Moon } from 'lucide-react'
 import { useAuthStore } from '../store/auth'
 import { useLanguageStore } from '../store/language'
+import { useThemeStore } from '../store/theme'
 import { useTranslation } from '../i18n'
 import type { UserRole } from '../types'
 import clsx from 'clsx'
@@ -20,6 +21,7 @@ export function Login() {
   const navigate = useNavigate()
   const { user, loginWithCredentials } = useAuthStore()
   const { language, setLanguage } = useLanguageStore()
+  const { theme, toggleTheme } = useThemeStore()
   const t = useTranslation()
 
   const [email, setEmail] = useState('')
@@ -76,8 +78,16 @@ export function Login() {
       </div>
 
       <div className="w-full max-w-md relative z-10">
-        {/* Language selector */}
-        <div className="flex justify-end mb-4">
+        {/* Language selector + theme toggle */}
+        <div className="flex items-center justify-end gap-2 mb-4">
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label={theme === 'dark' ? 'Ativar modo claro' : 'Ativar modo escuro'}
+            className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
+          >
+            {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+          </button>
           <div className="flex rounded-lg overflow-hidden border border-white/20">
             {LANG_OPTIONS.map(opt => (
               <button
@@ -97,6 +107,7 @@ export function Login() {
             ))}
           </div>
         </div>
+
 
         {/* Logo */}
         <div className="text-center mb-8">

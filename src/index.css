@@ -116,7 +116,7 @@
 
   .grade-cell {
     @apply px-3 py-2 text-sm text-center border-b border-[#E2E8F0] cursor-pointer
-    hover:bg-slate-50 transition-colors;
+    hover:bg-slate-50 transition-colors dark:border-slate-700 dark:hover:bg-slate-700;
   }
 
   .grade-cell-editing {
@@ -136,11 +136,11 @@
   }
 
   .drawer {
-    @apply fixed top-0 right-0 h-full w-[480px] bg-white shadow-modal z-50 flex flex-col animate-slide-in-right;
+    @apply fixed top-0 right-0 h-full w-[480px] bg-white shadow-modal z-50 flex flex-col animate-slide-in-right dark:bg-slate-900;
   }
 
   .drawer-mobile {
-    @apply fixed inset-0 bg-white z-50 flex flex-col animate-slide-in-right;
+    @apply fixed inset-0 bg-white z-50 flex flex-col animate-slide-in-right dark:bg-slate-900;
   }
 
   .toast-container {
@@ -163,11 +163,13 @@
 
   .tab-button {
     @apply px-4 py-2 text-sm font-medium text-[#64748B] border-b-2 border-transparent
-    hover:text-[#0F172A] hover:border-slate-300 transition-all;
+    hover:text-[#0F172A] hover:border-slate-300 transition-all
+    dark:text-slate-400 dark:hover:text-slate-100 dark:hover:border-slate-500;
   }
 
   .tab-button-active {
-    @apply px-4 py-2 text-sm font-medium text-[#1E3A8A] border-b-2 border-[#1E3A8A];
+    @apply px-4 py-2 text-sm font-medium text-[#1E3A8A] border-b-2 border-[#1E3A8A]
+    dark:text-blue-400 dark:border-blue-400;
   }
 
   .kpi-card {
@@ -246,6 +248,10 @@
 /* Borders */
 .dark .border-\[\#E2E8F0\] { border-color: #334155; }
 .dark .border-\[\#F1F5F9\] { border-color: #334155; }
+
+/* EFF6FF (light blue tint used in login demo buttons) */
+.dark .bg-\[\#EFF6FF\]              { background-color: rgba(30, 58, 138, 0.2); }
+.dark .hover\:bg-\[\#EFF6FF\]:hover { background-color: rgba(30, 58, 138, 0.25); }
 
 /* Divide utilities */
 .dark .divide-\[\#F1F5F9\] > :not([hidden]) ~ :not([hidden]) { border-color: #334155; }
