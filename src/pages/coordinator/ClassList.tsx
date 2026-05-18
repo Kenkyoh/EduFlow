@@ -83,7 +83,8 @@ function CreateClassModal({
   const [newSubjectName, setNewSubjectName] = useState('')
   const [newSubjectColor, setNewSubjectColor] = useState(SUBJECT_COLORS[0])
   const [teacherEmail, setTeacherEmail] = useState('')
-  const [showSuggestions, setShowSuggestions] = useState(false)
+  const [selectedTeacherName, setSelectedTeacherName] = useState('')
+  const [teacherSearch, setTeacherSearch] = useState('')
   const { gradeScale } = useSettingsStore()
   const grading_type: 'numeric' | 'mencao' = gradeScale === 'mencao' ? 'mencao' : 'numeric'
   const currentYear = new Date().getFullYear().toString()
@@ -114,7 +115,8 @@ function CreateClassModal({
     setNewSubjectName('')
     setNewSubjectColor(SUBJECT_COLORS[0])
     setTeacherEmail('')
-    setShowSuggestions(false)
+    setSelectedTeacherName('')
+    setTeacherSearch('')
     setEmailError('')
   }
 
@@ -317,48 +319,68 @@ function CreateClassModal({
               )}
             </div>
 
-            {/* E-mail do professor */}
-            <div className="relative">
+            {/* Professor responsável */}
+            <div>
               <label className="block text-xs font-medium text-[#64748B] mb-1.5">
                 Professor responsável <span className="text-red-500">*</span>
               </label>
-              <input
-                type="text"
-                autoComplete="off"
-                className={clsx('input', emailError && 'border-red-400 focus:border-red-500')}
-                placeholder="Buscar por nome ou e-mail..."
-                value={teacherEmail}
-                onChange={e => {
-                  setTeacherEmail(e.target.value)
-                  setEmailError('')
-                  setShowSuggestions(true)
-                }}
-                onFocus={() => setShowSuggestions(true)}
-                onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
-              />
-              {emailError && (
-                <p className="text-xs text-red-500 mt-1">{emailError}</p>
-              )}
 
-              {/* Dropdown de sugestões */}
-              {showSuggestions && (() => {
-                const q = teacherEmail.trim().toLowerCase()
-                const matches = teachers.filter(t =>
-                  t.name.toLowerCase().includes(q) || t.email.toLowerCase().includes(q)
-                )
-                if (matches.length === 0) return null
-                return (
-                  <ul className="absolute z-10 left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-[#E2E8F0] rounded-xl shadow-modal overflow-hidden max-h-48 overflow-y-auto">
-                    {matches.map(t => (
-                      <li key={t.id}>
+              {/* Selecionado */}
+              {teacherEmail && selectedTeacherName ? (
+                <div className="flex items-center gap-3 p-3 rounded-xl border-2 border-[#1E3A8A] bg-blue-50 dark:bg-blue-900/20 mb-2">
+                  <div className="w-8 h-8 rounded-full bg-[#1E3A8A]/10 flex items-center justify-center text-[#1E3A8A] text-sm font-semibold flex-shrink-0">
+                    {selectedTeacherName.charAt(0)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-[#1E3A8A] truncate">{selectedTeacherName}</p>
+                    <p className="text-xs text-[#64748B] truncate">{teacherEmail}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => { setTeacherEmail(''); setSelectedTeacherName(''); setEmailError('') }}
+                    className="text-[#94A3B8] hover:text-[#DC2626] transition-colors flex-shrink-0"
+                    aria-label="Remover seleção"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              ) : (
+                <>
+                  {/* Busca */}
+                  <input
+                    type="text"
+                    autoComplete="off"
+                    className={clsx('input mb-2', emailError && 'border-red-400')}
+                    placeholder="Buscar por nome ou e-mail..."
+                    value={teacherSearch}
+                    onChange={e => { setTeacherSearch(e.target.value); setEmailError('') }}
+                  />
+
+                  {/* Lista fixa */}
+                  <div className="border border-[#E2E8F0] rounded-xl overflow-hidden max-h-44 overflow-y-auto">
+                    {teachers.length === 0 ? (
+                      <p className="px-3 py-4 text-xs text-center text-[#94A3B8]">
+                        Nenhum professor cadastrado na escola.
+                      </p>
+                    ) : (() => {
+                      const q = teacherSearch.trim().toLowerCase()
+                      const matches = teachers.filter(t =>
+                        t.name.toLowerCase().includes(q) || t.email.toLowerCase().includes(q)
+                      )
+                      if (matches.length === 0) return (
+                        <p className="px-3 py-4 text-xs text-center text-[#94A3B8]">Nenhum professor encontrado.</p>
+                      )
+                      return matches.map(t => (
                         <button
+                          key={t.id}
                           type="button"
-                          onMouseDown={() => {
+                          onClick={() => {
                             setTeacherEmail(t.email)
-                            setShowSuggestions(false)
+                            setSelectedTeacherName(t.name)
+                            setTeacherSearch('')
                             setEmailError('')
                           }}
-                          className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-[#F8FAFC] dark:hover:bg-slate-700 transition-colors text-left"
+                          className="w-full flex items-center gap-3 px-3 py-2.5 border-b border-[#F1F5F9] last:border-0 hover:bg-[#F8FAFC] dark:hover:bg-slate-700 transition-colors text-left"
                         >
                           <div className="w-7 h-7 rounded-full bg-[#1E3A8A]/10 flex items-center justify-center text-[#1E3A8A] text-xs font-semibold flex-shrink-0">
                             {t.name.charAt(0)}
@@ -368,11 +390,15 @@ function CreateClassModal({
                             <p className="text-xs text-[#94A3B8] truncate">{t.email}</p>
                           </div>
                         </button>
-                      </li>
-                    ))}
-                  </ul>
-                )
-              })()}
+                      ))
+                    })()}
+                  </div>
+                </>
+              )}
+
+              {emailError && (
+                <p className="text-xs text-red-500 mt-1">{emailError}</p>
+              )}
             </div>
 
             {/* Tipo de avaliação — herdado das configurações */}
