@@ -1,38 +1,38 @@
 import { create } from 'zustand'
 import type { User } from '../types'
-import { api, setToken, clearToken, getToken } from '../lib/api'
+import { supabase } from '../lib/supabase'
+import { setToken, clearToken } from '../lib/api'
 
-interface LoginResponse {
-  user: ApiUser
-  token: string
-  refreshToken: string
-}
-
-interface MeResponse {
-  user: ApiUser
-}
-
-interface ApiUser {
+interface ProfileRow {
   id: string
   name: string
-  email: string
   role: User['role']
-  institution: string
-  schoolId: string | null
-  avatar: string | null
+  institution: string | null
+  school_id: string | null
   bio: string | null
+  avatar_url: string | null
 }
 
-function mapApiUser(apiUser: ApiUser): User {
+async function fetchProfile(userId: string): Promise<ProfileRow | null> {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id, name, role, institution, school_id, bio, avatar_url')
+    .eq('id', userId)
+    .single()
+  if (error || !data) return null
+  return data as ProfileRow
+}
+
+function toUser(profile: ProfileRow, email: string): User {
   return {
-    id: apiUser.id,
-    name: apiUser.name,
-    email: apiUser.email,
-    role: apiUser.role,
-    institution: apiUser.institution ?? 'Vekta',
-    schoolId: apiUser.schoolId ?? undefined,
-    avatar: apiUser.avatar ?? undefined,
-    bio: apiUser.bio ?? undefined,
+    id: profile.id,
+    name: profile.name,
+    email,
+    role: profile.role,
+    institution: profile.institution ?? 'Vekta',
+    schoolId: profile.school_id ?? undefined,
+    avatar: profile.avatar_url ?? undefined,
+    bio: profile.bio ?? undefined,
   }
 }
 
@@ -48,32 +48,36 @@ export const useAuthStore = create<AuthStore>((set) => ({
   user: null,
 
   loginWithCredentials: async (email, password) => {
-    const { user: apiUser, token } = await api.post<LoginResponse>('/api/auth/login', { email, password })
-    setToken(token)
-    set({ user: mapApiUser(apiUser) })
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+
+    if (error || !data.user || !data.session) {
+      throw new Error(error?.message ?? 'Email ou senha inválidos')
+    }
+
+    setToken(data.session.access_token)
+
+    const profile = await fetchProfile(data.user.id)
+    if (!profile) throw new Error('Perfil não encontrado. Contate o suporte.')
+
+    set({ user: toUser(profile, data.user.email ?? '') })
   },
 
   logout: async () => {
-    try {
-      if (getToken()) {
-        await api.post('/api/auth/logout')
-      }
-    } catch {
-      // ignora erros de rede no logout
-    } finally {
-      clearToken()
-      set({ user: null })
-    }
+    try { await supabase.auth.signOut() } catch { /* ignora erros de rede */ }
+    clearToken()
+    set({ user: null })
   },
 
   restoreSession: async () => {
-    if (!getToken()) return
-    try {
-      const { user: apiUser } = await api.get<MeResponse>('/api/auth/me')
-      set({ user: mapApiUser(apiUser) })
-    } catch {
-      clearToken()
-    }
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) return
+
+    setToken(session.access_token)
+
+    const profile = await fetchProfile(session.user.id)
+    if (!profile) { clearToken(); return }
+
+    set({ user: toUser(profile, session.user.email ?? '') })
   },
 
   updateProfile: (updates) =>
