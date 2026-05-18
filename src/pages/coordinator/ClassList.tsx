@@ -397,18 +397,31 @@ export function CoordinatorClassList() {
   const load = useCallback(async () => {
     if (!user?.schoolId) return
     setLoading(true)
+
+    const BASE_SELECT = `id, name, year, period, grading_type, students_count, delivery_rate, average, at_risk, teacher_id, subjects(id, name, color, color_light), profiles(name)`
+
+    // Try with grade_level; fall back gracefully if column doesn't exist yet
     const { data, error } = await supabase
       .from('classes')
-      .select(`
-        id, name, grade_level, year, period, grading_type, students_count, delivery_rate, average, at_risk,
-        teacher_id,
-        subjects(id, name, color, color_light),
-        profiles!teacher_id(name)
-      `)
+      .select(`grade_level, ${BASE_SELECT}`)
       .eq('school_id', user.schoolId)
       .order('name')
 
-    if (error) { setIsError(true); setLoading(false); return }
+    if (error) {
+      // If grade_level column is missing, retry without it
+      const { data: fallback, error: fallbackErr } = await supabase
+        .from('classes')
+        .select(BASE_SELECT)
+        .eq('school_id', user.schoolId)
+        .order('name')
+
+      if (fallbackErr) { setIsError(true); setLoading(false); return }
+      setClasses(((fallback ?? []) as unknown as Omit<ClassRow, 'grade_level'>[]).map(r => ({ ...r, grade_level: '' })) as ClassRow[])
+      setLoading(false)
+      setIsError(false)
+      return
+    }
+
     setClasses((data ?? []) as unknown as ClassRow[])
     setLoading(false)
     setIsError(false)
@@ -471,7 +484,11 @@ export function CoordinatorClassList() {
       {loading && <SkClassGrid count={8} cols={4} />}
 
       {isError && (
-        <p className="text-center py-12 text-red-500 text-sm">Erro ao carregar turmas.</p>
+        <div className="text-center py-12 space-y-2">
+          <p className="text-red-500 text-sm font-medium">Erro ao carregar turmas.</p>
+          <p className="text-[#94A3B8] text-xs">Verifique se você está autenticado e se o Supabase está configurado corretamente.</p>
+          <button type="button" onClick={load} className="btn-secondary text-xs mt-2">Tentar novamente</button>
+        </div>
       )}
 
       {!loading && !isError && (
