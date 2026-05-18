@@ -65,7 +65,7 @@ Acesse os perfis de demonstração com um clique na tela de login (senha: `Demo@
 | Campo | Valor |
 |---|---|
 | E-mail | `admin@vekta.app` |
-| Senha | `Demo@2025#` |
+| Senha | `Vekta@2025#Admin` |
 
 ---
 
