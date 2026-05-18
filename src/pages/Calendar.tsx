@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ChevronLeft, ChevronRight, Plus, X, Clock, BookOpen } from 'lucide-react'
 import { Header } from '../components/Header'
 import { ActivityDrawer } from '../components/ActivityDrawer'
 import { toast } from '../components/Toast'
-import { mockCalendarEvents, mockSubjects } from '../data/mock'
+import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/auth'
 import { useTranslation } from '../i18n'
 import type { CalendarEvent } from '../types'
@@ -20,6 +20,65 @@ const TYPE_ICONS: Record<string, string> = {
   outro: '📌',
 }
 
+interface SubjectFilter {
+  id: string
+  name: string
+  color: string
+}
+
+function useCalendarData() {
+  const user = useAuthStore(s => s.user)
+  const [events, setEvents] = useState<CalendarEvent[]>([])
+  const [subjects, setSubjects] = useState<SubjectFilter[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (!user) return
+    let cancelled = false
+
+    async function load() {
+      setLoading(true)
+      const { data } = await supabase
+        .from('activities')
+        .select('id, title, type, due_date, description, subjects(id, name, color, color_light)')
+        .eq('published', true)
+        .order('due_date', { ascending: true })
+
+      if (cancelled || !data) { setLoading(false); return }
+
+      const mapped: CalendarEvent[] = data.map((row: any) => ({
+        id: row.id,
+        title: row.title,
+        type: row.type as CalendarEvent['type'],
+        date: (row.due_date as string).split('T')[0],
+        description: row.description ?? undefined,
+        subjectId: row.subjects?.id ?? '',
+        subjectName: row.subjects?.name ?? '',
+        color: row.subjects?.color ?? '#64748B',
+        colorLight: row.subjects?.color_light ?? '#F8FAFC',
+      }))
+
+      const seen = new Set<string>()
+      const subs: SubjectFilter[] = []
+      for (const ev of mapped) {
+        if (ev.subjectId && !seen.has(ev.subjectId)) {
+          seen.add(ev.subjectId)
+          subs.push({ id: ev.subjectId, name: ev.subjectName, color: ev.color })
+        }
+      }
+
+      setEvents(mapped)
+      setSubjects(subs)
+      setLoading(false)
+    }
+
+    load()
+    return () => { cancelled = true }
+  }, [user])
+
+  return { events, subjects, loading }
+}
+
 function EventDetailDrawer({ event, onClose }: { event: CalendarEvent; onClose: () => void }) {
   const t = useTranslation()
   return (
@@ -34,7 +93,7 @@ function EventDetailDrawer({ event, onClose }: { event: CalendarEvent; onClose: 
               <p className="text-xs text-[#64748B]">{t('activityTypes.' + event.type)}</p>
             </div>
           </div>
-          <button type="button" onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-[#64748B]">
+          <button type="button" onClick={onClose} aria-label="Fechar" className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-[#64748B]">
             <X size={16} />
           </button>
         </div>
@@ -69,12 +128,19 @@ export function CalendarPage() {
   const user = useAuthStore(s => s.user)
   const isTeacher = user?.role === 'teacher' || user?.role === 'coordinator'
 
+  const { events, subjects, loading } = useCalendarData()
+
   const [currentDate, setCurrentDate] = useState(new Date())
   const [viewMode, setViewMode] = useState<ViewMode>('month')
-  const [selectedSubjects, setSelectedSubjects] = useState<string[]>(mockSubjects.map(s => s.id))
+  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([])
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [drawerDate, setDrawerDate] = useState<string | undefined>()
+
+  // sync subject filter when subjects load
+  useEffect(() => {
+    setSelectedSubjects(subjects.map(s => s.id))
+  }, [subjects])
 
   const year = currentDate.getFullYear()
   const month = currentDate.getMonth()
@@ -93,7 +159,7 @@ export function CalendarPage() {
     setCurrentDate(d)
   }
 
-  const filteredEvents = mockCalendarEvents.filter(e => selectedSubjects.includes(e.subjectId))
+  const filteredEvents = events.filter(e => selectedSubjects.includes(e.subjectId))
 
   const getEventsForDate = (dateStr: string) =>
     filteredEvents.filter(e => e.date === dateStr)
@@ -168,6 +234,7 @@ export function CalendarPage() {
                     {dayEvents.slice(0, 3).map(ev => (
                       <button
                         key={ev.id}
+                        type="button"
                         onClick={e => { e.stopPropagation(); setSelectedEvent(ev) }}
                         className="calendar-event-pill w-full text-left"
                         style={{ backgroundColor: ev.colorLight, color: ev.color }}
@@ -202,8 +269,8 @@ export function CalendarPage() {
       return (
         <div className="card p-12 flex flex-col items-center gap-3 text-[#94A3B8]">
           <BookOpen size={36} strokeWidth={1.5} />
-          <p className="font-medium">{t('calendar.noEventsFound')}</p>
-          {isTeacher && (
+          <p className="font-medium">{loading ? 'Carregando...' : t('calendar.noEventsFound')}</p>
+          {isTeacher && !loading && (
             <button type="button" onClick={() => setDrawerOpen(true)} className="btn-primary text-sm">
               {t('calendar.createFirstActivity')}
             </button>
@@ -214,7 +281,7 @@ export function CalendarPage() {
 
     return (
       <div className="space-y-4">
-        {Object.entries(grouped).map(([date, events]) => {
+        {Object.entries(grouped).map(([date, evList]) => {
           const d = new Date(date + 'T12:00:00')
           const isToday = date === todayStr
           return (
@@ -225,7 +292,7 @@ export function CalendarPage() {
                   {isToday && <span className="ml-2 text-xs bg-white/20 px-2 py-0.5 rounded-full">{t('calendar.todayBtn')}</span>}
                 </p>
               </div>
-              {events.map(ev => (
+              {evList.map(ev => (
                 <button
                   key={ev.id}
                   type="button"
@@ -265,25 +332,31 @@ export function CalendarPage() {
         <div className="hidden md:block w-48 flex-shrink-0 space-y-4">
           <div className="card p-3">
             <p className="text-xs font-semibold text-[#64748B] mb-2">{t('calendar.subjects')}</p>
-            <div className="space-y-1.5">
-              {mockSubjects.map(s => (
-                <label key={s.id} className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="rounded"
-                    checked={selectedSubjects.includes(s.id)}
-                    onChange={e => {
-                      setSelectedSubjects(prev =>
-                        e.target.checked ? [...prev, s.id] : prev.filter(id => id !== s.id)
-                      )
-                    }}
-                    style={{ accentColor: s.color }}
-                  />
-                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: s.color }} />
-                  <span className="text-xs text-[#0F172A]">{s.name}</span>
-                </label>
-              ))}
-            </div>
+            {loading ? (
+              <div className="space-y-2">
+                {[1,2,3].map(i => <div key={i} className="h-4 bg-slate-100 rounded animate-pulse" />)}
+              </div>
+            ) : (
+              <div className="space-y-1.5">
+                {subjects.map(s => (
+                  <label key={s.id} className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="rounded"
+                      checked={selectedSubjects.includes(s.id)}
+                      onChange={e => {
+                        setSelectedSubjects(prev =>
+                          e.target.checked ? [...prev, s.id] : prev.filter(id => id !== s.id)
+                        )
+                      }}
+                      style={{ accentColor: s.color }}
+                    />
+                    <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: s.color }} />
+                    <span className="text-xs text-[#0F172A]">{s.name}</span>
+                  </label>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="card p-3">

@@ -1,14 +1,153 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Download, CheckCircle, AlertTriangle, XCircle, Clock, TrendingUp, ChevronDown } from 'lucide-react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { Header } from '../../components/Header'
-import { mockReportCardData, MENCAO_COLORS, MENCAO_SCORES, MENCAO_ORDER } from '../../data/mock'
+import { MENCAO_COLORS, MENCAO_SCORES, MENCAO_ORDER } from '../../data/mock'
+import { useAuthStore } from '../../store/auth'
 import { useSettingsStore } from '../../store/settings'
+import { supabase } from '../../lib/supabase'
 import { formatGrade, gradeColorClass, scoreToMencao, scoreToConceptual, CONCEPTUAL_COLORS } from '../../utils/gradeFormat'
 import { toast } from '../../components/Toast'
 import { useTranslation } from '../../i18n'
-import type { ReportCardSubjectData } from '../../types'
+import type { ReportCardSubjectData, MencaoValue } from '../../types'
 import clsx from 'clsx'
+
+// --------------- data fetching ---------------
+
+interface GradeRow {
+  class_id: string
+  bimester: number
+  assessment: string
+  weight: number
+  score: number | null
+  attendance: number
+}
+
+interface ObjectiveRow {
+  class_id: string
+  bimester: number
+  objective_index: number
+  title: string
+  value: MencaoValue | null
+  attendance: number
+}
+
+interface ClassRow {
+  id: string
+  grading_type: 'numeric' | 'mencao'
+  teacher_id: string
+  subjects: { id: string; name: string; color: string; color_light: string } | null
+}
+
+function weightedAvg(rows: GradeRow[]): number {
+  const withScore = rows.filter(r => r.score !== null)
+  if (withScore.length === 0) return 0
+  const totalWeight = withScore.reduce((s, r) => s + r.weight, 0)
+  if (totalWeight === 0) return 0
+  return withScore.reduce((s, r) => s + r.score! * r.weight, 0) / totalWeight
+}
+
+function mencaoAvg(rows: ObjectiveRow[]): number {
+  const withValue = rows.filter(r => r.value !== null)
+  if (withValue.length === 0) return 0
+  return withValue.reduce((s, r) => s + MENCAO_SCORES[r.value!], 0) * 2
+}
+
+function toStatus(avg: number, hasData: boolean): ReportCardSubjectData['status'] {
+  if (!hasData) return 'pending'
+  if (avg >= 6) return 'approved'
+  if (avg >= 4) return 'recovery'
+  return 'failed'
+}
+
+async function fetchReportCardData(userId: string, bimester: number): Promise<ReportCardSubjectData[]> {
+  const [{ data: enrollments }, { data: allGrades }, { data: allObjectives }] = await Promise.all([
+    supabase.from('class_students').select('class_id').eq('student_id', userId),
+    supabase.from('student_grades').select('class_id, bimester, assessment, weight, score, attendance').eq('student_id', userId),
+    supabase.from('student_objectives').select('class_id, bimester, objective_index, title, value, attendance').eq('student_id', userId),
+  ])
+
+  const classIds = (enrollments ?? []).map((e: any) => e.class_id)
+  if (classIds.length === 0) return []
+
+  const { data: classes } = await supabase
+    .from('classes')
+    .select('id, grading_type, teacher_id, subjects(id, name, color, color_light)')
+    .in('id', classIds)
+
+  const teacherIds = [...new Set((classes ?? []).map((c: any) => c.teacher_id).filter(Boolean))]
+  const { data: teachers } = teacherIds.length > 0
+    ? await supabase.from('profiles').select('id, name').in('id', teacherIds)
+    : { data: [] }
+
+  const teacherMap = Object.fromEntries((teachers ?? []).map((t: any) => [t.id, t.name as string]))
+  const grades = (allGrades ?? []) as GradeRow[]
+  const objectives = (allObjectives ?? []) as ObjectiveRow[]
+
+  return (classes ?? []).map((cls: any) => {
+    const c = cls as ClassRow
+    const subj = c.subjects
+    const color = subj?.color ?? '#64748B'
+    const colorLight = subj?.color_light ?? '#F8FAFC'
+    const subjectName = subj?.name ?? 'Disciplina'
+    const teacher = teacherMap[c.teacher_id] ?? ''
+
+    const clsGrades = grades.filter(g => g.class_id === c.id)
+    const clsObjectives = objectives.filter(o => o.class_id === c.id)
+
+    const bimGrades = clsGrades.filter(g => g.bimester === bimester)
+    const bimObjectives = clsObjectives.filter(o => o.bimester === bimester)
+
+    // history: averages for bimesters 1-3
+    const history = [1, 2, 3].map(b => {
+      if (c.grading_type === 'mencao') {
+        const rows = clsObjectives.filter(o => o.bimester === b)
+        return rows.length > 0 ? mencaoAvg(rows) : 0
+      }
+      const rows = clsGrades.filter(g => g.bimester === b)
+      return rows.length > 0 ? weightedAvg(rows) : 0
+    })
+
+    const attendance = c.grading_type === 'mencao'
+      ? bimObjectives[0]?.attendance ?? 100
+      : bimGrades[0]?.attendance ?? 100
+
+    if (c.grading_type === 'mencao') {
+      const avg = mencaoAvg(bimObjectives)
+      return {
+        subjectId: subj?.id ?? c.id,
+        subjectName,
+        teacher,
+        color,
+        colorLight,
+        gradingType: 'mencao' as const,
+        average: avg,
+        status: toStatus(avg, bimObjectives.length > 0),
+        attendance,
+        history,
+        mencaoObjectives: bimObjectives
+          .sort((a, b) => a.objective_index - b.objective_index)
+          .map(o => ({ id: `${c.id}-${o.objective_index}`, title: o.title, value: o.value })),
+      }
+    }
+
+    const avg = weightedAvg(bimGrades)
+    return {
+      subjectId: subj?.id ?? c.id,
+      subjectName,
+      teacher,
+      color,
+      colorLight,
+      average: avg,
+      status: toStatus(avg, bimGrades.some(g => g.score !== null)),
+      attendance,
+      history,
+      assessments: bimGrades.map(g => ({ name: g.assessment, weight: g.weight, score: g.score })),
+    }
+  })
+}
+
+// --------------- UI components ---------------
 
 function StatusBadge({ status }: { status: 'approved' | 'recovery' | 'failed' | 'pending' }) {
   const t = useTranslation()
@@ -87,12 +226,10 @@ function SubjectCard({ subject }: { subject: ReportCardSubjectData }) {
   const isMencaoScale = gradeScale === 'mencao'
   const isMencao = isMencaoSubject || isMencaoScale
 
-  // For chart: percentage scale multiplies values × 10
   const chartData = subject.history.map((avg, i) => ({
     bimestre: `${i + 1}º Bim`,
     média: gradeScale === 'percentage' ? Math.round(avg * 10) : avg,
   }))
-  const historyData = chartData
   const chartDomain = gradeScale === 'percentage' ? [0, 100] : [0, 10]
   const chartTickFormatter = (v: number) => gradeScale === 'percentage' ? `${v}%` : gradeScale === 'conceptual' ? scoreToConceptual(v) : String(v)
 
@@ -145,7 +282,6 @@ function SubjectCard({ subject }: { subject: ReportCardSubjectData }) {
             {isMencaoSubject ? (
               <MencaoObjectivesPanel subject={subject as ReportCardSubjectData & { gradingType: 'mencao' }} />
             ) : isMencaoScale ? (
-              /* Global Menção scale: derive PA-N from numeric average */
               <div>
                 <p className="text-xs font-medium text-[#64748B] mb-2">Menção Derivada (escala PA–N)</p>
                 <div className="space-y-2">
@@ -233,7 +369,7 @@ function SubjectCard({ subject }: { subject: ReportCardSubjectData }) {
                 Histórico de {isMencaoSubject ? 'Pontos' : gradeScale === 'conceptual' ? 'Conceitos' : gradeScale === 'percentage' ? 'Médias %' : 'Médias'}
               </p>
               <ResponsiveContainer width="100%" height={120}>
-                <LineChart data={historyData} margin={{ top: 5, right: 5, left: -30, bottom: 5 }}>
+                <LineChart data={chartData} margin={{ top: 5, right: 5, left: -30, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
                   <XAxis dataKey="bimestre" tick={{ fontSize: 10, fill: '#94A3B8' }} />
                   <YAxis domain={chartDomain} tick={{ fontSize: 10, fill: '#94A3B8' }} tickFormatter={chartTickFormatter} />
@@ -256,18 +392,33 @@ function SubjectCard({ subject }: { subject: ReportCardSubjectData }) {
   )
 }
 
+// --------------- main page ---------------
+
 export function StudentReportCard() {
-  const [period, setPeriod] = useState('2')
+  const user = useAuthStore(s => s.user)
   const t = useTranslation()
+  const [period, setPeriod] = useState('2')
+  const [data, setData] = useState<ReportCardSubjectData[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (!user) return
+    let cancelled = false
+    setLoading(true)
+    fetchReportCardData(user.id, Number(period)).then(result => {
+      if (!cancelled) { setData(result); setLoading(false) }
+    })
+    return () => { cancelled = true }
+  }, [user, period])
 
   const handleExport = () => {
     toast('Gerando PDF... Isso pode levar alguns segundos.', 'info')
     setTimeout(() => toast('Boletim exportado com sucesso! Download iniciado.'), 2000)
   }
 
-  const overallAverage = (
-    mockReportCardData.reduce((acc, s) => acc + s.average, 0) / mockReportCardData.length
-  ).toFixed(1)
+  const overallAverage = data.length > 0
+    ? (data.reduce((acc, s) => acc + s.average, 0) / data.length).toFixed(1)
+    : '—'
 
   return (
     <>
@@ -276,6 +427,7 @@ export function StudentReportCard() {
         actions={
           <div className="flex items-center gap-2">
             <select
+              aria-label="Selecionar bimestre"
               className="input h-9 text-sm pr-8"
               value={period}
               onChange={e => setPeriod(e.target.value)}
@@ -296,60 +448,93 @@ export function StudentReportCard() {
         <div className="card p-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-full bg-[#1E3A8A] flex items-center justify-center text-white text-lg font-bold">
-              L
+              {user?.name?.charAt(0) ?? '?'}
             </div>
             <div>
-              <h2 className="font-display font-semibold text-[#0F172A]">Lucas Mendes</h2>
+              <h2 className="font-display font-semibold text-[#0F172A]">{user?.name ?? '—'}</h2>
               <p className="text-sm text-[#64748B]">3º Ano A · {period}º Bimestre · 2024</p>
-              <p className="text-xs text-[#94A3B8]">Colégio Estadual São Paulo · Matrícula: 2024001</p>
+              <p className="text-xs text-[#94A3B8]">{user?.institution ?? 'Vekta'} · Matrícula: 2024001</p>
             </div>
           </div>
           <div className="text-right">
             <p className="text-xs text-[#94A3B8]">Média geral do período</p>
-            <p className={clsx(
-              'text-3xl font-bold font-display',
-              parseFloat(overallAverage) >= 6 ? 'text-emerald-600'
-              : parseFloat(overallAverage) >= 4 ? 'text-amber-600'
-              : 'text-red-600'
-            )}>
-              {overallAverage}
-            </p>
-            <StatusBadge status={parseFloat(overallAverage) >= 6 ? 'approved' : 'recovery'} />
+            {loading ? (
+              <div className="h-9 w-16 bg-slate-100 rounded animate-pulse mt-1" />
+            ) : (
+              <p className={clsx(
+                'text-3xl font-bold font-display',
+                overallAverage === '—' ? 'text-[#94A3B8]'
+                : parseFloat(overallAverage) >= 6 ? 'text-emerald-600'
+                : parseFloat(overallAverage) >= 4 ? 'text-amber-600'
+                : 'text-red-600'
+              )}>
+                {overallAverage}
+              </p>
+            )}
+            {!loading && overallAverage !== '—' && (
+              <StatusBadge status={parseFloat(overallAverage) >= 6 ? 'approved' : 'recovery'} />
+            )}
           </div>
         </div>
 
         {/* Summary */}
-        <div className="grid grid-cols-3 gap-4">
-          {[
-            { label: 'Aprovado em', value: `${mockReportCardData.filter(s => s.status === 'approved').length}/${mockReportCardData.length}`, sub: 'disciplinas' },
-            { label: 'Frequência média', value: `${Math.round(mockReportCardData.reduce((a, s) => a + s.attendance, 0) / mockReportCardData.length)}%`, sub: 'das aulas' },
-            { label: 'Em recuperação', value: `${mockReportCardData.filter(s => s.status === 'recovery').length}`, sub: 'disciplina(s)' },
-          ].map(stat => (
-            <div key={stat.label} className="card p-4 text-center">
-              <p className="text-xs text-[#64748B]">{stat.label}</p>
-              <p className="text-2xl font-bold font-display text-[#0F172A] mt-1">{stat.value}</p>
-              <p className="text-xs text-[#94A3B8]">{stat.sub}</p>
-            </div>
-          ))}
-        </div>
+        {!loading && data.length > 0 && (
+          <div className="grid grid-cols-3 gap-4">
+            {[
+              { label: 'Aprovado em', value: `${data.filter(s => s.status === 'approved').length}/${data.length}`, sub: 'disciplinas' },
+              { label: 'Frequência média', value: `${Math.round(data.reduce((a, s) => a + s.attendance, 0) / data.length)}%`, sub: 'das aulas' },
+              { label: 'Em recuperação', value: `${data.filter(s => s.status === 'recovery').length}`, sub: 'disciplina(s)' },
+            ].map(stat => (
+              <div key={stat.label} className="card p-4 text-center">
+                <p className="text-xs text-[#64748B]">{stat.label}</p>
+                <p className="text-2xl font-bold font-display text-[#0F172A] mt-1">{stat.value}</p>
+                <p className="text-xs text-[#94A3B8]">{stat.sub}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Skeleton */}
+        {loading && (
+          <div className="space-y-3">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="card p-4 flex items-center justify-between">
+                <div className="space-y-2">
+                  <div className="h-4 w-32 bg-slate-100 rounded animate-pulse" />
+                  <div className="h-3 w-20 bg-slate-100 rounded animate-pulse" />
+                </div>
+                <div className="h-8 w-16 bg-slate-100 rounded animate-pulse" />
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Subject cards */}
-        <div className="space-y-3">
-          {mockReportCardData.map(subject => (
-            <SubjectCard key={subject.subjectId} subject={subject} />
-          ))}
-        </div>
+        {!loading && (
+          <div className="space-y-3">
+            {data.map(subject => (
+              <SubjectCard key={subject.subjectId} subject={subject} />
+            ))}
+            {data.length === 0 && (
+              <div className="card p-12 text-center text-[#94A3B8]">
+                <p className="font-medium">Nenhuma nota lançada para o {period}º Bimestre.</p>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* PDF export note */}
-        <div className="card p-4 flex items-start gap-3 bg-blue-50 border-blue-200">
-          <TrendingUp size={16} className="text-[#1E3A8A] mt-0.5" />
-          <div>
-            <p className="text-sm font-medium text-[#1E3A8A]">Exportação PDF</p>
-            <p className="text-xs text-[#1E3A8A]/70 mt-0.5">
-              O PDF inclui logo da instituição, dados do aluno, tabela completa de notas, frequências, situação final e QR Code de verificação digital.
-            </p>
+        {!loading && data.length > 0 && (
+          <div className="card p-4 flex items-start gap-3 bg-blue-50 border-blue-200">
+            <TrendingUp size={16} className="text-[#1E3A8A] mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-[#1E3A8A]">Exportação PDF</p>
+              <p className="text-xs text-[#1E3A8A]/70 mt-0.5">
+                O PDF inclui logo da instituição, dados do aluno, tabela completa de notas, frequências, situação final e QR Code de verificação digital.
+              </p>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </>
   )
