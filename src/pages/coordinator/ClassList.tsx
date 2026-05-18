@@ -76,12 +76,14 @@ function CreateClassModal({
   onCreated: () => void
 }) {
   const [subjects, setSubjects] = useState<SubjectRow[]>([])
+  const [teachers, setTeachers] = useState<{ id: string; name: string; email: string }[]>([])
   const [name, setName] = useState('')
   const [gradeLevel, setGradeLevel] = useState('')
   const [subjectId, setSubjectId] = useState('')
   const [newSubjectName, setNewSubjectName] = useState('')
   const [newSubjectColor, setNewSubjectColor] = useState(SUBJECT_COLORS[0])
   const [teacherEmail, setTeacherEmail] = useState('')
+  const [showSuggestions, setShowSuggestions] = useState(false)
   const { gradeScale } = useSettingsStore()
   const grading_type: 'numeric' | 'mencao' = gradeScale === 'mencao' ? 'mencao' : 'numeric'
   const currentYear = new Date().getFullYear().toString()
@@ -96,6 +98,13 @@ function CreateClassModal({
       .eq('school_id', schoolId)
       .order('name')
       .then(({ data }) => setSubjects(data ?? []))
+    supabase
+      .from('profiles')
+      .select('id, name, email')
+      .eq('school_id', schoolId)
+      .eq('role', 'teacher')
+      .order('name')
+      .then(({ data }) => setTeachers((data ?? []).filter(t => t.email) as { id: string; name: string; email: string }[]))
   }, [open, schoolId])
 
   const reset = () => {
@@ -105,6 +114,7 @@ function CreateClassModal({
     setNewSubjectName('')
     setNewSubjectColor(SUBJECT_COLORS[0])
     setTeacherEmail('')
+    setShowSuggestions(false)
     setEmailError('')
   }
 
@@ -308,20 +318,61 @@ function CreateClassModal({
             </div>
 
             {/* E-mail do professor */}
-            <div>
+            <div className="relative">
               <label className="block text-xs font-medium text-[#64748B] mb-1.5">
-                E-mail do professor responsável <span className="text-red-500">*</span>
+                Professor responsável <span className="text-red-500">*</span>
               </label>
               <input
-                type="email"
+                type="text"
+                autoComplete="off"
                 className={clsx('input', emailError && 'border-red-400 focus:border-red-500')}
-                placeholder="professor@escola.vekta.app"
+                placeholder="Buscar por nome ou e-mail..."
                 value={teacherEmail}
-                onChange={e => { setTeacherEmail(e.target.value); setEmailError('') }}
+                onChange={e => {
+                  setTeacherEmail(e.target.value)
+                  setEmailError('')
+                  setShowSuggestions(true)
+                }}
+                onFocus={() => setShowSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
               />
               {emailError && (
                 <p className="text-xs text-red-500 mt-1">{emailError}</p>
               )}
+
+              {/* Dropdown de sugestões */}
+              {showSuggestions && (() => {
+                const q = teacherEmail.trim().toLowerCase()
+                const matches = teachers.filter(t =>
+                  t.name.toLowerCase().includes(q) || t.email.toLowerCase().includes(q)
+                )
+                if (matches.length === 0) return null
+                return (
+                  <ul className="absolute z-10 left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-[#E2E8F0] rounded-xl shadow-modal overflow-hidden max-h-48 overflow-y-auto">
+                    {matches.map(t => (
+                      <li key={t.id}>
+                        <button
+                          type="button"
+                          onMouseDown={() => {
+                            setTeacherEmail(t.email)
+                            setShowSuggestions(false)
+                            setEmailError('')
+                          }}
+                          className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-[#F8FAFC] dark:hover:bg-slate-700 transition-colors text-left"
+                        >
+                          <div className="w-7 h-7 rounded-full bg-[#1E3A8A]/10 flex items-center justify-center text-[#1E3A8A] text-xs font-semibold flex-shrink-0">
+                            {t.name.charAt(0)}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-[#0F172A] truncate">{t.name}</p>
+                            <p className="text-xs text-[#94A3B8] truncate">{t.email}</p>
+                          </div>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )
+              })()}
             </div>
 
             {/* Tipo de avaliação — herdado das configurações */}
