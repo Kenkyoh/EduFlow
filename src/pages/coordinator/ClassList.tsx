@@ -45,7 +45,13 @@ const SUBJECT_COLORS = [
   { color: '#65A30D', light: '#F7FEE7' },
 ]
 
-const PERIODS = ['1º Bimestre', '2º Bimestre', '3º Bimestre', '4º Bimestre']
+function currentPeriod(): string {
+  const month = new Date().getMonth() + 1 // 1–12
+  if (month <= 4) return '1º Bimestre'
+  if (month <= 7) return '2º Bimestre'
+  if (month <= 10) return '3º Bimestre'
+  return '4º Bimestre'
+}
 
 // ─── Create Class Modal ───────────────────────────────────────
 
@@ -67,7 +73,6 @@ function CreateClassModal({
   const [newSubjectColor, setNewSubjectColor] = useState(SUBJECT_COLORS[0])
   const [teacherEmail, setTeacherEmail] = useState('')
   const [gradingType, setGradingType] = useState<'numeric' | 'mencao'>('numeric')
-  const [period, setPeriod] = useState(PERIODS[0])
   const [year, setYear] = useState(new Date().getFullYear().toString())
   const [saving, setSaving] = useState(false)
   const [emailError, setEmailError] = useState('')
@@ -89,7 +94,6 @@ function CreateClassModal({
     setNewSubjectColor(SUBJECT_COLORS[0])
     setTeacherEmail('')
     setGradingType('numeric')
-    setPeriod(PERIODS[0])
     setYear(new Date().getFullYear().toString())
     setEmailError('')
   }
@@ -146,7 +150,7 @@ function CreateClassModal({
           name: name.trim(),
           grading_type: gradingType,
           year,
-          period,
+          period: currentPeriod(),
         })
 
       if (classErr) {
@@ -308,27 +312,23 @@ function CreateClassModal({
               </div>
             </div>
 
-            {/* Período e Ano */}
+            {/* Ano + período automático */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium text-[#64748B] mb-1.5">Período</label>
-                <select
-                  aria-label="Período"
-                  className="input"
-                  value={period}
-                  onChange={e => setPeriod(e.target.value)}
-                >
-                  {PERIODS.map(p => <option key={p} value={p}>{p}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-[#64748B] mb-1.5">Ano</label>
+                <label className="block text-xs font-medium text-[#64748B] mb-1.5">Ano letivo</label>
                 <input
                   className="input"
                   value={year}
                   onChange={e => setYear(e.target.value)}
                   placeholder="2025"
                 />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-[#64748B] mb-1.5">Período</label>
+                <div className="input flex items-center text-[#64748B] bg-slate-50 cursor-default select-none">
+                  {currentPeriod()}
+                </div>
+                <p className="text-[11px] text-[#94A3B8] mt-1">Definido pela data atual</p>
               </div>
             </div>
           </div>
