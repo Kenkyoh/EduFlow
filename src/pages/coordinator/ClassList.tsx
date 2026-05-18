@@ -16,6 +16,7 @@ import clsx from 'clsx'
 interface ClassRow {
   id: string
   name: string
+  grade_level: string
   year: string
   period: string
   grading_type: 'numeric' | 'mencao'
@@ -27,6 +28,13 @@ interface ClassRow {
   subjects: { id: string; name: string; color: string; color_light: string } | null
   profiles: { name: string } | null
 }
+
+const GRADE_LEVELS = [
+  { group: 'Ensino Fundamental I', options: ['1° ano', '2° ano', '3° ano', '4° ano', '5° ano'] },
+  { group: 'Ensino Fundamental II', options: ['6° ano', '7° ano', '8° ano', '9° ano'] },
+  { group: 'Ensino Médio', options: ['1° ano do Ensino Médio', '2° ano do Ensino Médio', '3° ano do Ensino Médio'] },
+  { group: 'EJA / Outros', options: ['EJA Fundamental', 'EJA Médio', 'Outro'] },
+]
 
 interface SubjectRow {
   id: string
@@ -69,6 +77,7 @@ function CreateClassModal({
 }) {
   const [subjects, setSubjects] = useState<SubjectRow[]>([])
   const [name, setName] = useState('')
+  const [gradeLevel, setGradeLevel] = useState('')
   const [subjectId, setSubjectId] = useState('')
   const [newSubjectName, setNewSubjectName] = useState('')
   const [newSubjectColor, setNewSubjectColor] = useState(SUBJECT_COLORS[0])
@@ -91,6 +100,7 @@ function CreateClassModal({
 
   const reset = () => {
     setName('')
+    setGradeLevel('')
     setSubjectId('')
     setNewSubjectName('')
     setNewSubjectColor(SUBJECT_COLORS[0])
@@ -101,7 +111,7 @@ function CreateClassModal({
   const handleClose = () => { reset(); onClose() }
 
   const handleSubmit = async () => {
-    if (!name.trim() || !teacherEmail.trim()) return
+    if (!name.trim() || !gradeLevel || !teacherEmail.trim()) return
     if (!subjectId && !newSubjectName.trim()) return
 
     setSaving(true)
@@ -148,6 +158,7 @@ function CreateClassModal({
           subject_id: finalSubjectId,
           teacher_id: teacher.id,
           name: name.trim(),
+          grade_level: gradeLevel,
           grading_type,
           year: currentYear,
           period: currentPeriod(),
@@ -171,6 +182,7 @@ function CreateClassModal({
   const canSubmit =
     !saving &&
     name.trim() !== '' &&
+    gradeLevel !== '' &&
     teacherEmail.trim() !== '' &&
     (subjectId !== '' || newSubjectName.trim() !== '')
 
@@ -201,10 +213,32 @@ function CreateClassModal({
               </label>
               <input
                 className="input"
-                placeholder="Ex.: Turma A — Matemática"
+                placeholder="Ex.: Turma A"
                 value={name}
                 onChange={e => setName(e.target.value)}
               />
+            </div>
+
+            {/* Série / Ano escolar */}
+            <div>
+              <label className="block text-xs font-medium text-[#64748B] mb-1.5">
+                Série <span className="text-red-500">*</span>
+              </label>
+              <select
+                aria-label="Série"
+                className="input"
+                value={gradeLevel}
+                onChange={e => setGradeLevel(e.target.value)}
+              >
+                <option value="">Selecionar série...</option>
+                {GRADE_LEVELS.map(g => (
+                  <optgroup key={g.group} label={g.group}>
+                    {g.options.map(o => (
+                      <option key={o} value={o}>{o}</option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
             </div>
 
             {/* Disciplina */}
@@ -366,7 +400,7 @@ export function CoordinatorClassList() {
     const { data, error } = await supabase
       .from('classes')
       .select(`
-        id, name, year, period, grading_type, students_count, delivery_rate, average, at_risk,
+        id, name, grade_level, year, period, grading_type, students_count, delivery_rate, average, at_risk,
         teacher_id,
         subjects(id, name, color, color_light),
         profiles!teacher_id(name)
@@ -385,6 +419,7 @@ export function CoordinatorClassList() {
   const filtered = classes.filter(cls =>
     !query ||
     cls.name.toLowerCase().includes(query.toLowerCase()) ||
+    cls.grade_level.toLowerCase().includes(query.toLowerCase()) ||
     (cls.subjects?.name ?? '').toLowerCase().includes(query.toLowerCase()) ||
     (cls.profiles?.name ?? '').toLowerCase().includes(query.toLowerCase())
   )
@@ -459,7 +494,10 @@ export function CoordinatorClassList() {
               </div>
 
               <h3 className="font-display font-semibold text-[#0F172A]">{cls.name}</h3>
-              <p className="text-xs text-[#64748B] mt-0.5">{cls.subjects?.name ?? '—'}</p>
+              {cls.grade_level && (
+                <p className="text-xs font-medium text-[#64748B] mt-0.5">{cls.grade_level}</p>
+              )}
+              <p className="text-xs text-[#94A3B8] mt-0.5">{cls.subjects?.name ?? '—'}</p>
               <p className="text-xs text-[#94A3B8] mt-0.5 truncate">{cls.profiles?.name ?? '—'}</p>
 
               <div className="mt-4 space-y-2">

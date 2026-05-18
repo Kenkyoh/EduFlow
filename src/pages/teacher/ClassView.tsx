@@ -15,6 +15,7 @@ import clsx from 'clsx'
 interface ClassData {
   id: string
   name: string
+  grade_level: string
   year: string
   period: string
   grading_type: 'numeric' | 'mencao'
@@ -222,7 +223,7 @@ export function TeacherClassView() {
     setClsLoading(true)
     const { data } = await supabase
       .from('classes')
-      .select('id, name, year, period, grading_type, students_count, delivery_rate, average, at_risk, subjects(id, name, color, color_light)')
+      .select('id, name, grade_level, year, period, grading_type, students_count, delivery_rate, average, at_risk, subjects(id, name, color, color_light)')
       .eq('id', classId)
       .single()
     setCls(data as unknown as ClassData | null)
@@ -293,7 +294,7 @@ export function TeacherClassView() {
   return (
     <>
       <Header
-        title={`${cls.name} — ${cls.subjects?.name ?? ''}`}
+        title={[cls.grade_level, cls.subjects?.name].filter(Boolean).join(' — ') || cls.name}
         actions={
           <button type="button" onClick={() => setDrawerOpen(true)} className="btn-primary text-sm">
             <Plus size={16} /> Nova atividade
@@ -313,7 +314,10 @@ export function TeacherClassView() {
             </div>
             <div>
               <h2 className="font-display font-semibold text-[#0F172A]">{cls.name}</h2>
-              <p className="text-sm text-[#64748B]">{cls.subjects?.name ?? '—'} · {cls.students_count} alunos · {cls.period}</p>
+              <p className="text-sm text-[#64748B]">
+                {[cls.grade_level, cls.subjects?.name].filter(Boolean).join(' · ')}
+                {' · '}{cls.students_count} alunos · {cls.period}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-6 text-center">
