@@ -10,6 +10,7 @@ import { useSettingsStore } from '../../store/settings'
 import { formatGrade, SCALE_INFO } from '../../utils/gradeFormat'
 import clsx from 'clsx'
 import { useTranslation } from '../../i18n'
+import { SkCoordinatorDashboard } from '../../components/Skeleton'
 
 function KpiCard({ label, value, unit, change, icon: Icon, iconColor, iconBg }: {
   label: string
@@ -50,7 +51,7 @@ export function CoordinatorDashboard() {
   const { gradeDistribution, monthlyEvolution, atRisk } = mockCoordinatorData
   const { gradeScale } = useSettingsStore()
   const t = useTranslation()
-  const { data: classes = [] } = useClasses()
+  const { data: classes = [], isLoading } = useClasses()
 
   const totalStudents   = classes.reduce((a, c) => a + c.studentsCount, 0)
   const totalAtRisk     = classes.reduce((a, c) => a + (c.atRisk ?? 0), 0)
@@ -69,6 +70,15 @@ export function CoordinatorDashboard() {
     atRiskStudents: totalAtRisk,
     attendance: mockCoordinatorData.kpis.attendance,
     changes: mockCoordinatorData.kpis.changes,
+  }
+
+  if (isLoading) {
+    return (
+      <>
+        <Header title="Painel da Coordenação" />
+        <SkCoordinatorDashboard />
+      </>
+    )
   }
 
   return (

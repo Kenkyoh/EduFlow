@@ -1,14 +1,18 @@
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Building2, Users, GraduationCap, TrendingUp, ChevronRight, Plus, BookOpen } from 'lucide-react'
 import { useAuthStore } from '../../store/auth'
 import { mockSchools } from '../../data/mock'
 import { STATUS_CONFIG, PLAN_CONFIG } from './adminConfig'
 import { useTranslation } from '../../i18n'
+import { SkAdminDashboard } from '../../components/Skeleton'
 
 export function AdminDashboard() {
   const user = useAuthStore(s => s.user)
   const navigate = useNavigate()
   const t = useTranslation()
+  const [isLoading, setIsLoading] = useState(true)
+  useEffect(() => { setIsLoading(false) }, [])
 
   const activeSchools = mockSchools.filter(s => s.status === 'active').length
   const totalStudents = mockSchools.reduce((acc, s) => acc + s.studentsCount, 0)
@@ -21,6 +25,8 @@ export function AdminDashboard() {
     { label: t('admin.dashboard.totalStudents'),      value: totalStudents.toLocaleString('pt-BR'),   icon: GraduationCap, color: '#7C3AED', bg: '#F5F3FF' },
     { label: t('admin.dashboard.totalTeachers'),      value: totalTeachers,                           icon: Users,         color: '#D97706', bg: '#FFFBEB' },
   ]
+
+  if (isLoading) return <SkAdminDashboard />
 
   return (
     <div className="space-y-6">
