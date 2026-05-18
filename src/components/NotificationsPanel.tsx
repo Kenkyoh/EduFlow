@@ -60,7 +60,7 @@ export function NotificationsPanel() {
         className="fixed inset-0 bg-black/20 z-40"
         onClick={closePanel}
       />
-      <div className="fixed top-0 right-0 h-full w-80 bg-white dark:bg-slate-900 border-l border-[#E2E8F0] z-50 flex flex-col shadow-modal animate-slide-in-right">
+      <div className="fixed top-0 right-0 h-full w-full sm:w-80 bg-white dark:bg-slate-900 border-l border-[#E2E8F0] z-50 flex flex-col shadow-modal animate-slide-in-right">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-[#E2E8F0]">
           <div className="flex items-center gap-2">

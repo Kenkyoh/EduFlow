@@ -84,7 +84,7 @@ export function StudentActivities() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {[
             { label: t('student.activities.stats.pending'), value: activities.filter(a => a.status === 'pending' || a.status === 'upcoming').length, color: 'text-amber-600', bg: 'bg-amber-50' },
             { label: t('student.activities.stats.late'), value: activities.filter(a => a.status === 'late').length, color: 'text-red-600', bg: 'bg-red-50' },

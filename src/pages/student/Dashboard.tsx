@@ -80,7 +80,7 @@ export function StudentDashboard() {
 
       <div className="space-y-6">
         {/* Welcome bar */}
-        <div className="card p-4 bg-gradient-to-r from-[#1E3A8A] to-[#1e40af] text-white flex items-center justify-between">
+        <div className="card p-4 bg-gradient-to-r from-[#1E3A8A] to-[#1e40af] text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div>
             <h2 className="font-display font-semibold text-lg">{t('student.dashboard.goodMorning', { name: user?.name.split(' ')[0] ?? '' })}</h2>
             <p className="text-blue-200 text-sm mt-0.5">

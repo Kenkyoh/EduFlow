@@ -44,7 +44,7 @@ export function Header({ title, actions }: HeaderProps) {
         <Menu size={20} />
       </button>
 
-      <h1 className="font-display font-semibold text-[#0F172A] text-base md:text-lg flex-shrink-0">
+      <h1 className="font-display font-semibold text-[#0F172A] text-base md:text-lg min-w-0 truncate">
         {title}
       </h1>
 

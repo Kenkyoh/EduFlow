@@ -520,7 +520,8 @@ export function TeacherClassView() {
               </div>
             ) : (
               <div className="card overflow-hidden">
-                <table className="w-full">
+                <div className="overflow-x-auto">
+                <table className="w-full min-w-[480px]">
                   <thead className="bg-[#F8FAFC] border-b border-[#E2E8F0]">
                     <tr>
                       <th className="px-4 py-3 text-left text-xs font-medium text-[#64748B]">Aluno</th>
@@ -561,6 +562,7 @@ export function TeacherClassView() {
                     })}
                   </tbody>
                 </table>
+                </div>
               </div>
             )}
           </div>

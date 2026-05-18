@@ -120,7 +120,7 @@ export function Login() {
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-modal p-8">
+        <div className="bg-white rounded-2xl shadow-modal p-5 sm:p-8">
           <h2 className="font-display font-semibold text-[#0F172A] text-xl mb-6">{t('login.signIn')}</h2>
 
           {/* Demo profiles */}
