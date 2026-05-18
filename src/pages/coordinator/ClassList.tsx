@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Users, TrendingUp, AlertTriangle, BookOpen, Plus, X, Loader2 } from 'lucide-react'
 import { Header } from '../../components/Header'
 import { useAuthStore } from '../../store/auth'
+import { useSettingsStore } from '../../store/settings'
 import { supabase } from '../../lib/supabase'
 import { useSearchStore } from '../../store/search'
 import { toast } from '../../components/Toast'
@@ -72,7 +73,8 @@ function CreateClassModal({
   const [newSubjectName, setNewSubjectName] = useState('')
   const [newSubjectColor, setNewSubjectColor] = useState(SUBJECT_COLORS[0])
   const [teacherEmail, setTeacherEmail] = useState('')
-  const [gradingType, setGradingType] = useState<'numeric' | 'mencao'>('numeric')
+  const { gradeScale } = useSettingsStore()
+  const grading_type: 'numeric' | 'mencao' = gradeScale === 'mencao' ? 'mencao' : 'numeric'
   const [year, setYear] = useState(new Date().getFullYear().toString())
   const [saving, setSaving] = useState(false)
   const [emailError, setEmailError] = useState('')
@@ -93,7 +95,6 @@ function CreateClassModal({
     setNewSubjectName('')
     setNewSubjectColor(SUBJECT_COLORS[0])
     setTeacherEmail('')
-    setGradingType('numeric')
     setYear(new Date().getFullYear().toString())
     setEmailError('')
   }
@@ -148,7 +149,7 @@ function CreateClassModal({
           subject_id: finalSubjectId,
           teacher_id: teacher.id,
           name: name.trim(),
-          grading_type: gradingType,
+          grading_type,
           year,
           period: currentPeriod(),
         })
@@ -290,26 +291,22 @@ function CreateClassModal({
               )}
             </div>
 
-            {/* Tipo de avaliação */}
+            {/* Tipo de avaliação — herdado das configurações */}
             <div>
-              <label className="block text-xs font-medium text-[#64748B] mb-2">Tipo de avaliação</label>
-              <div className="flex gap-4">
-                {(['numeric', 'mencao'] as const).map(type => (
-                  <label key={type} className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="gradingType"
-                      value={type}
-                      checked={gradingType === type}
-                      onChange={() => setGradingType(type)}
-                      className="accent-[#1E3A8A]"
-                    />
-                    <span className="text-sm text-[#0F172A]">
-                      {type === 'numeric' ? 'Numérica (0–10)' : 'Menção (PA/AC/A/P/N)'}
-                    </span>
-                  </label>
-                ))}
+              <label className="block text-xs font-medium text-[#64748B] mb-1.5">Tipo de avaliação</label>
+              <div className="input flex items-center justify-between bg-slate-50 cursor-default select-none">
+                <span className="text-[#0F172A]">
+                  {grading_type === 'mencao' ? 'Menção (PA / AC / A / P / N)' : 'Numérica (0 – 10)'}
+                </span>
+                <a
+                  href="/settings"
+                  className="text-xs text-[#1E3A8A] hover:underline flex-shrink-0 ml-3"
+                  onClick={handleClose}
+                >
+                  Alterar nas configurações
+                </a>
               </div>
+              <p className="text-[11px] text-[#94A3B8] mt-1">Definido na aba Aprovação das configurações da escola</p>
             </div>
 
             {/* Ano + período automático */}
