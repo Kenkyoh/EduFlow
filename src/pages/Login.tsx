@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { GraduationCap, Eye, EyeOff, Chrome } from 'lucide-react'
+import { GraduationCap, Eye, EyeOff, Chrome, ChevronRight } from 'lucide-react'
 import { useAuthStore } from '../store/auth'
 import { useLanguageStore } from '../store/language'
 import { useTranslation } from '../i18n'
@@ -8,6 +8,7 @@ import type { UserRole } from '../types'
 import clsx from 'clsx'
 
 const DEMO_PASSWORD = 'Demo@2025#'
+const ADMIN_PASSWORD = 'Vekta@2025#Admin'
 
 const LANG_OPTIONS: { code: 'pt' | 'en' | 'es'; flag: string; label: string }[] = [
   { code: 'pt', flag: '🇧🇷', label: 'PT' },
@@ -37,11 +38,12 @@ export function Login() {
     else                               navigate('/coordinator',  { replace: true })
   }, [user, navigate])
 
-  const DEMO_PROFILES: { role: UserRole; label: string; email: string; color: string; emoji: string }[] = [
-    { role: 'student',     label: t('roles.student'),     email: 'lucas@escola.vekta.app',    color: 'bg-blue-50 border-blue-200 text-blue-700',         emoji: '🎓' },
-    { role: 'teacher',     label: t('roles.teacher'),     email: 'ana.lima@escola.vekta.app', color: 'bg-purple-50 border-purple-200 text-purple-700',   emoji: '👩‍🏫' },
-    { role: 'coordinator', label: t('roles.coordinator'), email: 'carlos@escola.vekta.app',   color: 'bg-emerald-50 border-emerald-200 text-emerald-700', emoji: '📊' },
-    { role: 'guardian',    label: t('roles.guardian'),    email: 'fernanda.mendes@gmail.com', color: 'bg-rose-50 border-rose-200 text-rose-700',          emoji: '👪' },
+  const DEMO_PROFILES: { role: UserRole; label: string; email: string; password: string; avatarBg: string; textColor: string; emoji: string }[] = [
+    { role: 'student',     label: t('roles.student'),     email: 'lucas@escola.vekta.app',    password: DEMO_PASSWORD,  avatarBg: 'bg-blue-100',    textColor: 'text-blue-700',    emoji: '🎓' },
+    { role: 'teacher',     label: t('roles.teacher'),     email: 'ana.lima@escola.vekta.app', password: DEMO_PASSWORD,  avatarBg: 'bg-purple-100',  textColor: 'text-purple-700',  emoji: '👩‍🏫' },
+    { role: 'coordinator', label: t('roles.coordinator'), email: 'carlos@escola.vekta.app',   password: DEMO_PASSWORD,  avatarBg: 'bg-emerald-100', textColor: 'text-emerald-700', emoji: '📊' },
+    { role: 'guardian',    label: t('roles.guardian'),    email: 'fernanda.mendes@gmail.com', password: DEMO_PASSWORD,  avatarBg: 'bg-rose-100',    textColor: 'text-rose-700',    emoji: '👪' },
+    { role: 'admin',       label: t('roles.admin'),       email: 'admin@vekta.app',           password: ADMIN_PASSWORD, avatarBg: 'bg-slate-100',   textColor: 'text-slate-700',   emoji: '⚙️' },
   ]
 
   const handleLogin = async (demoEmail?: string, demoPassword?: string) => {
@@ -112,21 +114,24 @@ export function Login() {
 
           {/* Demo profiles */}
           <div className="mb-5">
-            <p className="text-xs font-medium text-[#94A3B8] mb-2">{t('login.quickAccess')}</p>
-            <div className="grid grid-cols-2 gap-2">
+            <p className="text-xs font-medium text-[#94A3B8] mb-2.5">{t('login.quickAccess')}</p>
+            <div className="space-y-1.5">
               {DEMO_PROFILES.map(p => (
                 <button
                   key={p.role}
                   type="button"
                   disabled={loading}
-                  onClick={() => handleLogin(p.email, DEMO_PASSWORD)}
-                  className={clsx(
-                    'flex items-center gap-2 py-2 px-3 rounded-lg border text-xs font-medium transition-all hover:scale-[1.02] disabled:opacity-60',
-                    p.color
-                  )}
+                  onClick={() => handleLogin(p.email, p.password)}
+                  className="w-full flex items-center gap-2.5 p-2.5 rounded-lg border border-[#E2E8F0] hover:border-[#1E3A8A]/40 hover:bg-[#EFF6FF] transition-all text-left disabled:opacity-60 group"
                 >
-                  <span className="text-base">{p.emoji}</span>
-                  <span>{p.label}</span>
+                  <div className={clsx('w-8 h-8 rounded-lg flex items-center justify-center text-sm flex-shrink-0', p.avatarBg)}>
+                    {p.emoji}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className={clsx('text-xs font-semibold leading-tight', p.textColor)}>{p.label}</p>
+                    <p className="text-[10px] text-[#94A3B8] truncate mt-0.5">{p.email}</p>
+                  </div>
+                  <ChevronRight size={13} className="text-[#CBD5E1] group-hover:text-[#1E3A8A] transition-colors flex-shrink-0" />
                 </button>
               ))}
             </div>
