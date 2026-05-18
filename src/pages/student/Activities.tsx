@@ -1,18 +1,19 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Clock, Upload, CheckCircle, AlertTriangle } from 'lucide-react'
+import { Clock, Upload, AlertTriangle } from 'lucide-react'
 import { Header } from '../../components/Header'
 import { getDaysUntil } from '../../data/mock'
 import { useSearchStore } from '../../store/search'
 import { useTranslation } from '../../i18n'
 import { useActivities } from '../../hooks/useActivities'
 import { SkActivityRow } from '../../components/Skeleton'
+import { EmptyState } from '../../components/EmptyState'
 import clsx from 'clsx'
 
 export function StudentActivities() {
   const navigate = useNavigate()
   const t = useTranslation()
-  const query = useSearchStore(s => s.query)
+  const { query, setQuery } = useSearchStore()
   const [filter, setFilter] = useState<'all' | 'pending' | 'late' | 'submitted'>('all')
   const [subjectFilter, setSubjectFilter] = useState<string>('all')
   const { data: activities = [], isLoading } = useActivities()
@@ -34,6 +35,12 @@ export function StudentActivities() {
     )
 
   const sorted = [...filtered].sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
+
+  function clearFilters() {
+    setFilter('all')
+    setSubjectFilter('all')
+    setQuery('')
+  }
 
   return (
     <>
@@ -96,10 +103,20 @@ export function StudentActivities() {
             {[0, 1, 2, 3].map(i => <SkActivityRow key={i} />)}
           </div>
         ) : sorted.length === 0 ? (
-          <div className="card p-12 flex flex-col items-center gap-3 text-[#94A3B8]">
-            <CheckCircle size={40} strokeWidth={1.5} />
-            <p className="font-medium">{t('student.activities.noActivitiesFound')}</p>
-          </div>
+          activities.length === 0 ? (
+            <EmptyState
+              variant="done"
+              title={t('student.activities.noActivitiesFound')}
+              description={t('student.dashboard.upToDate')}
+              action={{ label: t('nav.calendar'), onClick: () => navigate('/calendar') }}
+            />
+          ) : (
+            <EmptyState
+              variant="search"
+              title={t('student.activities.noActivitiesFound')}
+              action={{ label: t('common.clearFilters'), onClick: clearFilters }}
+            />
+          )
         ) : (
           <div className="space-y-3">
             {sorted.map(act => {

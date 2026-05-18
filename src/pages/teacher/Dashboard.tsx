@@ -1,9 +1,10 @@
 import { useNavigate } from 'react-router-dom'
 import {
   Clock, Users, CheckSquare, MessageSquare, ArrowRight,
-  AlertCircle, TrendingUp, FileText, Plus
+  TrendingUp, FileText, Plus
 } from 'lucide-react'
 import { Header } from '../../components/Header'
+import { EmptyState } from '../../components/EmptyState'
 import { ActivityDrawer } from '../../components/ActivityDrawer'
 import { mockActivities, mockSubmissions } from '../../data/mock'
 import { useClasses } from '../../hooks/useClasses'
@@ -11,13 +12,14 @@ import { useState } from 'react'
 import { toast } from '../../components/Toast'
 import clsx from 'clsx'
 import { useTranslation } from '../../i18n'
+import { SkTeacherDashboard } from '../../components/Skeleton'
 
 export function TeacherDashboard() {
   const navigate = useNavigate()
   const [drawerOpen, setDrawerOpen] = useState(false)
   const t = useTranslation()
 
-  const { data: activeClasses = [] } = useClasses()
+  const { data: activeClasses = [], isLoading } = useClasses()
   const corrections = mockSubmissions.filter(s => s.status === 'submitted')
   const totalStudents = activeClasses.reduce((a, c) => a + c.studentsCount, 0)
   const avgDeliveryRate = activeClasses.length
@@ -37,6 +39,15 @@ export function TeacherDashboard() {
     { id: 2, student: 'Maria Silva', preview: 'Minha entrega chegou? Tive problemas com o arquivo', time: 'Ontem', unread: true },
     { id: 3, student: 'Pedro Oliveira', preview: 'Obrigado pelo feedback! Posso reenviar?', time: '2 dias', unread: false },
   ]
+
+  if (isLoading) {
+    return (
+      <>
+        <Header title={t('teacher.dashboard.title')} />
+        <SkTeacherDashboard />
+      </>
+    )
+  }
 
   return (
     <>
@@ -113,10 +124,11 @@ export function TeacherDashboard() {
             </div>
 
             {corrections.length === 0 ? (
-              <div className="card p-8 flex flex-col items-center gap-3 text-[#94A3B8]">
-                <CheckSquare size={36} strokeWidth={1.5} />
-                <p className="font-medium">{t('teacher.dashboard.allCorrected')}</p>
-              </div>
+              <EmptyState
+                variant="done"
+                title={t('teacher.dashboard.allCorrected')}
+                description={t('teacher.dashboard.allCorrectedDesc')}
+              />
             ) : (
               <div className="space-y-2">
                 {corrections.map(sub => (

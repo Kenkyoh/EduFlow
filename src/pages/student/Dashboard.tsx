@@ -1,22 +1,25 @@
 import { useNavigate } from 'react-router-dom'
 import {
-  Clock, CheckCircle, AlertTriangle, ArrowRight, BookOpen,
+  Clock, AlertTriangle, ArrowRight, BookOpen,
   TrendingUp, Star, Zap
 } from 'lucide-react'
 import { Header } from '../../components/Header'
+import { EmptyState } from '../../components/EmptyState'
 import { mockAnnouncements, getDaysUntil } from '../../data/mock'
 import { useClasses } from '../../hooks/useClasses'
 import { useActivities } from '../../hooks/useActivities'
 import { useAuthStore } from '../../store/auth'
 import { useTranslation } from '../../i18n'
+import { SkStudentDashboard } from '../../components/Skeleton'
 import clsx from 'clsx'
 
 export function StudentDashboard() {
   const navigate = useNavigate()
   const t = useTranslation()
   const user = useAuthStore(s => s.user)
-  const { data: classes = [] } = useClasses()
-  const { data: activities = [] } = useActivities()
+  const { data: classes = [], isLoading: loadingClasses } = useClasses()
+  const { data: activities = [], isLoading: loadingActivities } = useActivities()
+  const isLoading = loadingClasses || loadingActivities
 
   const progressBySubject = classes.map(c => ({
     subjectId: c.subjectId,
@@ -54,6 +57,15 @@ export function StudentDashboard() {
     { label: t('student.dashboard.messages'), icon: '💬', path: '/messages' },
     { label: t('student.dashboard.classes'), icon: '📚', path: '/student/classes' },
   ]
+
+  if (isLoading) {
+    return (
+      <>
+        <Header title={t('student.dashboard.title')} />
+        <SkStudentDashboard />
+      </>
+    )
+  }
 
   return (
     <>
@@ -99,11 +111,12 @@ export function StudentDashboard() {
             </div>
 
             {sorted.length === 0 ? (
-              <div className="card p-8 flex flex-col items-center justify-center gap-3 text-[#94A3B8]">
-                <CheckCircle size={36} strokeWidth={1.5} />
-                <p className="font-medium">{t('student.dashboard.noActivitiesPending')}</p>
-                <p className="text-sm">{t('student.dashboard.upToDate')}</p>
-              </div>
+              <EmptyState
+                variant="done"
+                title={t('student.dashboard.noActivitiesPending')}
+                description={t('student.dashboard.upToDate')}
+                action={{ label: t('student.dashboard.viewAll'), onClick: () => navigate('/student/activities') }}
+              />
             ) : (
               <div className="space-y-3">
                 {sorted.map(act => {

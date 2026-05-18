@@ -1,12 +1,15 @@
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  GraduationCap, TrendingUp, Clock, AlertTriangle, ChevronRight,
+  TrendingUp, Clock, AlertTriangle, ChevronRight,
   BookOpen, Calendar, Bell,
 } from 'lucide-react'
 import { useAuthStore } from '../../store/auth'
 import { mockGuardianStudents } from '../../data/mock'
 import { Header } from '../../components/Header'
+import { EmptyState } from '../../components/EmptyState'
 import { useTranslation } from '../../i18n'
+import { SkGuardianDashboard } from '../../components/Skeleton'
 import clsx from 'clsx'
 
 const EVENT_ICONS = {
@@ -20,6 +23,8 @@ export function GuardianDashboard() {
   const user = useAuthStore(s => s.user)
   const navigate = useNavigate()
   const t = useTranslation()
+  const [isLoading, setIsLoading] = useState(true)
+  useEffect(() => { setIsLoading(false) }, [])
 
   const STATUS_CONFIG = {
     approved: { label: t('common.approved'),  className: 'bg-emerald-50 text-emerald-700' },
@@ -31,6 +36,15 @@ export function GuardianDashboard() {
   const students = (user?.studentIds ?? [])
     .map(id => mockGuardianStudents[id])
     .filter(Boolean)
+
+  if (isLoading) {
+    return (
+      <>
+        <Header title={t('guardian.dashboard.title')} />
+        <SkGuardianDashboard />
+      </>
+    )
+  }
 
   return (
     <>
@@ -47,10 +61,12 @@ export function GuardianDashboard() {
         </div>
 
         {students.length === 0 ? (
-          <div className="card py-20 text-center">
-            <GraduationCap size={40} className="mx-auto text-[#CBD5E1] mb-4" />
-            <p className="text-[#64748B]">{t('guardian.dashboard.noStudents')}</p>
-          </div>
+          <EmptyState
+            variant="students"
+            title={t('guardian.dashboard.noStudents')}
+            description={t('guardian.dashboard.noStudentsDesc')}
+            action={{ label: t('guardian.dashboard.contactSchool'), onClick: () => navigate('/messages') }}
+          />
         ) : (
           students.map(student => (
             <div key={student.id} className="space-y-4">

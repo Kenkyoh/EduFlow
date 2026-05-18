@@ -5,10 +5,11 @@ import { useClasses } from '../../hooks/useClasses'
 import { useSearchStore } from '../../store/search'
 import { useTranslation } from '../../i18n'
 import { SkClassGrid } from '../../components/Skeleton'
+import { EmptyState } from '../../components/EmptyState'
 
 export function TeacherClassList() {
   const navigate = useNavigate()
-  const query = useSearchStore(s => s.query)
+  const { query, setQuery } = useSearchStore()
   const t = useTranslation()
   const { data: classes = [], isLoading, isError } = useClasses()
 
@@ -31,9 +32,13 @@ export function TeacherClassList() {
       {!isLoading && !isError && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {displayed.length === 0 && (
-            <p className="col-span-full text-center py-12 text-[#94A3B8] text-sm">
-              {t('teacher.classList.noClassesFound', { query })}
-            </p>
+            <div className="col-span-full">
+              <EmptyState
+                variant="search"
+                title={query ? t('teacher.classList.noClassesFound', { query }) : t('common.noResults')}
+                action={query ? { label: t('common.clearSearch'), onClick: () => setQuery('') } : undefined}
+              />
+            </div>
           )}
           {displayed.map(cls => (
             <button

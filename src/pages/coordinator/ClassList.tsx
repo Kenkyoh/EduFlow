@@ -5,9 +5,10 @@ import { useSearchStore } from '../../store/search'
 import clsx from 'clsx'
 import { useTranslation } from '../../i18n'
 import { SkClassGrid } from '../../components/Skeleton'
+import { EmptyState } from '../../components/EmptyState'
 
 export function CoordinatorClassList() {
-  const query = useSearchStore(s => s.query)
+  const { query, setQuery } = useSearchStore()
   const t = useTranslation()
   const { data: classes = [], isLoading, isError } = useClasses()
 
@@ -130,8 +131,12 @@ export function CoordinatorClassList() {
           ))}
 
           {filtered.length === 0 && (
-            <div className="col-span-full text-center py-12 text-[#94A3B8] text-sm">
-              {t('coordinator.classList.noClassesFound', { query })}
+            <div className="col-span-full">
+              <EmptyState
+                variant="search"
+                title={query ? t('coordinator.classList.noClassesFound', { query }) : t('common.noResults')}
+                action={query ? { label: t('common.clearSearch'), onClick: () => setQuery('') } : undefined}
+              />
             </div>
           )}
         </div>
