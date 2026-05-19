@@ -85,6 +85,8 @@ Todos os 5 perfis estão disponíveis como **botões de 1 clique** na tela de lo
 | 🔢 | Lançamento de notas: sistema numérico e por menção/objetivos |
 | ✅ | Fila de correção de entregas com feedback por aluno |
 | 📢 | Publicação de avisos e materiais no mural da turma |
+| 👤 | Matrícula de alunos por e-mail com confirmação visual prévia |
+| 🗑️ | Remoção de aluno com diálogo de confirmação (evita exclusões acidentais) |
 
 ### 📊 Coordenador
 
@@ -94,6 +96,9 @@ Todos os 5 perfis estão disponíveis como **botões de 1 clique** na tela de lo
 | ⚠️ | Lista de alunos em risco com acesso rápido |
 | 📉 | Gráficos de distribuição de notas e evolução mensal |
 | 🏫 | Visão consolidada de todas as turmas da escola |
+| ➕ | Criação de turmas com série, disciplina personalizada e lista pesquisável de professores |
+| 🎨 | Picker de cor ao criar disciplinas novas |
+| 🗓️ | Bimestre e ano letivo calculados automaticamente pela data atual |
 
 ### 👨‍👩‍👧 Responsável
 
@@ -124,11 +129,17 @@ Todos os 5 perfis estão disponíveis como **botões de 1 clique** na tela de lo
 | 🎨 | Personalização de perfil: foto, cor do avatar, senha |
 | 📱 | Design responsivo (mobile-first) |
 | 📌 | Barra lateral colapsável com navegação por papel |
-| 🌙 | Tema claro/escuro com toggle no header, persistência em `localStorage` e detecção automática da preferência do sistema |
+| 🌙 | Tema claro/escuro com toggle no header e na tela de login, persistência em `localStorage` |
 | 💀 | Skeleton loaders em todos os dashboards e listas durante o carregamento |
-| 📭 | Empty states com ilustrações SVG e botão de ação sugerida em cada página |
+| 📭 | Empty states com ação sugerida em cada página sem dados |
 | 🔍 | Página 404 personalizada com redirecionamento inteligente por perfil |
-| ⚡ | Acesso rápido no login: 5 perfis demo com 1 clique, e-mail visível em cada botão |
+| ⚡ | Acesso rápido no login: 5 perfis demo com 1 clique |
+| 📲 | Barra de navegação inferior no mobile (bottom nav) com ícone ativo destacado |
+| ⌨️ | Atalho `Cmd+K` / `Ctrl+K` para focar a busca global; `Esc` para limpar e sair |
+| ⬆️ | Scroll automático ao topo a cada mudança de rota |
+| 🔔 | Badge de notificação com animação de entrada (bounce) no sidebar e no header |
+| ✅ | `ConfirmDialog` reutilizável para qualquer ação destrutiva (suporte a Esc e estado de loading) |
+| 📱 | Layout totalmente responsivo: grids colapsam em mobile, tabelas com scroll horizontal, modais ajustados |
 
 ---
 
@@ -152,11 +163,10 @@ Todos os 5 perfis estão disponíveis como **botões de 1 clique** na tela de lo
 
 | Categoria | Tecnologia |
 |---|---|
-| Runtime | Node.js 18+ + Express |
-| Linguagem | TypeScript (tsx) |
 | Banco de dados | PostgreSQL via Supabase |
 | Autenticação | Supabase Auth + JWT |
-| Cliente DB | Supabase JS Client |
+| Autorização | Row Level Security (RLS) por escola e perfil |
+| Cliente DB | Supabase JS Client (`@supabase/supabase-js`) |
 
 ---
 
@@ -174,44 +184,37 @@ git clone https://github.com/Kenkyoh/Vekta.git
 cd Vekta
 ```
 
-### 2. Configure o frontend
+### 2. Configure as variáveis de ambiente
 
 ```bash
-npm install
 cp .env.example .env
-# Edite .env → VITE_API_URL=http://localhost:3001
 ```
 
-### 3. Configure o backend
+Edite `.env` com as credenciais do seu projeto Supabase:
 
-```bash
-cd backend
-npm install
-cp .env.example .env
-# Edite .env com sua URL e service_role key do Supabase
+```env
+VITE_SUPABASE_URL=https://seu-projeto.supabase.co
+VITE_SUPABASE_ANON_KEY=sua-chave-anonima
 ```
 
-> As variáveis necessárias estão documentadas em `backend/.env.example`.
+### 3. Execute as migrações no Supabase
 
-### 4. Configure o banco de dados
-
-Execute os arquivos SQL **em ordem** no SQL Editor do Supabase:
+Abra o **SQL Editor** do seu projeto e execute os arquivos **em ordem**:
 
 ```
 backend/supabase/01_schema.sql           # Tabelas, enums e triggers
 backend/supabase/02_demo_seed.sql        # Usuários de demonstração
 backend/supabase/03_classes_subjects.sql # Estrutura de turmas e disciplinas
 backend/supabase/04_classes_seed.sql     # Dados de exemplo
-backend/supabase/05_activities.sql       # Atividades
+backend/supabase/05_activities.sql       # Atividades e submissões
+backend/supabase/07_class_management.sql # Gestão de turmas e e-mails de professores
+backend/supabase/08_grade_level.sql      # Coluna de série (ano escolar)
 ```
 
-### 5. Inicie os servidores
+### 4. Instale as dependências e inicie
 
 ```bash
-# Terminal 1 — backend (porta 3001)
-cd backend && npm run dev
-
-# Terminal 2 — frontend (porta 5173)
+npm install
 npm run dev
 ```
 
@@ -230,28 +233,27 @@ npm run preview  # Prévia do build
 
 ```
 ├── backend/
-│   ├── src/
-│   │   ├── config/        # Cliente Supabase (admin + auth)
-│   │   ├── middleware/    # Autenticação JWT
-│   │   ├── routes/        # auth, subjects, classes, activities
-│   │   ├── types/         # Interfaces TypeScript
-│   │   └── server.ts      # Entry point Express
-│   └── supabase/          # Migrations SQL (01–05)
+│   └── supabase/              # Migrations SQL (01–08)
 │
 └── src/
-    ├── components/        # Componentes compartilhados
-    ├── hooks/             # React Query hooks (useClasses, useActivities…)
-    ├── lib/               # Cliente HTTP (api.ts)
+    ├── components/
+    │   ├── BottomNav.tsx      # Barra de navegação inferior (mobile)
+    │   ├── ConfirmDialog.tsx  # Modal de confirmação reutilizável
+    │   ├── Header.tsx         # Cabeçalho com busca (Cmd+K) e tema
+    │   ├── Sidebar.tsx        # Sidebar colapsável com badge animado
+    │   ├── Layout.tsx         # Layout principal + scroll-to-top
+    │   └── ...                # Toast, Skeleton, NotificationsPanel…
+    ├── hooks/                 # React Query hooks (useClasses, useActivities…)
+    ├── lib/                   # Cliente Supabase (supabase.ts)
     ├── pages/
-    │   ├── student/       # Páginas do aluno
-    │   ├── teacher/       # Páginas do professor
-    │   ├── coordinator/   # Páginas do coordenador
-    │   ├── guardian/      # Páginas do responsável
-    │   └── admin/         # Páginas do administrador
-    ├── store/             # Estado global Zustand (auth, grades…)
-    ├── i18n/              # Traduções PT / EN / ES
-    ├── types/             # Tipos TypeScript globais
-    └── utils/             # Formatação de notas, labels de papéis
+    │   ├── student/           # Dashboard, ClassList, ClassView, Activities, ReportCard
+    │   ├── teacher/           # Dashboard, ClassList, ClassView, GradeTable
+    │   ├── coordinator/       # Dashboard, ClassList, Analytics
+    │   ├── guardian/          # Dashboard, StudentDetail
+    │   └── admin/             # Dashboard, Schools, Settings
+    ├── store/                 # Estado global Zustand (auth, sidebar, theme…)
+    ├── i18n/                  # Traduções PT / EN / ES
+    └── types/                 # Tipos TypeScript globais
 ```
 
 ---
