@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { Plus, Users, FileText, BookOpen, ClipboardList, BarChart3, Zap, X, Loader2, UserPlus, Trash2 } from 'lucide-react'
 import { Header } from '../../components/Header'
 import { ActivityDrawer } from '../../components/ActivityDrawer'
+import { ConfirmDialog } from '../../components/ConfirmDialog'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../store/auth'
 import { mockActivities, mockAnnouncements, getActivityTypeLabel } from '../../data/mock'
@@ -216,6 +217,8 @@ export function TeacherClassView() {
   const [clsLoading, setClsLoading] = useState(true)
 
   const [students, setStudents] = useState<EnrolledStudent[]>([])
+  const [confirmRemove, setConfirmRemove] = useState<{ studentId: string; name: string } | null>(null)
+  const [removing, setRemoving] = useState(false)
   const [studentsLoading, setStudentsLoading] = useState(false)
 
   const loadClass = useCallback(async () => {
@@ -245,17 +248,20 @@ export function TeacherClassView() {
   useEffect(() => { loadClass() }, [loadClass])
   useEffect(() => { if (tab === 'alunos') loadStudents() }, [tab, loadStudents])
 
-  const handleRemoveStudent = async (studentId: string, studentName: string) => {
-    if (!classId) return
+  const handleRemoveStudent = async () => {
+    if (!classId || !confirmRemove) return
+    setRemoving(true)
     const { error } = await supabase
       .from('class_students')
       .delete()
       .eq('class_id', classId)
-      .eq('student_id', studentId)
+      .eq('student_id', confirmRemove.studentId)
 
+    setRemoving(false)
     if (error) { toast('Erro ao remover aluno.', 'error'); return }
-    setStudents(prev => prev.filter(s => s.student_id !== studentId))
-    toast(`${studentName} removido(a) da turma.`, 'success')
+    setStudents(prev => prev.filter(s => s.student_id !== confirmRemove.studentId))
+    toast(`${confirmRemove.name} removido(a) da turma.`, 'success')
+    setConfirmRemove(null)
   }
 
   const classActivities = mockActivities.filter(a => cls && a.classIds.includes(cls.id))
@@ -551,7 +557,7 @@ export function TeacherClassView() {
                             <button
                               type="button"
                               title="Remover aluno"
-                              onClick={() => handleRemoveStudent(s.student_id, name)}
+                              onClick={() => setConfirmRemove({ studentId: s.student_id, name })}
                               className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-red-50 text-[#94A3B8] hover:text-red-500 transition-colors"
                             >
                               <Trash2 size={14} />
@@ -622,6 +628,17 @@ export function TeacherClassView() {
         classId={cls.id}
         schoolId={user?.schoolId ?? ''}
         onEnrolled={() => { loadStudents(); loadClass() }}
+      />
+
+      <ConfirmDialog
+        open={confirmRemove !== null}
+        title="Remover aluno da turma"
+        message={`Tem certeza que deseja remover ${confirmRemove?.name ?? ''} desta turma? O aluno perderá o acesso às atividades e notas.`}
+        confirmLabel="Remover"
+        danger
+        loading={removing}
+        onConfirm={handleRemoveStudent}
+        onCancel={() => setConfirmRemove(null)}
       />
     </>
   )

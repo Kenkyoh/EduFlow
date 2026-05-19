@@ -146,7 +146,7 @@ export function Sidebar() {
             <Bell size={18} className="flex-shrink-0" />
             <span className={clsx(collapsed && 'md:hidden')}>{t('nav.notifications')}</span>
             {unreadCount > 0 && (
-              <span className="absolute top-1.5 left-7 min-w-[18px] h-[18px] rounded-full bg-[#DC2626] text-white text-[10px] flex items-center justify-center font-bold px-1">
+              <span key={unreadCount} className="absolute top-1.5 left-7 min-w-[18px] h-[18px] rounded-full bg-[#DC2626] text-white text-[10px] flex items-center justify-center font-bold px-1 animate-badge-appear">
                 {unreadCount > 9 ? '9+' : unreadCount}
               </span>
             )}

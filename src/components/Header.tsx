@@ -5,7 +5,7 @@ import { useSidebarStore } from '../store/sidebar'
 import { useSearchStore } from '../store/search'
 import { UserAvatar } from './UserAvatar'
 import { useTranslation } from '../i18n'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useThemeStore } from '../store/theme'
 import clsx from 'clsx'
@@ -25,8 +25,25 @@ export function Header({ title, actions }: HeaderProps) {
   const t = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
+  const searchRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => { setQuery('') }, [location.pathname, setQuery])
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault()
+        searchRef.current?.focus()
+        searchRef.current?.select()
+      }
+      if (e.key === 'Escape' && document.activeElement === searchRef.current) {
+        searchRef.current?.blur()
+        setQuery('')
+      }
+    }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [setQuery])
 
   return (
     <header className={clsx(
@@ -52,11 +69,17 @@ export function Header({ title, actions }: HeaderProps) {
       <div className="relative flex-1 max-w-xs ml-2 hidden sm:block">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94A3B8]" />
         <input
-          className="input pl-9 h-8 text-sm"
+          ref={searchRef}
+          className="input pl-9 pr-14 h-8 text-sm"
           placeholder={t('header.search')}
           value={query}
           onChange={e => setQuery(e.target.value)}
         />
+        {!query && (
+          <span className="absolute right-2.5 top-1/2 -translate-y-1/2 hidden lg:flex items-center gap-0.5 pointer-events-none">
+            <kbd className="text-[10px] font-medium text-[#94A3B8] bg-slate-100 dark:bg-slate-700 dark:text-slate-400 px-1.5 py-0.5 rounded border border-[#E2E8F0] dark:border-slate-600">⌘K</kbd>
+          </span>
+        )}
       </div>
 
       <div className="flex items-center gap-1 md:gap-2 ml-auto">
@@ -81,7 +104,7 @@ export function Header({ title, actions }: HeaderProps) {
         >
           <Bell size={18} />
           {unreadCount > 0 && (
-            <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-[#DC2626] text-white text-[10px] flex items-center justify-center font-bold">
+            <span key={unreadCount} className="absolute top-1 right-1 w-4 h-4 rounded-full bg-[#DC2626] text-white text-[10px] flex items-center justify-center font-bold animate-badge-appear">
               {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}
