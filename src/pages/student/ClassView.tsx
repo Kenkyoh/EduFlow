@@ -195,22 +195,10 @@ export function StudentClassView() {
         )}
 
         {tab === 'materiais' && (
-          <div className="space-y-3">
-            {[
-              { title: 'Resumo: Funções Quadráticas', type: 'PDF', size: '1.2 MB', date: '3 dias atrás' },
-              { title: 'Videoaula: Discriminante', type: 'Vídeo', size: '22 min', date: '1 semana' },
-            ].map((mat, i) => (
-              <div key={i} className="card p-4 flex items-center gap-4 cursor-pointer hover:shadow-md transition-shadow">
-                <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
-                  <FileText size={20} className="text-[#1E3A8A]" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-[#0F172A]">{mat.title}</p>
-                  <p className="text-xs text-[#94A3B8]">{mat.type} · {mat.size} · {mat.date}</p>
-                </div>
-                <button type="button" className="btn-ghost text-xs" onClick={() => toast('Download iniciado', 'info')}>Download</button>
-              </div>
-            ))}
+          <div className="card p-10 flex flex-col items-center gap-3 text-[#94A3B8]">
+            <FileText size={36} strokeWidth={1.5} />
+            <p className="font-medium text-[#64748B]">Nenhum material disponível</p>
+            <p className="text-sm text-center max-w-xs">O professor ainda não compartilhou materiais nesta turma.</p>
           </div>
         )}
       </div>

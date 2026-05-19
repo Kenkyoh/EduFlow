@@ -92,6 +92,13 @@ function CreateClassModal({
   const [emailError, setEmailError] = useState('')
 
   useEffect(() => {
+    if (!open) return
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') handleClose() }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
     if (!open || !schoolId) return
     supabase
       .from('subjects')

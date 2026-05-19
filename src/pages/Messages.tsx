@@ -199,7 +199,7 @@ export function Messages() {
 
   const ConversationList = (
     <div className="flex flex-col h-full">
-      <div className="p-3 border-b border-[#E2E8F0] flex-shrink-0">
+      <div className="p-3 border-b border-[#E2E8F0] dark:border-slate-700 flex-shrink-0">
         <div className="relative">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#94A3B8]" />
           <input
@@ -234,8 +234,8 @@ export function Messages() {
               type="button"
               onClick={() => handleSelect(conv)}
               className={clsx(
-                'w-full flex items-start gap-3 p-3.5 border-b border-[#F1F5F9] hover:bg-[#F8FAFC] transition-colors text-left',
-                selectedId === conv.id && 'bg-blue-50 border-l-2 border-l-[#1E3A8A]'
+                'w-full flex items-start gap-3 p-3.5 border-b border-[#F1F5F9] dark:border-slate-700 hover:bg-[#F8FAFC] dark:hover:bg-slate-800 transition-colors text-left',
+                selectedId === conv.id && 'bg-blue-50 dark:bg-blue-900/20 border-l-2 border-l-[#1E3A8A]'
               )}
             >
               <div className="w-9 h-9 rounded-full bg-[#1E3A8A]/10 flex items-center justify-center text-[#1E3A8A] font-semibold text-sm flex-shrink-0">
@@ -272,7 +272,7 @@ export function Messages() {
 
   const ThreadPanel = selected ? (
     <div className="flex flex-col h-full">
-      <div className="flex items-center gap-3 px-4 py-3.5 border-b border-[#E2E8F0] bg-white flex-shrink-0">
+      <div className="flex items-center gap-3 px-4 py-3.5 border-b border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-slate-900 flex-shrink-0">
         <button
           type="button"
           onClick={() => setSelectedId(null)}
@@ -304,7 +304,7 @@ export function Messages() {
               )}
               <div className={clsx(
                 'max-w-[75%] rounded-2xl px-4 py-2.5',
-                isMe ? 'bg-[#1E3A8A] text-white rounded-br-sm' : 'bg-[#F1F5F9] text-[#0F172A] rounded-bl-sm'
+                isMe ? 'bg-[#1E3A8A] text-white rounded-br-sm' : 'bg-[#F1F5F9] dark:bg-slate-700 text-[#0F172A] dark:text-slate-100 rounded-bl-sm'
               )}>
                 <p className="text-sm">{msg.content}</p>
                 <div className={clsx('flex items-center gap-1 mt-1', isMe ? 'justify-end' : 'justify-start')}>
@@ -320,7 +320,7 @@ export function Messages() {
         <div ref={bottomRef} />
       </div>
 
-      <div className="px-4 py-3 border-t border-[#E2E8F0] bg-white flex-shrink-0">
+      <div className="px-4 py-3 border-t border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-slate-900 flex-shrink-0">
         <div className="flex items-center gap-2">
           <button type="button" title={t('messages.attach')} className="w-8 h-8 flex items-center justify-center text-[#94A3B8] hover:text-[#64748B] transition-colors">
             <Paperclip size={18} />
@@ -360,7 +360,7 @@ export function Messages() {
 
       <div className="card overflow-hidden flex h-[calc(100vh-140px)]">
         <div className={clsx(
-          'border-r border-[#E2E8F0] flex-shrink-0 md:w-72',
+          'border-r border-[#E2E8F0] dark:border-slate-700 flex-shrink-0 md:w-72',
           selectedId ? 'hidden md:flex md:flex-col' : 'flex flex-col w-full'
         )}>
           {ConversationList}

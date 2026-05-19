@@ -63,11 +63,14 @@ export function ActivityDrawer({ isOpen, onClose, initialDate, onPublish }: Acti
   }, [initialDate])
 
   useEffect(() => {
-    if (form.type === 'prova') {
-      setConflict(Math.random() > 0.5)
-    } else {
-      setConflict(false)
-    }
+    if (!isOpen) return
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [isOpen, onClose])
+
+  useEffect(() => {
+    setConflict(false)
   }, [form.type, form.dueDate])
 
   const selectedSubject = subjects.find(s => s.id === form.subjectId)
@@ -105,16 +108,16 @@ export function ActivityDrawer({ isOpen, onClose, initialDate, onPublish }: Acti
       <div className="drawer-overlay" onClick={onClose} />
       <div className="drawer">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] flex-shrink-0">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#E2E8F0] dark:border-slate-700 flex-shrink-0">
           <div>
-            <h2 className="font-display font-semibold text-[#0F172A]">{t('activityDrawer.title')}</h2>
+            <h2 className="font-display font-semibold text-[#0F172A] dark:text-slate-100">{t('activityDrawer.title')}</h2>
             <p className="text-xs text-[#64748B] mt-0.5">{t('activityDrawer.subtitle')}</p>
           </div>
           <button
             type="button"
             aria-label={t('activityDrawer.close')}
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-[#64748B]"
+            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-[#64748B]"
           >
             <X size={16} />
           </button>
@@ -229,7 +232,7 @@ export function ActivityDrawer({ isOpen, onClose, initialDate, onPublish }: Acti
                     'px-3 py-1.5 rounded-lg text-xs font-medium border transition-all',
                     form.type === val
                       ? 'bg-[#1E3A8A] text-white border-[#1E3A8A]'
-                      : 'bg-white text-[#64748B] border-[#E2E8F0] hover:border-[#1E3A8A] hover:text-[#1E3A8A]'
+                      : 'bg-white text-[#64748B] border-[#E2E8F0] hover:border-[#1E3A8A] hover:text-[#1E3A8A] dark:bg-slate-700 dark:text-slate-300 dark:border-slate-600 dark:hover:border-blue-400 dark:hover:text-blue-400'
                   )}
                 >
                   {t('activityTypes.' + val)}
@@ -325,7 +328,7 @@ export function ActivityDrawer({ isOpen, onClose, initialDate, onPublish }: Acti
               <Paperclip size={12} className="inline mr-1" />
               {t('activityDrawer.attachmentsLabel')}
             </label>
-            <label className="flex items-center justify-center gap-2 border-2 border-dashed border-[#E2E8F0] rounded-lg p-4 cursor-pointer hover:border-[#1E3A8A] hover:bg-blue-50/30 transition-all">
+            <label className="flex items-center justify-center gap-2 border-2 border-dashed border-[#E2E8F0] dark:border-slate-600 rounded-lg p-4 cursor-pointer hover:border-[#1E3A8A] hover:bg-blue-50/30 dark:hover:border-blue-400 dark:hover:bg-blue-900/20 transition-all">
               <Paperclip size={16} className="text-[#94A3B8]" />
               <span className="text-sm text-[#94A3B8]">{t('activityDrawer.attachmentsPlaceholder')}</span>
               <input type="file" multiple className="hidden" accept=".pdf,.doc,.docx,.ppt,.pptx,.png,.jpg" />
@@ -379,7 +382,7 @@ export function ActivityDrawer({ isOpen, onClose, initialDate, onPublish }: Acti
         </div>
 
         {/* Footer */}
-        <div className="flex items-center gap-3 px-5 py-4 border-t border-[#E2E8F0] flex-shrink-0">
+        <div className="flex items-center gap-3 px-5 py-4 border-t border-[#E2E8F0] dark:border-slate-700 flex-shrink-0">
           <button type="button" onClick={onClose} className="btn-secondary flex-1">
             {t('activityDrawer.cancel')}
           </button>

@@ -412,8 +412,7 @@ export function StudentReportCard() {
   }, [user, period])
 
   const handleExport = () => {
-    toast('Gerando PDF... Isso pode levar alguns segundos.', 'info')
-    setTimeout(() => toast('Boletim exportado com sucesso! Download iniciado.'), 2000)
+    toast('Exportação de PDF em breve!', 'info')
   }
 
   const overallAverage = data.length > 0
