@@ -25,8 +25,8 @@ export function StudentDashboard() {
   const t = useTranslation()
   const user = useAuthStore(s => s.user)
   const greeting = getGreeting()
-  const { data: classes = [], isLoading: loadingClasses } = useClasses()
-  const { data: activities = [], isLoading: loadingActivities } = useActivities()
+  const { data: classes = [], isLoading: loadingClasses, error: classesError } = useClasses()
+  const { data: activities = [], isLoading: loadingActivities, error: activitiesError } = useActivities()
   const isLoading = loadingClasses || loadingActivities
 
   const progressBySubject = classes.map(c => ({
@@ -71,6 +71,22 @@ export function StudentDashboard() {
       <>
         <Header title={t('student.dashboard.title')} />
         <SkStudentDashboard />
+      </>
+    )
+  }
+
+  if (classesError || activitiesError) {
+    const msg = ((classesError || activitiesError) as Error)?.message ?? 'Erro desconhecido'
+    return (
+      <>
+        <Header title={t('student.dashboard.title')} />
+        <div className="card p-6 text-center space-y-2 mt-4">
+          <p className="text-sm font-medium text-red-600">Erro ao carregar o dashboard</p>
+          <p className="text-xs text-[#94A3B8] font-mono">{msg}</p>
+          <button type="button" className="btn-secondary text-xs mt-2" onClick={() => window.location.reload()}>
+            Tentar novamente
+          </button>
+        </div>
       </>
     )
   }
