@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
+import { SpeedInsights } from '@vercel/speed-insights/react'
 import { useAuthStore } from './store/auth'
 import { Layout } from './components/Layout'
 import { ToastContainer } from './components/Toast'
@@ -107,6 +108,7 @@ export default function App() {
         <Route path="*" element={<NotFound />} />
       </Routes>
       <ToastContainer />
+      <SpeedInsights />
     </>
   )
 }
