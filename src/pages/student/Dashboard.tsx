@@ -13,10 +13,18 @@ import { useTranslation } from '../../i18n'
 import { SkStudentDashboard } from '../../components/Skeleton'
 import clsx from 'clsx'
 
+function getGreeting(): { text: string; emoji: string } {
+  const h = new Date().getHours()
+  if (h < 12) return { text: 'Bom dia', emoji: '☀️' }
+  if (h < 18) return { text: 'Boa tarde', emoji: '🌤️' }
+  return { text: 'Boa noite', emoji: '🌙' }
+}
+
 export function StudentDashboard() {
   const navigate = useNavigate()
   const t = useTranslation()
   const user = useAuthStore(s => s.user)
+  const greeting = getGreeting()
   const { data: classes = [], isLoading: loadingClasses } = useClasses()
   const { data: activities = [], isLoading: loadingActivities } = useActivities()
   const isLoading = loadingClasses || loadingActivities
@@ -80,9 +88,11 @@ export function StudentDashboard() {
 
       <div className="space-y-6">
         {/* Welcome bar */}
-        <div className="card p-4 bg-gradient-to-r from-[#1E3A8A] to-[#1e40af] text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div className="card p-4 bg-gradient-to-r from-[#1E3A8A] to-[#1e40af] text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 overflow-hidden relative">
+          <div className="absolute -top-6 -right-6 w-32 h-32 rounded-full bg-white/5 pointer-events-none" />
+          <div className="absolute -bottom-8 right-24 w-24 h-24 rounded-full bg-white/5 pointer-events-none" />
           <div>
-            <h2 className="font-display font-semibold text-lg">{t('student.dashboard.goodMorning', { name: user?.name.split(' ')[0] ?? '' })}</h2>
+            <h2 className="font-display font-semibold text-lg">{greeting.emoji} {greeting.text}, {user?.name.split(' ')[0] ?? ''}!</h2>
             <p className="text-blue-200 text-sm mt-0.5">
               {t('student.dashboard.youHave')} <span className="font-semibold text-white">{sorted.filter(a => getDaysUntil(a.dueDate) <= 3).length} atividades</span> {t('student.dashboard.activitiesIn3Days')}
             </p>

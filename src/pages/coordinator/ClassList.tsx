@@ -578,7 +578,11 @@ export function CoordinatorClassList() {
       {!loading && !isError && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filtered.map(cls => (
-            <div key={cls.id} className="card p-5">
+            <div key={cls.id} className="card p-5 overflow-hidden relative hover:-translate-y-0.5 hover:shadow-md transition-all">
+              <div
+                className="absolute top-0 left-0 right-0 h-[3px]"
+                style={{ backgroundColor: cls.subjects?.color ?? '#1E3A8A' }}
+              />
               <div className="flex items-start justify-between mb-4">
                 <div
                   className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-base"

@@ -125,8 +125,8 @@ export function Sidebar() {
                 clsx(
                   'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all',
                   isActive
-                    ? 'bg-blue-50 text-[#1E3A8A] dark:bg-blue-900/20 dark:text-blue-400'
-                    : 'text-[#64748B] hover:bg-slate-100 hover:text-[#0F172A] dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-100'
+                    ? 'bg-blue-50 text-[#1E3A8A] dark:bg-blue-900/20 dark:text-blue-400 border-l-[3px] border-[#1E3A8A] dark:border-blue-400'
+                    : 'text-[#64748B] hover:bg-slate-100 hover:text-[#0F172A] dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-100 border-l-[3px] border-transparent'
                 )
               }
               title={collapsed ? label : undefined}

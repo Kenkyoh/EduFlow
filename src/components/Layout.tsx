@@ -20,7 +20,7 @@ export function Layout() {
         'min-h-screen pt-[60px] transition-all duration-300',
         collapsed ? 'md:ml-16' : 'md:ml-60'
       )}>
-        <div className="max-w-[1200px] mx-auto p-4 md:p-6 pb-20 md:pb-6">
+        <div key={pathname} className="max-w-[1200px] mx-auto p-4 md:p-6 pb-20 md:pb-6 animate-fade-up">
           <Outlet />
         </div>
       </main>

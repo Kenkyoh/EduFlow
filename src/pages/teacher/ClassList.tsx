@@ -44,8 +44,12 @@ export function TeacherClassList() {
             <button
               key={cls.id}
               onClick={() => navigate(`/teacher/class/${cls.id}`)}
-              className="card p-5 text-left hover:shadow-md transition-shadow group"
+              className="card p-5 text-left hover:-translate-y-0.5 hover:shadow-md transition-all group overflow-hidden relative"
             >
+              <div
+                className="absolute top-0 left-0 right-0 h-[3px]"
+                style={{ backgroundColor: cls.color }}
+              />
               <div
                 className="w-14 h-14 rounded-xl flex items-center justify-center text-white font-bold text-xl mb-4 group-hover:scale-105 transition-transform"
                 style={{ backgroundColor: cls.color }}
