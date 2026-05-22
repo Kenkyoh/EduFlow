@@ -8,7 +8,7 @@ interface ApiClass extends ClassInfo {
   atRisk: number
 }
 
-const CLASS_SELECT = 'id, name, year, period, grading_type, students_count, delivery_rate, average, at_risk, teacher_id, subjects(id, name, color, color_light), profiles(name)'
+const CLASS_SELECT = 'id, name, year, period, grading_type, students_count, delivery_rate, average, at_risk, teacher_id, subjects(id, name, color, color_light), profiles!teacher_id(name)'
 
 function mapRow(row: Record<string, unknown>): ApiClass {
   const subj = row.subjects as Record<string, string> | null
