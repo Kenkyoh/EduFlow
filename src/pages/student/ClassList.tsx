@@ -27,7 +27,11 @@ export function StudentClassList() {
       {isLoading && <SkClassGrid count={6} />}
 
       {isError && (
-        <p className="text-center py-12 text-red-500 text-sm">Erro ao carregar turmas.</p>
+        <EmptyState
+          variant="search"
+          title="Erro ao carregar turmas"
+          description="Não foi possível buscar suas turmas. Tente recarregar a página."
+        />
       )}
 
       {!isLoading && !isError && (
@@ -35,8 +39,9 @@ export function StudentClassList() {
           {displayed.length === 0 && (
             <div className="col-span-full">
               <EmptyState
-                variant="search"
-                title={query ? t('student.classList.noClassesFound', { query }) : t('common.noResults')}
+                variant="students"
+                title={query ? `Nenhuma turma encontrada para "${query}"` : 'Você não está em nenhuma turma'}
+                description={query ? undefined : 'Aguarde seu professor ou coordenador te matricular em uma turma.'}
                 action={query ? { label: t('common.clearSearch'), onClick: () => setQuery('') } : undefined}
               />
             </div>

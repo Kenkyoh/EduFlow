@@ -43,15 +43,22 @@ async function fetchForTeacher(userId: string): Promise<ApiClass[]> {
 }
 
 async function fetchForStudent(userId: string): Promise<ApiClass[]> {
-  const { data, error } = await supabase
+  const { data: enrollment, error: enrollErr } = await supabase
     .from('class_students')
-    .select(`classes(${CLASS_SELECT})`)
+    .select('class_id')
     .eq('student_id', userId)
+  if (enrollErr) throw enrollErr
+
+  const classIds = (enrollment ?? []).map(r => (r as Record<string, string>).class_id)
+  if (!classIds.length) return []
+
+  const { data, error } = await supabase
+    .from('classes')
+    .select(CLASS_SELECT)
+    .in('id', classIds)
+    .order('name')
   if (error) throw error
-  return (data ?? [])
-    .map(r => (r as Record<string, unknown>).classes)
-    .filter(Boolean)
-    .map(c => mapRow(c as Record<string, unknown>))
+  return (data ?? []).map(r => mapRow(r as Record<string, unknown>))
 }
 
 async function fetchForSchool(schoolId: string): Promise<ApiClass[]> {
