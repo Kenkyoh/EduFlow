@@ -45,3 +45,9 @@ Thumbs.db
 
 # Claude Code
 .claude/
+
+# Playwright / screenshot scripts (dev tooling)
+screenshot.mjs
+screenshots.mjs
+all-screenshots.mjs
+mobile-login.png
