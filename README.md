@@ -354,6 +354,16 @@ O suporte cobre:
 
 ---
 
+## 🛒 Adquira o Template
+
+Este projeto está disponível para compra como template completo:
+
+👉 [Comprar no Gumroad](https://scaramuzza7.gumroad.com/l/irkpor)
+
+Inclui código fonte completo, instruções de setup e suporte por e-mail.
+
+---
+
 ## Licença
 
 MIT © [Luiz Felipe Scaramuzza](https://github.com/Kenkyoh)
